@@ -4,6 +4,8 @@ import 'package:cstyle_cashier_3/utils/database.utils.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
+import 'package:ntp/ntp.dart';
 
 class HeroPage extends StatefulWidget {
   const HeroPage({super.key});
@@ -13,15 +15,22 @@ class HeroPage extends StatefulWidget {
 }
 
 class _HeroPageState extends State<HeroPage> {
-  String loadingStatus = "Initializing connection to database.";
+  String loadingStatus = "Checking time with our online services.";
 
   @override
   void initState() {
-    connectAndSync();
+    checkDateTime().then((_) async {
+      await connectAndSync();
+    }).catchError((error) {
+      LoggerUtils().log("Error on checking date and time", LogType.error);
+    });
     super.initState();
   }
 
-  void connectAndSync() async {
+  Future<void> connectAndSync() async {
+    setState(() {
+      loadingStatus = "Connecting to local database";
+    });
     try {
       await DatabaseUtils().database;
       LoggerUtils().log("Database connected", LogType.info);
@@ -65,23 +74,112 @@ class _HeroPageState extends State<HeroPage> {
           if (value == null) {
             context.push("/setup");
           } else {
-            context.push("/dashboard");
+            context.push("/main");
           }
         }).catchError((error) {
           LoggerUtils().log(error.toString(), LogType.error);
         });
       }).catchError((error) {
         LoggerUtils().log(error.toString(), LogType.error);
+        setState(() {
+          loadingStatus = "Failed to connect to designated server";
+        });
       });
     } catch (error) {
       LoggerUtils().log(error.toString(), LogType.error);
     }
   }
 
+  Future<void> checkDateTime() async {
+    setState(() {
+      loadingStatus = "Checking time with our online services.";
+    });
+    try {
+      DateTime ntpTime = await NTP.now();
+      DateTime localTime = DateTime.now();
+
+      setState(() {
+        if ((ntpTime.difference(localTime).inSeconds).abs() > 30) {
+          setState(() {
+            LoggerUtils().log(
+              "Time difference is ${ntpTime.difference(localTime).inSeconds.abs()}",
+              LogType.error,
+            );
+            loadingStatus =
+                "Time difference is too large. Please set your time and date appropriately.";
+            throw Exception("Time missmatch");
+          });
+        } else {
+          loadingStatus = "Time is synced.";
+        }
+      });
+    } catch (e) {
+      LoggerUtils().log(
+          "Time sync process is error. Please try again later.", LogType.error);
+      setState(() {
+        loadingStatus = "Error fetching time.";
+      });
+
+      throw Exception(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Text(loadingStatus),
+      backgroundColor: const Color.fromARGB(
+        255,
+        161,
+        121,
+        220,
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Expanded(
+              flex: 8,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    "assets/images/IconReverted.webp",
+                    width: 100,
+                    height: 100,
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  const Text(
+                    "CSTYLE CASHIER APPLICATION",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: "Lato",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Text(
+                    "Version 2.0.1",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: "Lato",
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Text(
+                    loadingStatus,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

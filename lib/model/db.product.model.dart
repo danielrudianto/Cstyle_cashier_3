@@ -12,6 +12,7 @@ class SQLProductModel {
   String brandID;
   String? mongoId;
   double price;
+  num stock;
   List<SQLProductImageModel>? images;
 
   SQLProductModel({
@@ -26,6 +27,7 @@ class SQLProductModel {
     this.mongoId,
     this.images,
     required this.price,
+    required this.stock,
   });
 
   Map<String, dynamic> toMap() {
@@ -39,7 +41,8 @@ class SQLProductModel {
       'typeID': typeID,
       'brandID': brandID,
       'mongoId': mongoId,
-      'price': price
+      'price': price,
+      'stock': stock,
     };
   }
 
@@ -55,6 +58,7 @@ class SQLProductModel {
       brandID: map['brandID'],
       mongoId: map['mongoId'],
       price: map['price'],
+      stock: map['stock'],
     );
   }
 
@@ -67,14 +71,24 @@ class SQLProductModel {
   }
 
   static Future<List<SQLProductModel>> fetchByKeyword(
-      String keyword, int page) async {
+      List<String> selectedTypes, String keyword, int page) async {
     final db = await DatabaseUtils().database;
-    var result = await db.query("product",
-        where: "reference LIKE ? OR description LIKE ?",
-        limit: 10,
-        offset: (page - 1) * 10,
-        whereArgs: ["%$keyword%", "%$keyword%"]);
-    return result.map((e) => SQLProductModel.fromMap(e)).toList();
+    if (selectedTypes.isEmpty) {
+      var result = await db.query("product",
+          where: "reference LIKE ? OR description LIKE ?",
+          limit: 30,
+          offset: (page - 1) * 30,
+          whereArgs: ["%$keyword%", "%$keyword%"]);
+      return result.map((e) => SQLProductModel.fromMap(e)).toList();
+    } else {
+      var result = await db.query("product",
+          where:
+              "type IN (${selectedTypes.map((x) => "'${x.replaceAll("'", "'''")}'").join(",")}) AND (reference LIKE ? OR description LIKE ?)",
+          limit: 30,
+          offset: (page - 1) * 30,
+          whereArgs: ["%$keyword%", "%$keyword%"]);
+      return result.map((e) => SQLProductModel.fromMap(e)).toList();
+    }
   }
 
   static Future<List<String>> fetchProductTypes() async {

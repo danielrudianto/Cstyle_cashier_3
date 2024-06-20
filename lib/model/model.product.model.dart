@@ -9,6 +9,7 @@ class ProductModel {
   String type;
   String? barcode;
   num price;
+  num? stock;
   List<ProductImageModel>? images;
 
   ProductModel({
@@ -19,6 +20,7 @@ class ProductModel {
     required this.type,
     this.barcode,
     required this.price,
+    this.stock,
     this.images,
   });
 
@@ -43,12 +45,15 @@ class ProductModel {
       type: map['type'],
       barcode: map['barcode'],
       price: map['price'],
+      stock: map['stock'],
     );
   }
 
-  static Future<List<ProductModel>> fetch(String keyword, int page) async {
+  static Future<List<ProductModel>> fetch(
+      List<String> selectedTypes, String keyword, int page) async {
     List<ProductModel> result = [];
-    var products = await SQLProductModel.fetchByKeyword(keyword, page);
+    var products =
+        await SQLProductModel.fetchByKeyword(selectedTypes, keyword, page);
     var productImages =
         await ProductImageModel.fetchByItemIDs(products.map((x) {
       return x.id!;
@@ -63,6 +68,7 @@ class ProductModel {
         type: products[i].type,
         barcode: products[i].barcode,
         price: products[i].price,
+        stock: products[i].stock,
         images: productImages
             .where((x) => x.productId == products[i].mongoId!)
             .toList(),
@@ -85,6 +91,7 @@ class ProductModel {
       type: products[0].type,
       barcode: products[0].barcode,
       price: products[0].price,
+      stock: products[0].stock,
       images: productImages
           .where((x) => x.productId == products[0].mongoId!)
           .toList(),

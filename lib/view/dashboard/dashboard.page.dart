@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:cstyle_cashier_3/model/model.cart-item.model.dart';
 import 'package:cstyle_cashier_3/model/model.product-type.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
-import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-cart-selector.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-grid-list.dart';
-import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-search-bar.dart';
+import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-header.dart';
+import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-type-selector.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
+import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 import 'package:provider/provider.dart';
@@ -23,11 +26,15 @@ class _DashboardPageState extends State<DashboardPage> {
   bool isLoadingData = false;
   List<ProductModel> products = [];
   List<ProductTypeModel> productTypeNames = [];
+  List<String> selectedProductTypes = [];
 
   @override
   void initState() {
-    fetchProductTypes();
-    fetchProducts(1);
+    Timer(const Duration(milliseconds: 250), () {
+      fetchProductTypes();
+      fetchProducts(1);
+    });
+
     super.initState();
   }
 
@@ -50,7 +57,8 @@ class _DashboardPageState extends State<DashboardPage> {
       page = page;
     });
 
-    var productResult = await ProductModel.fetch(keyword, page);
+    var productResult =
+        await ProductModel.fetch(selectedProductTypes, keyword, page);
     LoggerUtils().log("Found ${products.length} products", LogType.info);
 
     setState(() {
@@ -61,6 +69,8 @@ class _DashboardPageState extends State<DashboardPage> {
     LoggerUtils()
         .log("Fetching products completed ${DateTime.now()}", LogType.info);
   }
+
+  Future<void> viewCart() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -111,9 +121,18 @@ class _DashboardPageState extends State<DashboardPage> {
       }
     }
 
-    return Scaffold(
-      body: Center(
-        child: BarcodeKeyboardListener(
+    return Consumer<CompareNotifier>(builder: (_, value, __) {
+      return Scaffold(
+        floatingActionButton: value.selectedComparisson.length <= 1
+            ? null
+            : FloatingActionButton(
+                tooltip: "Compare products",
+                child: const Icon(
+                  Icons.compare_arrows,
+                ),
+                onPressed: () {},
+              ),
+        body: BarcodeKeyboardListener(
           bufferDuration: const Duration(milliseconds: 1000),
           onBarcodeScanned: (barcode) {
             LoggerUtils().log("Barcode scanned: $barcode", LogType.info);
@@ -129,42 +148,48 @@ class _DashboardPageState extends State<DashboardPage> {
             });
           },
           useKeyDownEvent: true,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
+          child: Column(
+            children: [
               Expanded(
-                child: Column(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DashboardSearchBar(
-                      onChanged: (value) async {
+                    DashboardTypeSelector(
+                      productTypes:
+                          productTypeNames.map((x) => x.name).toList(),
+                      selectedTypes: selectedProductTypes,
+                      onUpdateSelectedTypes: (List<String> types) {
                         setState(() {
-                          keyword = value;
-                          page = 1;
+                          selectedProductTypes = types;
                         });
-                        await fetchProducts(1);
+
+                        fetchProducts(1);
                       },
-                      isDisabled: false,
                     ),
                     Expanded(
-                      child: DashboardGridList(
-                        products: products,
-                        onAddProduct: (ProductModel product) async {
-                          await addProductToCart(product);
-                        },
+                      child: Column(
+                        children: [
+                          const DashboardHeader(),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: DashboardGridList(
+                                products: products,
+                                onAddProduct: (ProductModel product) async {
+                                  await addProductToCart(product);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(
-                width: 600,
-                child: CartSelector(),
-              ),
             ],
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

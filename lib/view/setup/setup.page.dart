@@ -21,7 +21,7 @@ class _SetupStorePageState extends State<SetupStorePage> {
           code: value.code,
         ).create().then((value) {
           // TODO: Sync the product stock
-          router.replace("/dashboard");
+          router.replace("/main");
         }).catchError((error) {
           LoggerUtils().log(error.toString(), LogType.error);
         });

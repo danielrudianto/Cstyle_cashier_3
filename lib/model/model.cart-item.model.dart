@@ -12,6 +12,7 @@ class CartItemModel extends ProductModel {
     required super.description,
     required super.brand,
     required super.type,
+    super.stock,
     super.barcode,
     required super.price,
     super.images,
@@ -42,6 +43,7 @@ class CartItemModel extends ProductModel {
       barcode: map['barcode'],
       price: map['price'],
       quantity: map['quantity'],
+      stock: map['stock'],
       discount: map['discount'],
     );
   }
