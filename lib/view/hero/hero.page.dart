@@ -1,11 +1,15 @@
+import 'package:cstyle_cashier_3/model/model.cart.model.dart';
 import 'package:cstyle_cashier_3/model/model.migration.model.dart';
+import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
+import 'package:cstyle_cashier_3/utils/sync.utils.dart';
+import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logger/logger.dart';
 import 'package:ntp/ntp.dart';
+import 'package:provider/provider.dart';
 
 class HeroPage extends StatefulWidget {
   const HeroPage({super.key});
@@ -51,17 +55,18 @@ class _HeroPageState extends State<HeroPage> {
               await DatabaseUtils().runCommand(command);
             }
             LoggerUtils().log(
-                "${value.commands!.length} commands successfully ran 🚀🚀🚀",
-                LogType.info);
-            if (lastMigrationVersion == 0) {
-              // If never synced, insert migration data
-              await DatabaseUtils().runCommands([
-                "INSERT INTO migration (migration_version) VALUES (${value.migrationVersion});"
-              ]);
-            } else if (lastMigrationVersion != value.migrationVersion) {
-              await DatabaseUtils().runCommands([
-                "INSERT INTO migration (migration_version) VALUES (${value.migrationVersion});"
-              ]);
+              "${value.commands!.length} commands successfully ran 🚀🚀🚀",
+              LogType.info,
+            );
+            loadingStatus = "Migration applied to local database.";
+            if (lastMigrationVersion == 0 ||
+                lastMigrationVersion != value.migrationVersion) {
+              await MigrationModel(
+                migrationVersion: value.migrationVersion,
+                createdAt: DateTime.now(),
+              ).create();
+
+              loadingStatus = "Migration applied to local database.";
             }
           } catch (error) {
             LoggerUtils().log(error.toString(), LogType.error);
@@ -74,7 +79,46 @@ class _HeroPageState extends State<HeroPage> {
           if (value == null) {
             context.push("/setup");
           } else {
-            context.push("/main");
+            setState(() {
+              loadingStatus = "Loading stock data from designated server";
+            });
+            var storeCode = value.code;
+            ProductStockModel.fetchServerStock(storeCode).then((stocks) async {
+              // Update local database stock
+              try {
+                setState(() {
+                  loadingStatus = "Applying stock data to local database";
+                });
+                await ProductStockModel.updateServerStock(stocks);
+
+                setState(() {
+                  loadingStatus =
+                      "Successfully loaded stock data from designated server";
+                });
+                SyncUtils.sync();
+
+                // Get incompleted carts
+                CartModel.fetchCartsCount().then((count) {
+                  Provider.of<CartNotifier>(context, listen: false)
+                      .setCartCount(count);
+                }).catchError((error) {
+                  LoggerUtils().log(error.toString(), LogType.error);
+                });
+                context.push("/main");
+              } catch (error) {
+                setState(() {
+                  loadingStatus =
+                      "Failed loading stock data from designated server";
+                });
+                LoggerUtils().log(error.toString(), LogType.error);
+              }
+            }).catchError((error) {
+              setState(() {
+                loadingStatus =
+                    "Loading stock data from designated server encountered an error";
+              });
+              LoggerUtils().log(error.toString(), LogType.error);
+            });
           }
         }).catchError((error) {
           LoggerUtils().log(error.toString(), LogType.error);

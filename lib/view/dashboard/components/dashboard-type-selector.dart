@@ -4,11 +4,13 @@ class DashboardTypeSelector extends StatefulWidget {
   final List<String> productTypes;
   final List<String> selectedTypes;
   final Function onUpdateSelectedTypes;
+  final Function onSearch;
   const DashboardTypeSelector({
     super.key,
     required this.selectedTypes,
     required this.productTypes,
     required this.onUpdateSelectedTypes,
+    required this.onSearch,
   });
 
   @override
@@ -74,10 +76,13 @@ class _DashboardTypeSelectorState extends State<DashboardTypeSelector> {
               ),
               prefixIconColor: Color.fromARGB(255, 209, 209, 209),
             ),
-            style: TextStyle(
+            style: const TextStyle(
               color: Color.fromARGB(255, 122, 122, 122),
               fontFamily: "Lato",
             ),
+            onChanged: (value) {
+              widget.onSearch(value);
+            },
           ),
           const SizedBox(
             height: 15,
@@ -99,7 +104,13 @@ class _DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                     activeColor: const Color.fromARGB(255, 109, 78, 137),
                     value: widget.selectedTypes.isEmpty,
                     onChanged: (value) {
-                      widget.onUpdateSelectedTypes([]);
+                      if (value != null && value == true) {
+                        // Remove all
+                        widget.selectedTypes.clear();
+                        widget.onUpdateSelectedTypes(widget.selectedTypes);
+                      } else if (value != null && value == false) {
+                        return;
+                      }
                     },
                   ),
                   title: Text(

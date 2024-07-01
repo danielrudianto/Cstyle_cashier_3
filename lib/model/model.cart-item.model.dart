@@ -1,50 +1,42 @@
-import 'package:cstyle_cashier_3/model/model.product.model.dart';
-
-class CartItemModel extends ProductModel {
+class CartItemModel {
+  int? id;
+  String itemID;
   int quantity;
   double discount;
+  double price;
+  String reference;
+  String description;
 
   CartItemModel({
+    this.id,
+    required this.itemID,
     required this.quantity,
     required this.discount,
-    required super.id,
-    required super.reference,
-    required super.description,
-    required super.brand,
-    required super.type,
-    super.stock,
-    super.barcode,
-    required super.price,
-    super.images,
+    required this.price,
+    required this.reference,
+    required this.description,
   });
 
   @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'reference': reference,
-      'description': description,
-      'brand': brand,
-      'type': type,
-      'barcode': barcode,
-      'price': price,
+      'itemID': itemID,
       'quantity': quantity,
       'discount': discount,
+      'price': price,
     };
   }
 
   factory CartItemModel.fromMap(Map<String, dynamic> map) {
     return CartItemModel(
       id: map['id'],
+      itemID: map['itemID'],
+      quantity: map['quantity'],
+      discount: map['discount'],
+      price: map['price'],
       reference: map['reference'],
       description: map['description'],
-      brand: map['brand'],
-      type: map['type'],
-      barcode: map['barcode'],
-      price: map['price'],
-      quantity: map['quantity'],
-      stock: map['stock'],
-      discount: map['discount'],
     );
   }
 }

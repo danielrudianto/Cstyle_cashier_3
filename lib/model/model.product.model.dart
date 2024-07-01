@@ -1,15 +1,15 @@
-import 'package:cstyle_cashier_3/model/db.product.model.dart';
+import 'package:cstyle_cashier_3/db/db.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.product-image.model.dart';
 
 class ProductModel {
-  int id;
+  String id;
   String reference;
   String description;
   String brand;
   String type;
   String? barcode;
-  num price;
-  num? stock;
+  double price;
+  int? stock;
   List<ProductImageModel>? images;
 
   ProductModel({
@@ -61,7 +61,7 @@ class ProductModel {
 
     for (var i = 0; i < products.length; i++) {
       result.add(ProductModel(
-        id: products[i].id!,
+        id: products[i].mongoID!,
         reference: products[i].reference,
         description: products[i].description,
         brand: products[i].brand,
@@ -70,7 +70,7 @@ class ProductModel {
         price: products[i].price,
         stock: products[i].stock,
         images: productImages
-            .where((x) => x.productId == products[i].mongoId!)
+            .where((x) => x.productId == products[i].mongoID!)
             .toList(),
       ));
     }
@@ -79,22 +79,11 @@ class ProductModel {
   }
 
   static Future<ProductModel?> fetchByBarcode(String barcode) async {
-    var products = await SQLProductModel.fetchByBarcode(barcode);
-    if (products.isEmpty) return null;
-    var productImages =
-        await ProductImageModel.fetchByItemIDs([products[0].id!]);
-    return ProductModel(
-      id: products[0].id!,
-      reference: products[0].reference,
-      description: products[0].description,
-      brand: products[0].brand,
-      type: products[0].type,
-      barcode: products[0].barcode,
-      price: products[0].price,
-      stock: products[0].stock,
-      images: productImages
-          .where((x) => x.productId == products[0].mongoId!)
-          .toList(),
-    );
+    try {
+      var products = await SQLProductModel.fetchByBarcode(barcode);
+      return ProductModel.fromMap(products.toMap());
+    } catch (error) {
+      throw Exception(error);
+    }
   }
 }

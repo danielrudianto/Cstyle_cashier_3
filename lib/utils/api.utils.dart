@@ -3,27 +3,37 @@ import 'package:dio/dio.dart';
 class ApiUtils {
   final Dio _dio;
 
-  final String baseURL = "http://127.0.0.1:5000/";
   // final String baseURL = "https://api.cstyle.cloud/";
 
   ApiUtils() : _dio = Dio(BaseOptions(baseUrl: "http://127.0.0.1:5000/"));
 
-  Future<dynamic> getRequest(String endpoint) async {
+  Future<dynamic> getRequest(
+    String endpoint,
+    Map<String, dynamic>? queryParams,
+    Options? options,
+  ) async {
     try {
-      final response = await _dio.get(endpoint);
+      final response = await _dio.get(
+        endpoint,
+        options: options,
+        queryParameters: queryParams,
+      );
       return response.data;
-    } catch (e) {
-      throw Exception('Failed to load data: $e');
+    } on DioException catch (e) {
+      throw Exception(e.response);
     }
   }
 
   Future<dynamic> postRequest(
-      String endpoint, Map<String, dynamic> data) async {
+    String endpoint,
+    Map<String, dynamic> data,
+    Options? options,
+  ) async {
     try {
-      final response = await _dio.post(endpoint, data: data);
+      final response = await _dio.post(endpoint, data: data, options: options);
       return response.data;
-    } catch (e) {
-      throw Exception('Failed to post data: $e');
+    } on DioException catch (e) {
+      throw Exception(e.response);
     }
   }
 
@@ -31,8 +41,8 @@ class ApiUtils {
     try {
       final response = await _dio.put(endpoint, data: data);
       return response.data;
-    } catch (e) {
-      throw Exception('Failed to update data: $e');
+    } on DioException catch (e) {
+      throw Exception(e.response);
     }
   }
 
@@ -40,8 +50,8 @@ class ApiUtils {
     try {
       final response = await _dio.delete(endpoint);
       return response.data;
-    } catch (e) {
-      throw Exception('Failed to delete data: $e');
+    } on DioException catch (e) {
+      throw Exception(e.response);
     }
   }
 }

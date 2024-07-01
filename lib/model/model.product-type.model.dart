@@ -1,4 +1,4 @@
-import 'package:cstyle_cashier_3/model/db.product.model.dart';
+import 'package:cstyle_cashier_3/db/db.product.model.dart';
 
 class ProductTypeModel {
   String name;
@@ -20,9 +20,7 @@ class ProductTypeModel {
   }
 
   static Future<List<ProductTypeModel>> getList() async {
-    var result = await SQLProductModel.fetchProductTypes();
-    return result.map((e) {
-      return ProductTypeModel(name: e);
-    }).toList();
+    var result = await SQLProductType.fetchProductTypes();
+    return result.map((e) => ProductTypeModel(name: e.name)).toList();
   }
 }

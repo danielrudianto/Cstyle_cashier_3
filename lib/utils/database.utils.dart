@@ -32,16 +32,18 @@ class DatabaseUtils {
     await db.execute('''
       CREATE TABLE bill_code (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
         date TEXT NOT NULL,
-        memberID TEXT,
+        memberID TEXT DEFAULT NULL,
         createdBy TEXT NOT NULL,
         createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        is_delete INTEGER NOT NULL DEFAULT 0,
-        is_synced INTEGER NOT NULL DEFAULT 0,
+        isDeleted INTEGER NOT NULL DEFAULT 0,
+        isSynced INTEGER NOT NULL DEFAULT 0,
         deletedBy TEXT DEFAULT NULL,
         deletedAt TEXT DEFAULT NULL,
-        mongoID TEXT UNIQUE NOT NULL,
-        syncedAt DATETIME DEFAULT NULL
+        mongoID TEXT UNIQUE DEFAULT NULL,
+        syncedAt DATETIME DEFAULT NULL,
+        errorMessage TEXT DEFAULT NULL
       )
     ''');
 
@@ -52,8 +54,8 @@ class DatabaseUtils {
         quantity INTEGER NOT NULL CHECK (quantity >= 1),
         price REAL NOT NULL,
         discount REAL NOT NULL,
-        bill_code_id INTEGER,
-        FOREIGN KEY (bill_code_id) REFERENCES bill_code (id)
+        billCodeID INTEGER,
+        FOREIGN KEY (billCodeID) REFERENCES bill_code (id)
         FOREIGN KEY (itemID) REFERENCES product (mongoID)
       )
     ''');
@@ -61,10 +63,10 @@ class DatabaseUtils {
     await db.execute('''
       CREATE TABLE bill_payment (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        bill_code_id INTEGER,
-        payment_method_id TEXT NOT NULL,
+        billCodeID INTEGER,
+        paymentMethod TEXT NOT NULL,
         amount REAL NOT NULL,
-        FOREIGN KEY (bill_code_id) REFERENCES bill_code (id)
+        FOREIGN KEY (billCodeID) REFERENCES bill_code (id)
       )
     ''');
 
@@ -96,7 +98,7 @@ class DatabaseUtils {
     await db.execute('''
       CREATE TABLE migration (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        migration_version TEXT,
+        migrationVersion TEXT,
         createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     ''');
@@ -105,7 +107,8 @@ class DatabaseUtils {
       CREATE TABLE user (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userID TEXT UNIQUE NOT NULL,
-        employeeCode TEXT UNIQUE NOT NULL
+        code TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL
       )
     ''');
 
@@ -125,8 +128,8 @@ class DatabaseUtils {
         quantity INTEGER NOT NULL CHECK (quantity >= 1),
         price REAL NOT NULL,
         discount REAL NOT NULL,
-        cart_code_id INTEGER,
-        FOREIGN KEY (cart_code_id) REFERENCES cart_code (id)
+        cartCodeID INTEGER,
+        FOREIGN KEY (cartCodeID) REFERENCES cart_code (id)
       )
     ''');
 
@@ -135,16 +138,19 @@ class DatabaseUtils {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         address TEXT NOT NULL,
-        code TEXT UNIQUE NOT NULL
+        code TEXT UNIQUE NOT NULL,
+        phoneNumber TEXT NOT NULL
       )
       ''');
   }
 
   Future runCommands(List<String> command) async {
     final db = await database;
-    command.insert(0, "BEGIN TRANSACTION;");
-    command.add("COMMIT;");
-    return await db.execute(command.join(" "));
+    return db.transaction((txn) async {
+      for (var i = 0; i < command.length; i++) {
+        await txn.execute(command[i]);
+      }
+    });
   }
 
   Future runCommand(String command) async {

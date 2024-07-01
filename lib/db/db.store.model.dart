@@ -6,12 +6,14 @@ class SQLStoreModel {
   String name;
   String address;
   String code;
+  String phoneNumber;
 
   SQLStoreModel({
     this.id,
     required this.name,
     required this.address,
     required this.code,
+    required this.phoneNumber,
   });
 
   Map<String, dynamic> toMap() {
@@ -19,6 +21,7 @@ class SQLStoreModel {
       'name': name,
       'address': address,
       'code': code,
+      'phoneNumber': phoneNumber,
     };
   }
 
@@ -27,25 +30,24 @@ class SQLStoreModel {
       name: map['name'],
       address: map['address'],
       code: map['code'],
+      phoneNumber: map['phoneNumber'],
     );
   }
 
   Future<SQLStoreModel?> create() async {
     final db = await DatabaseUtils().database;
     try {
-      var storeID = await db.insert("store", {
-        "name": name,
-        "address": address,
-        "code": code,
-      });
+      await db.delete("store", where: "code = ?", whereArgs: [code]);
+      var storeID = await db.insert("store", toMap());
 
       if (storeID == 0) {
-        return null;
+        throw Exception("Failed to create store");
       } else {
         return SQLStoreModel(
           name: name,
           address: address,
           code: code,
+          phoneNumber: phoneNumber,
         );
       }
     } catch (error) {
@@ -54,18 +56,23 @@ class SQLStoreModel {
   }
 
   static Future<SQLStoreModel?> getCurrentProfile() async {
-    final db = await DatabaseUtils().database;
-    var result = await db.query("store", limit: 1, offset: 0);
-    if (result.isNotEmpty) {
-      return SQLStoreModel.fromMap(result.first);
-    } else {
-      return null;
+    try {
+      final db = await DatabaseUtils().database;
+      var result = await db.query("store", limit: 1, offset: 0);
+      if (result.isNotEmpty) {
+        return SQLStoreModel.fromMap(result.first);
+      } else {
+        return null;
+      }
+    } catch (error) {
+      throw Exception(error);
     }
   }
 
   static Future<SQLStoreModel?> checkStoreUID(String uid) async {
     if (RegExp(r"^[0-9a-fA-F]{32}$").hasMatch(uid)) {
-      var response = await ApiUtils().getRequest("cashier/check/$uid");
+      var response =
+          await ApiUtils().getRequest("cashier/check/$uid", {}, null);
       return SQLStoreModel.fromMap(response);
     } else {
       throw Exception("Invalid Store UID");

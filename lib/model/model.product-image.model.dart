@@ -1,4 +1,4 @@
-import 'package:cstyle_cashier_3/model/db.product_image.model.dart';
+import 'package:cstyle_cashier_3/db/db.product_image.model.dart';
 
 class ProductImageModel {
   int id;

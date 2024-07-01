@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
 
-class CompagePage extends StatefulWidget {
-  const CompagePage({super.key});
+class ComparePage extends StatefulWidget {
+  const ComparePage({super.key});
 
   @override
-  State<CompagePage> createState() => _CompagePageState();
+  State<ComparePage> createState() => _ComparePageState();
 }
 
-class _CompagePageState extends State<CompagePage> {
+class _ComparePageState extends State<ComparePage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Compare products"),
+      ),
+      body: Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Text("Images"),
+          ),
+        ],
+      ),
+    );
   }
 }

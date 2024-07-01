@@ -30,7 +30,7 @@ class SQLProductImageModel {
   static Future<List<SQLProductImageModel>> fetchByItemIDs(
       List<int> ids) async {
     List<SQLProductImageModel> result = [];
-    var db = await DatabaseUtils().database;
+    final db = await DatabaseUtils().database;
     db
         .query(
       "product_image",

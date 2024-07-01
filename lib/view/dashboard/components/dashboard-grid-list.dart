@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
@@ -6,14 +7,13 @@ import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:expansion_tile_group/expansion_tile_group.dart';
 import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DashboardGridList extends StatelessWidget {
   final List<ProductModel> products;
   final Function onAddProduct;
-  DashboardGridList({
+  const DashboardGridList({
     super.key,
     required this.products,
     required this.onAddProduct,
@@ -21,6 +21,165 @@ class DashboardGridList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget buildChildren(ProductModel e) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              // Border radius
+              borderRadius: BorderRadius.circular(10),
+            ),
+            height: 200,
+            width: 200,
+            child: CarouselSlider(
+              items: e.images!.map((x) {
+                return FastCachedImage(
+                  url: x.imageUrl,
+                );
+              }).toList(),
+              options: CarouselOptions(
+                enlargeCenterPage: true,
+                autoPlay: true,
+                aspectRatio: 1,
+                enlargeStrategy: CenterPageEnlargeStrategy.height,
+                viewportFraction: 1.0,
+                initialPage: 0,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              SizedBox(
+                width: 150,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Brand",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    Text(
+                      e.brand,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Divider(
+                      color: Colors.grey.shade200,
+                      thickness: 1,
+                    ),
+                    Text(
+                      "Reference",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    Text(
+                      e.reference,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Divider(
+                      color: Colors.grey.shade200,
+                      thickness: 1,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 250,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Type",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    Text(
+                      e.type,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Divider(
+                      color: Colors.grey.shade200,
+                      thickness: 1,
+                    ),
+                    Text(
+                      "Description",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    Text(
+                      e.description,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Divider(
+                      color: Colors.grey.shade200,
+                      thickness: 1,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 150,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Type",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    Text(
+                      e.type,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Divider(
+                      color: Colors.grey.shade200,
+                      thickness: 1,
+                    ),
+                    Text(
+                      "Barcode",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    Text(
+                      e.barcode == null || e.barcode == "" ? "N/A" : e.barcode!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Divider(
+                      color: Colors.grey.shade200,
+                      thickness: 1,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          )
+        ],
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.only(
         left: 20,
@@ -29,8 +188,9 @@ class DashboardGridList extends StatelessWidget {
       child: Consumer<CompareNotifier>(builder: (_, compare, __) {
         return ExpansionTileGroup(
           toggleType: ToggleType.expandOnlyCurrent,
-          children: products.map((e) {
+          children: products.mapIndexed((index, e) {
             return ExpansionTileItem(
+              key: Key(index.toString()),
               border: Border(
                 bottom: BorderSide(
                   color: Colors.grey.shade300,
@@ -87,7 +247,7 @@ class DashboardGridList extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Text(
                       NumberFormat.decimalPattern("en-US").format(e.price),
                     ),
@@ -102,178 +262,16 @@ class DashboardGridList extends StatelessWidget {
                     return SizedBox(
                       width: 40,
                       child: IconButton(
-                        onPressed: value.selectedCart != null &&
-                                value.checkExistingProduct(e.id) == 2
-                            ? null
-                            : () {
-                                onAddProduct(e);
-                              },
-                        icon: Icon(Icons.add_shopping_cart),
+                        onPressed: () {
+                          onAddProduct(e);
+                        },
+                        icon: const Icon(Icons.add_shopping_cart),
                       ),
                     );
                   }),
                 ],
               ),
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        // Border radius
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      height: 200,
-                      width: 200,
-                      child: CarouselSlider(
-                        items: e.images!.map((x) {
-                          return FastCachedImage(
-                            url: x.imageUrl,
-                          );
-                        }).toList(),
-                        options: CarouselOptions(
-                          enlargeCenterPage: true,
-                          autoPlay: true,
-                          aspectRatio: 1,
-                          enlargeStrategy: CenterPageEnlargeStrategy.height,
-                          viewportFraction: 1.0,
-                          initialPage: 0,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 150,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Brand",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                              Text(
-                                e.brand,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              Divider(
-                                color: Colors.grey.shade200,
-                                thickness: 1,
-                              ),
-                              Text(
-                                "Reference",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                              Text(
-                                e.reference,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              Divider(
-                                color: Colors.grey.shade200,
-                                thickness: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 250,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Type",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                              Text(
-                                e.type,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              Divider(
-                                color: Colors.grey.shade200,
-                                thickness: 1,
-                              ),
-                              Text(
-                                "Description",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                              Text(
-                                e.description,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              Divider(
-                                color: Colors.grey.shade200,
-                                thickness: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 150,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Type",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                              Text(
-                                e.type,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              Divider(
-                                color: Colors.grey.shade200,
-                                thickness: 1,
-                              ),
-                              Text(
-                                "Barcode",
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                              Text(
-                                e.barcode == null || e.barcode == ""
-                                    ? "N/A"
-                                    : e.barcode!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              Divider(
-                                color: Colors.grey.shade200,
-                                thickness: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                )
-              ],
+              children: [buildChildren(e)],
             );
           }).toList(),
         );

@@ -16,7 +16,7 @@ class CompareNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deselectProduct(int id) {
+  void deselectProduct(String id) {
     _selectedComparisson.removeWhere((element) => element.id == id);
     notifyListeners();
   }
@@ -26,7 +26,7 @@ class CompareNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  hasProduct(int id) {
+  hasProduct(String id) {
     return _selectedComparisson.any((element) => element.id == id);
   }
 }

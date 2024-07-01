@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.14)
 project(cstyle_cashier_3 LANGUAGES CXX)
 
+set(PDFIUM_VERSION "4929" CACHE STRING "" FORCE)
+set(PDFIUM_ARCH "x64" CACHE STRING "" FORCE)
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "cstyle_cashier_3")

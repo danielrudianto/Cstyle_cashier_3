@@ -19,8 +19,9 @@ class CartSelector extends StatelessWidget {
                     title: Text(value.selectedCart!.products[index].reference),
                     subtitle:
                         Text(value.selectedCart!.products[index].description),
-                    trailing: Text(value.selectedCart!.products[index].quantity
-                        .toString()),
+                    trailing: Text(
+                      value.selectedCart!.products[index].quantity.toString(),
+                    ),
                   );
                 },
                 itemCount: value.selectedCart == null

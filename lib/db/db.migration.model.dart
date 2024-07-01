@@ -16,16 +16,25 @@ class SQLMigrationModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'migration_version': migrationVersion,
+      'migrationVersion': migrationVersion,
     };
   }
 
   factory SQLMigrationModel.fromMap(Map<String, dynamic> map) {
     return SQLMigrationModel(
       id: map['id'],
-      migrationVersion: int.parse(map['migration_version']),
+      migrationVersion: int.parse(map['migrationVersion']),
       createdAt: DateTime.parse(map['createdAt']),
     );
+  }
+
+  Future<void> create() async {
+    try {
+      final db = await DatabaseUtils().database;
+      await db.insert("migration", toMap());
+    } catch (error) {
+      throw Exception(error);
+    }
   }
 
   static Future<SQLMigrationModel?> getLastMigrationVersion() async {
@@ -34,7 +43,7 @@ class SQLMigrationModel {
       "migration",
       limit: 1,
       offset: 0,
-      orderBy: "migration_version DESC",
+      orderBy: "migrationVersion DESC",
     );
 
     if (result.isEmpty) {
