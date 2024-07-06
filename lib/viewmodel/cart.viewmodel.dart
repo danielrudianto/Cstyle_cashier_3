@@ -26,6 +26,7 @@ class CartNotifier extends ChangeNotifier {
 
   void selectCart(CartModel cart) {
     _selectedCart = cart;
+    updatePrice();
     notifyListeners();
   }
 

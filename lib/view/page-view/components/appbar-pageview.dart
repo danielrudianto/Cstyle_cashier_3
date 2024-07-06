@@ -263,7 +263,7 @@ class AppbarPageView extends StatelessWidget {
               child: IconButton(
                 icon: Icon(Icons.upload_file, color: Colors.grey.shade500),
                 onPressed: () {
-                  router.go("/upload");
+                  router.push("/upload");
                 },
               ),
             ),

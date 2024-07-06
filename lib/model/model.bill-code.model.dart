@@ -1,6 +1,7 @@
 import 'package:cstyle_cashier_3/db/db.bill.model.dart';
 import 'package:cstyle_cashier_3/db/db.bill_code.model.dart';
 import 'package:cstyle_cashier_3/db/db.bill_payment.model.dart';
+import 'package:cstyle_cashier_3/db/db.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.bill-payment.model.dart';
 import 'package:cstyle_cashier_3/model/model.bill.model.dart';
 
@@ -175,6 +176,10 @@ class BillCodeModelCreate extends BillCodeModel {
           amount: e.amount,
         );
       }).toList());
+
+      modifiedBills.forEach((x) async {
+        await SQLProductModel.updateStock(x.itemID, x.quantity);
+      });
     } catch (error) {
       throw Exception(error);
     }

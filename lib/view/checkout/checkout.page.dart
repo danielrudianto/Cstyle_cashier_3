@@ -33,6 +33,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   List<Map<String, dynamic>> payments = [];
   double change = 0.0;
+  Printer? printer;
 
   // Get the cash payment
   double get cashPayment {
@@ -113,7 +114,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     _calculateChange();
   }
 
-  void _preCheckout() {
+  Future<void> _preCheckout() async {
     if (payments.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -152,23 +153,59 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return;
     }
 
-    showDialog<UserModel?>(
-        context: context,
-        builder: (context) {
-          return const Dialog(
-            child: SelectEmployee(),
-          );
-        }).then((value) {
-      if (value != null) {
-        setState(() {
-          employeeID = value.code;
-        });
-        _checkout();
-      }
-    });
+    Printer? selectedPrinter = null;
+    while (selectedPrinter == null) {
+      selectedPrinter = await checkPrinter();
+    }
+
+    if (selectedPrinter != null) {
+      showDialog<UserModel?>(
+          context: context,
+          builder: (context) {
+            return const Dialog(
+              child: SelectEmployee(),
+            );
+          }).then((value) {
+        if (value != null) {
+          setState(() {
+            employeeID = value.code;
+          });
+          _checkout(selectedPrinter!);
+        }
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Printer has not been set up."),
+      ));
+    }
   }
 
-  Future<void> _checkout() async {
+  Future<Printer?> checkPrinter() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString("printer:name") == null ||
+        prefs.getString("printer:url") == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Default printer is not found. Please select a printer"),
+      ));
+      return await Printing.pickPrinter(context: context);
+    } else {
+      var selectedPrinter = Printer(
+          url: prefs.getString("printer:url")!,
+          name: prefs.getString("printer:name")!);
+
+      if (selectedPrinter.isAvailable) {
+        return selectedPrinter;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content:
+              Text("Default printer is not available. Please select a printer"),
+        ));
+        return await Printing.pickPrinter(context: context);
+      }
+    }
+  }
+
+  Future<void> _checkout(Printer printer) async {
     try {
       var name =
           Provider.of<CartNotifier>(context, listen: false).selectedCart!.name;
@@ -178,23 +215,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
         employeeID!,
       );
 
-      // Check if user has selected sharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      if (prefs.getString("printer:url") != null) {
-        // Directly print the receipt
-        await Printing.directPrintPdf(
-          printer: Printer(
-            url: prefs.getString("printer:url")!,
-            name: prefs.getString("printer:name")!,
-            location: prefs.getString("printer:location")!,
-          ),
-          onLayout: (format) => _generatePDF(name),
-        );
+      await Printing.directPrintPdf(
+        printer: printer,
+        onLayout: (format) => _generatePDF(name),
+      );
 
-        await Provider.of<CartNotifier>(context, listen: false)
-            .deleteCurrentCart();
-        Navigator.pop(context);
-      }
+      await Provider.of<CartNotifier>(context, listen: false)
+          .deleteCurrentCart();
+      Navigator.pop(context);
     } catch (error) {
       LoggerUtils().log(error.toString(), LogType.error);
     }

@@ -253,7 +253,7 @@ List<CountryModel> availableCountries = const [
   CountryModel(code: 'UZ', name: 'Uzbekistan'),
   CountryModel(code: 'VU', name: 'Vanuatu'),
   CountryModel(code: 'VE', name: 'Venezuela (Bolivarian Republic of)'),
-  CountryModel(code: 'VN', name: 'Viet Nam'),
+  CountryModel(code: 'VN', name: 'Vietnam'),
   CountryModel(code: 'VG', name: 'Virgin Islands (British)'),
   CountryModel(code: 'VI', name: 'Virgin Islands (U.S.)'),
   CountryModel(code: 'WF', name: 'Wallis and Futuna'),

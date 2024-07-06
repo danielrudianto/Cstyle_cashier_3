@@ -98,6 +98,17 @@ class SQLProductModel {
       return result.map((e) => SQLProductModel.fromMap(e)).toList();
     }
   }
+
+  static Future<void> updateStock(String itemID, int quantity) async {
+    var db = await DatabaseUtils().database;
+    try {
+      await db.rawUpdate(
+          "UPDATE product SET stock = stock - ? WHERE mongoID = ?;",
+          [quantity, itemID]);
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
 }
 
 class SQLProductType {
