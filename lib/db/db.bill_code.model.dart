@@ -112,6 +112,28 @@ class SQLBillCodeModel {
       return SQLBillCodeModel.fromMap(billCode);
     }
   }
+
+  static updateUnsyncedBill(String id, String name) async {
+    final db = await DatabaseUtils().database;
+    var result = await db.update(
+        "bill_code",
+        {
+          "syncedAt": DateTime.now().toString(),
+          "isSynced": 1,
+          "mongoID": id,
+        },
+        where: "name = ?",
+        whereArgs: [name]);
+    return result;
+  }
+
+  static Future<List<SQLBillCodeModel>> fetch(int page) async {
+    final db = await DatabaseUtils().database;
+    var result = await db.query("bill_code",
+        orderBy: "id DESC", limit: 10, offset: (page - 1) * 10);
+
+    return result.map((e) => SQLBillCodeModel.fromMap(e)).toList();
+  }
 }
 
 class SQLBillCodeModelCreate extends SQLBillCodeModel {
@@ -230,6 +252,31 @@ class SQLBillCodeModelPrint extends SQLBillCodeModel {
     final db = await DatabaseUtils().database;
     var result = await db.rawQuery(
         "SELECT bill_code.id, bill_code.name, bill_code.date, bill_code.memberID, bill_code.mongoID, bill_code.createdBy, user.name AS createdByName, bill_code.createdAt FROM bill_code JOIN user ON bill_code.createdBy = user.code WHERE bill_code.name = '$name'");
+
+    if (result.isEmpty) {
+      throw Exception("Bill not found");
+    } else {
+      try {
+        var item = result.first;
+        var billCode = SQLBillCodeModelPrint.fromMap(result.first);
+        var items = await SQLBillModelPrint.fetchByBillCodeID(billCode.id!);
+        var payments =
+            await SQLBillPaymentModelPrint.fetchByBillCodeID(billCode.id!);
+
+        billCode.bills = items;
+        billCode.payments = payments;
+
+        return billCode;
+      } catch (error) {
+        throw Exception(error);
+      }
+    }
+  }
+
+  static Future<SQLBillCodeModelPrint> fetchByID(int id) async {
+    final db = await DatabaseUtils().database;
+    var result = await db.rawQuery(
+        "SELECT bill_code.id, bill_code.name, bill_code.date, bill_code.memberID, bill_code.mongoID, bill_code.createdBy, user.name AS createdByName, bill_code.createdAt FROM bill_code JOIN user ON bill_code.createdBy = user.code WHERE bill_code.id = $id");
 
     if (result.isEmpty) {
       throw Exception("Bill not found");

@@ -282,9 +282,11 @@ class AppbarPageView extends StatelessWidget {
                 ),
                 child: IconButton(
                   icon: Icon(Icons.inventory, color: Colors.grey.shade500),
-                  onPressed: () {
-                    onOpenCartList();
-                  },
+                  onPressed: value.cartCount == 0
+                      ? null
+                      : () {
+                          onOpenCartList();
+                        },
                 ),
               ),
             ),

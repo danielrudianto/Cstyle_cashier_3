@@ -185,7 +185,8 @@ class DashboardGridList extends StatelessWidget {
         left: 20,
         right: 20,
       ),
-      child: Consumer<CompareNotifier>(builder: (_, compare, __) {
+      child: Consumer2<CompareNotifier, CartNotifier>(
+          builder: (_, compareNotifier, cartNotifier, child) {
         return ExpansionTileGroup(
           toggleType: ToggleType.expandOnlyCurrent,
           children: products.mapIndexed((index, e) {
@@ -214,7 +215,7 @@ class DashboardGridList extends StatelessWidget {
                       ),
                       checkColor: Colors.white,
                       activeColor: const Color.fromARGB(255, 109, 78, 137),
-                      value: compare.hasProduct(e.id),
+                      value: compareNotifier.hasProduct(e.id),
                       onChanged: (value) {
                         LoggerUtils().log(
                             "User has change ${e.id} to $value. Prepared to be compared.",
@@ -255,20 +256,24 @@ class DashboardGridList extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      NumberFormat.decimalPattern("en-US").format(e.stock),
+                      NumberFormat.decimalPattern("en-US").format(
+                          (e.stock ?? 0) -
+                              cartNotifier.checkProductQuantity(e.id)),
                     ),
                   ),
-                  Consumer<CartNotifier>(builder: (_, value, __) {
-                    return SizedBox(
-                      width: 40,
-                      child: IconButton(
-                        onPressed: () {
-                          onAddProduct(e);
-                        },
-                        icon: const Icon(Icons.add_shopping_cart),
-                      ),
-                    );
-                  }),
+                  SizedBox(
+                    width: 40,
+                    child: IconButton(
+                      onPressed: ((e.stock ?? 0) -
+                                  cartNotifier.checkProductQuantity(e.id)) <=
+                              0
+                          ? null
+                          : () {
+                              onAddProduct(e);
+                            },
+                      icon: const Icon(Icons.add_shopping_cart),
+                    ),
+                  )
                 ],
               ),
               children: [buildChildren(e)],

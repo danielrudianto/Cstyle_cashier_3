@@ -493,7 +493,12 @@ class _PageViewPageState extends State<PageViewPage> {
                                       onPressed: () {
                                         Navigator.of(context).pop("checkout");
                                       },
-                                      child: const Text("Checkout"),
+                                      child: const Text(
+                                        "Checkout",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -508,9 +513,16 @@ class _PageViewPageState extends State<PageViewPage> {
               );
             });
           },
-        ).then((value) {
+        ).then((value) async {
           if (value == "checkout") {
-            context.push("/checkout");
+            // Check stock first
+            var validation = await cartNotifier.checkStock();
+            if (!validation) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text("Insufficient stock")));
+            } else {
+              GoRouter.of(context).push("/checkout");
+            }
           } else if (value == "clear") {
             Future.delayed(
                 const Duration(
@@ -579,19 +591,28 @@ class _PageViewPageState extends State<PageViewPage> {
                             child: ListView.builder(
                               itemBuilder: (context, index) {
                                 return ListTile(
-                                  onTap: () async {
-                                    // Get complete cart
-                                    var cart = await CartModel.fetchByID(
-                                        carts[index].id!);
-                                    Provider.of<CartNotifier>(context,
-                                            listen: false)
-                                        .selectCart(cart);
+                                  onTap: cartNotifier.selectedCart != null &&
+                                          cartNotifier.selectedCart!.id ==
+                                              carts[index].id
+                                      ? null
+                                      : () async {
+                                          // Get complete cart
+                                          var cart = await CartModel.fetchByID(
+                                              carts[index].id!);
+                                          Provider.of<CartNotifier>(context,
+                                                  listen: false)
+                                              .selectCart(cart);
 
-                                    Navigator.of(context).pop();
-                                  },
+                                          Navigator.of(context).pop();
+                                        },
                                   title: Text(carts[index].name),
                                   subtitle: Text(DateFormat("dd/MM/yyyy")
                                       .format(carts[index].date)),
+                                  trailing: cartNotifier.selectedCart != null &&
+                                          cartNotifier.selectedCart!.id ==
+                                              carts[index].id
+                                      ? const Icon(Icons.check)
+                                      : null,
                                 );
                               },
                               itemCount: carts.length,

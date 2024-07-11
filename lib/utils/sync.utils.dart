@@ -1,5 +1,6 @@
 import 'package:cstyle_cashier_3/db/db.bill_code.model.dart';
 import 'package:cstyle_cashier_3/db/db.store.model.dart';
+import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
 import 'package:cstyle_cashier_3/utils/api.utils.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:dio/dio.dart';
@@ -23,8 +24,14 @@ class SyncUtils {
                 Options(
                   headers: {"store": store!.code},
                 ))
-            .then((result) {})
-            .catchError((error) {});
+            .then((result) async {
+          for (var i = 0; i < result.length; i++) {
+            var billCode = BillCodeModelSync.fromMap(result[i]);
+            await billCode.updateSync();
+          }
+        }).catchError((error) {
+          LoggerUtils().log(error.toString(), LogType.error);
+        });
       } else {
         LoggerUtils().log("No bills to sync", LogType.info);
       }

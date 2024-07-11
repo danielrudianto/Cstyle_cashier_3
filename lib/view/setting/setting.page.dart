@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:flutter/material.dart';
@@ -217,6 +218,73 @@ class _SettingPageState extends State<SettingPage> {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(storeModel?.address ?? "N/A"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  ExpansionPanelRadio(
+                    value: 2,
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Padding(
+                        padding: EdgeInsets.all(15),
+                        child: Text("Manual override"),
+                      );
+                    },
+                    body: Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                                'Please be cautious when doing an override.'),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: GestureDetector(
+                              onTap: () async {
+                                try {
+                                  String storeCode = storeModel!.code;
+                                  await ProductStockModel.fetchServerStock(
+                                      storeCode);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Stock overridden successfully",
+                                      ),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Failed to override stock",
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 15,
+                                  horizontal: 35,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                  color: const Color.fromARGB(255, 0, 32, 92),
+                                ),
+                                child: const Text(
+                                  "Override Stock",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),

@@ -135,6 +135,7 @@ class CartNotifier extends ChangeNotifier {
 
       if (selectedCart!.products.isEmpty) {
         await CartModel.deleteByID(selectedCart!.id!);
+        setCartCount(cartCount - 1);
         deselectCart();
         updatePrice();
         notifyListeners();
@@ -147,6 +148,7 @@ class CartNotifier extends ChangeNotifier {
   Future<void> clearCart() async {
     try {
       await CartModel.deleteByID(selectedCart!.id!);
+      setCartCount(cartCount - 1);
       deselectCart();
       notifyListeners();
     } catch (error) {
@@ -210,5 +212,48 @@ class CartNotifier extends ChangeNotifier {
     } catch (error) {
       throw Exception(error);
     }
+  }
+
+  Future<bool> checkStock() {
+    if (selectedCart == null) {
+      return Future.value(false);
+    }
+
+    if (selectedCart!.products.isEmpty) {
+      return Future.value(false);
+    }
+
+    // Combine where productID is the same
+    var modifiedCartItems = selectedCart!.products.fold<Map<String, int>>(
+        {},
+        (previousValue, element) => {
+              ...previousValue,
+              element.itemID:
+                  (previousValue[element.itemID] ?? 0) + element.quantity
+            });
+
+    // Check stock
+    return ProductModel.checkStock(modifiedCartItems);
+  }
+
+  int checkProductQuantity(String id) {
+    if (selectedCart == null) {
+      return 0;
+    }
+
+    if (selectedCart!.products.isEmpty) {
+      return 0;
+    }
+
+    if (selectedCart!.products
+        .where((element) => element.itemID == id)
+        .isEmpty) {
+      return 0;
+    }
+
+// The products has more than 1 item with the same ID
+    return selectedCart!.products
+        .where((element) => element.itemID == id)
+        .fold(0, (sum, element) => sum + element.quantity);
   }
 }

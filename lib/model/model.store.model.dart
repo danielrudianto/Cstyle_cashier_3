@@ -1,12 +1,16 @@
 import 'package:cstyle_cashier_3/db/db.store.model.dart';
+import 'package:cstyle_cashier_3/utils/api.utils.dart';
+import 'package:dio/dio.dart';
 
 class StoreModel {
+  String? id;
   final String name;
   final String address;
   final String code;
   final String phoneNumber;
 
   StoreModel({
+    this.id,
     required this.name,
     required this.address,
     required this.code,
@@ -62,6 +66,28 @@ class StoreModel {
             code: store.code,
             phoneNumber: store.phoneNumber);
       }
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  static Future<List<StoreModel>> fetchStores() async {
+    try {
+      var store = await getCurrentProfile();
+      var stores = await ApiUtils().getRequest(
+          "cashier/stores",
+          {},
+          Options(headers: {
+            "store": store?.code,
+          }));
+
+      return List<StoreModel>.from(stores.map((store) => StoreModel(
+            id: store["_id"],
+            name: store["name"],
+            address: store["address"],
+            code: store["code"],
+            phoneNumber: store["phoneNumber"],
+          )));
     } catch (error) {
       throw Exception(error);
     }

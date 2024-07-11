@@ -1,9 +1,13 @@
 import 'package:cstyle_cashier_3/model/model.countries.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
+import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
+import 'package:cstyle_cashier_3/utils/router.utils.dart';
+import 'package:cstyle_cashier_3/view/checkout/components/select-employee.dart';
 import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 
@@ -12,6 +16,11 @@ class MemberPage extends StatefulWidget {
 
   @override
   State<MemberPage> createState() => _MemberPageState();
+}
+
+enum language {
+  EN,
+  ID,
 }
 
 class _MemberPageState extends State<MemberPage> {
@@ -188,9 +197,11 @@ class _MemberPageState extends State<MemberPage> {
                 ),
               );
             });
-      }
+      } else {}
     } catch (error) {
       LoggerUtils().log(error.toString(), LogType.error);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.toString())));
     } finally {
       setState(() {
         isLoading = false;
@@ -198,13 +209,77 @@ class _MemberPageState extends State<MemberPage> {
     }
   }
 
-  openAddMember() {
+  preOpenAddMember() {
+    showDialog<UserModel?>(
+        context: context,
+        builder: (context) {
+          return const Dialog(
+            child: SelectEmployee(),
+          );
+        }).then((value) {
+      if (value != null) {
+        openAddMember(value.id);
+      }
+    });
+  }
+
+  openAddMember(String userID) {
     TextEditingController codeEditingController = TextEditingController();
     TextEditingController nameEditingController = TextEditingController();
     TextEditingController memberNationalityController = TextEditingController();
     TextEditingController memberEmailController = TextEditingController();
     TextEditingController memberPhoneNumberController = TextEditingController();
+    TextEditingController memberBirthdayController = TextEditingController();
     CountryModel? nationality;
+    language? selectedLanguage = language.ID;
+    bool isSubmitting = false;
+
+    addMember() async {
+      setState(() {
+        isSubmitting = true;
+      });
+
+      try {
+        if (codeEditingController.text.isEmpty) {
+          throw Exception("Code cannot be empty");
+        }
+
+        if (nameEditingController.text.isEmpty) {
+          throw Exception("Name cannot be empty");
+        }
+
+        if (memberEmailController.text.isEmpty &&
+            memberPhoneNumberController.text.isEmpty) {
+          throw Exception(
+              "Please insert either phone number or email, or both.");
+        }
+
+        var member = MemberModel(
+          code: codeEditingController.text,
+          name: nameEditingController.text,
+          nationality: nationality?.code,
+          email: memberEmailController.text,
+          phoneNumber: memberPhoneNumberController.text,
+          birthday: DateTime.now(),
+          lang: selectedLanguage!,
+          points: 0,
+          createdBy: userID,
+        );
+
+        await member.create();
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Successfully created member")));
+        Navigator.pop(context);
+      } catch (error) {
+        LoggerUtils().log(error.toString(), LogType.error);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.toString())));
+      } finally {
+        setState(() {
+          isSubmitting = false;
+        });
+      }
+    }
 
     showDialog(
         barrierDismissible: false,
@@ -270,6 +345,15 @@ class _MemberPageState extends State<MemberPage> {
                               decoration: const InputDecoration(
                                 labelText: "Code",
                                 border: OutlineInputBorder(),
+                                focusColor: Colors.black54,
+                                hoverColor: Colors.black54,
+                                focusedBorder: OutlineInputBorder(),
+                                labelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
+                                floatingLabelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
                               ),
                             ),
                             const SizedBox(
@@ -280,6 +364,15 @@ class _MemberPageState extends State<MemberPage> {
                               decoration: const InputDecoration(
                                 labelText: "Name",
                                 border: OutlineInputBorder(),
+                                focusColor: Colors.black54,
+                                hoverColor: Colors.black54,
+                                focusedBorder: OutlineInputBorder(),
+                                labelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
+                                floatingLabelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
                               ),
                             ),
                             const SizedBox(
@@ -310,6 +403,15 @@ class _MemberPageState extends State<MemberPage> {
                                     hintText: "Ex. Indonesia (ID)",
                                     labelText: "Nationality",
                                     border: OutlineInputBorder(),
+                                    focusColor: Colors.black54,
+                                    hoverColor: Colors.black54,
+                                    focusedBorder: OutlineInputBorder(),
+                                    labelStyle: TextStyle(
+                                      color: Colors.black54,
+                                    ),
+                                    floatingLabelStyle: TextStyle(
+                                      color: Colors.black54,
+                                    ),
                                   ),
                                 );
                               },
@@ -431,6 +533,15 @@ class _MemberPageState extends State<MemberPage> {
                               decoration: const InputDecoration(
                                 labelText: "Phone number",
                                 border: OutlineInputBorder(),
+                                focusColor: Colors.black54,
+                                hoverColor: Colors.black54,
+                                focusedBorder: OutlineInputBorder(),
+                                labelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
+                                floatingLabelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
                               ),
                             ),
                             const SizedBox(
@@ -441,6 +552,15 @@ class _MemberPageState extends State<MemberPage> {
                               decoration: const InputDecoration(
                                 labelText: "Email",
                                 border: OutlineInputBorder(),
+                                focusColor: Colors.black54,
+                                hoverColor: Colors.black54,
+                                focusedBorder: OutlineInputBorder(),
+                                labelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
+                                floatingLabelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
                               ),
                             ),
                             const SizedBox(
@@ -452,31 +572,92 @@ class _MemberPageState extends State<MemberPage> {
                               height: 15,
                             ),
                             TextFormField(
-                              controller: nameEditingController,
                               decoration: const InputDecoration(
-                                labelText: "Preferred language",
+                                labelText: "Birthday",
                                 border: OutlineInputBorder(),
+                                focusColor: Colors.black54,
+                                hoverColor: Colors.black54,
+                                focusedBorder: OutlineInputBorder(),
+                                labelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
+                                floatingLabelStyle: TextStyle(
+                                  color: Colors.black54,
+                                ),
                               ),
+                              onTap: () {
+                                var firstDate = DateTime.now();
+                                var lastDate = DateTime.now();
+
+                                firstDate = DateTime(firstDate.year - 100);
+                                lastDate = DateTime(lastDate.year - 18);
+                                showDatePicker(
+                                        context: context,
+                                        firstDate: firstDate,
+                                        lastDate: lastDate)
+                                    .then((value) {
+                                  if (value == null) {
+                                    return;
+                                  } else {
+                                    memberBirthdayController.text =
+                                        DateFormat("dd/MM/yyyy").format(value);
+                                  }
+                                }).catchError((error) {
+                                  LoggerUtils()
+                                      .log(error.toString(), LogType.error);
+                                });
+                              },
+                              controller: memberBirthdayController,
                             ),
                             const SizedBox(
                               height: 15,
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 25,
-                              ),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 151, 158, 249),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Text(
-                                "Submit",
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 0, 32, 92),
+                            RadioListTile<language>(
+                                title: const Text("English"),
+                                groupValue: selectedLanguage,
+                                value: language.EN,
+                                activeColor: Colors.black54,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedLanguage = value;
+                                  });
+                                }),
+                            RadioListTile<language>(
+                                title: const Text("Bahasa"),
+                                groupValue: selectedLanguage,
+                                value: language.ID,
+                                activeColor: Colors.black54,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedLanguage = value;
+                                  });
+                                }),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            GestureDetector(
+                              onTap: isSubmitting
+                                  ? null
+                                  : () {
+                                      addMember();
+                                    },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                  horizontal: 25,
                                 ),
-                                textAlign: TextAlign.center,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Color.fromARGB(255, 151, 158, 249),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: const Text(
+                                  "Submit",
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 0, 32, 92),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
                           ],
@@ -503,234 +684,56 @@ class _MemberPageState extends State<MemberPage> {
               color: Color.fromARGB(255, 151, 158, 249),
               height: 300,
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Memberships",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 0, 32, 92),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 35,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    const Text(
-                      "Join our membership program today to earn points and get exclusive offers!",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 0, 32, 92),
-                        fontWeight: FontWeight.normal,
-                        fontSize: 18,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 25,
-                    ),
-                    // Create button
-                    GestureDetector(
-                      onTap: () {
-                        openAddMember();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25),
-                          color: const Color.fromARGB(255, 0, 32, 92),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 35,
-                            vertical: 10,
-                          ),
-                          child: Text(
-                            "Add new member",
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 255, 255, 255),
-                              fontWeight: FontWeight.normal,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                Container(
-                  color: Color.fromARGB(255, 151, 158, 249),
-                  height: 50,
-                ),
-                SizedBox(
-                  width: ResponsiveUtils.getContainerSize(context),
-                  child: StaggeredGrid.count(
-                    crossAxisCount: 6,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 20,
+                child: SizedBox(
+                  width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 2,
-                        mainAxisCellCount: 1,
-                        child: Card(
-                          elevation: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text("Current members"),
-                                  Text(
-                                    "1.265",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 32, 92),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 35,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                      const Text(
+                        "Memberships",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 0, 32, 92),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 35,
                         ),
                       ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 2,
-                        mainAxisCellCount: 1,
-                        child: Card(
-                          elevation: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text("Current members"),
-                                  Text(
-                                    "1.265",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 32, 92),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 35,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      const Text(
+                        "Join our membership program today to earn points and get exclusive offers!",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 0, 32, 92),
+                          fontWeight: FontWeight.normal,
+                          fontSize: 18,
                         ),
                       ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 2,
-                        mainAxisCellCount: 1,
-                        child: Card(
-                          elevation: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text("Current members"),
-                                  Text(
-                                    "1.265",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 32, 92),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 35,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      const SizedBox(
+                        height: 25,
                       ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 2,
-                        mainAxisCellCount: 1,
-                        child: Card(
-                          elevation: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text("Current members"),
-                                  Text(
-                                    "1.265",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 32, 92),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 35,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                      // Create button
+                      GestureDetector(
+                        onTap: () {
+                          preOpenAddMember();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(25),
+                            color: const Color.fromARGB(255, 0, 32, 92),
                           ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 4,
-                        mainAxisCellCount: 1,
-                        child: Card(
-                          elevation: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    "Need to check your member's code?",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 0, 32, 92),
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  TextFormField(
-                                    controller: codeEditingController,
-                                    readOnly: isLoading,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      suffix: SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: IconButton(
-                                          padding: const EdgeInsets.all(0),
-                                          icon: Icon(
-                                            Icons.search,
-                                            size: 15,
-                                          ),
-                                          onPressed: () {
-                                            fetchByCode(
-                                                    codeEditingController.text)
-                                                .then((member) {})
-                                                .catchError((error) {});
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 35,
+                              vertical: 10,
+                            ),
+                            child: Text(
+                              "Add new member",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 255, 255, 255),
+                                fontWeight: FontWeight.normal,
+                                fontSize: 18,
                               ),
                             ),
                           ),
@@ -739,16 +742,91 @@ class _MemberPageState extends State<MemberPage> {
                     ],
                   ),
                 ),
+              ),
+            ),
+            Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                Container(
+                  color: const Color.fromARGB(255, 151, 158, 249),
+                  height: 50,
+                ),
+                SizedBox(
+                  width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                  child: Card(
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              "Need to check your member's code?",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 0, 32, 92),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            TextFormField(
+                              controller: codeEditingController,
+                              readOnly: isLoading,
+                              decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                suffix: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: IconButton(
+                                    padding: const EdgeInsets.all(0),
+                                    icon: const Icon(
+                                      Icons.search,
+                                      size: 15,
+                                    ),
+                                    onPressed: () {
+                                      fetchByCode(codeEditingController.text)
+                                          .then((member) {})
+                                          .catchError((error) {});
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
             const SizedBox(
               height: 25,
             ),
-            Center(
-              child: SizedBox(
-                width: ResponsiveUtils.getContainerSize(context),
-                child: Text("View members here."),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Spacer(),
+                SizedBox(
+                  width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                  child: TextButton(
+                    onPressed: () {
+                      router.push("member/list");
+                    },
+                    child: const Text(
+                      "View members here.",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                const Spacer(),
+              ],
             ),
             const SizedBox(
               height: 25,

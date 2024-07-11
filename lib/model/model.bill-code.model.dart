@@ -93,6 +93,24 @@ class BillCodeModel {
       throw Exception(error);
     }
   }
+
+  static Future<List<BillCodeModel>> fetchHistory(int page) async {
+    try {
+      var bills = await SQLBillCodeModel.fetch(page);
+      return bills.map((x) {
+        return BillCodeModel(
+          id: x.id!,
+          date: x.date,
+          name: x.name,
+          memberID: x.memberID,
+          createdBy: x.createdBy,
+          mongoID: x.mongoID,
+        );
+      }).toList();
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
 }
 
 class BillCodeModelCreate extends BillCodeModel {
@@ -226,6 +244,69 @@ class BillCodeModelPrint extends BillCodeModel {
               amount: e.amount, paymentMethod: e.paymentMethod);
         }).toList(),
       );
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  static Future<BillCodeModelPrint> fetchByID(int id) async {
+    try {
+      var billCode = await SQLBillCodeModelPrint.fetchByID(id);
+      return BillCodeModelPrint(
+        date: billCode.date,
+        name: billCode.name,
+        memberID: billCode.memberID,
+        createdBy: billCode.createdBy,
+        createdByName: billCode.createdByName,
+        bills: billCode.bills.map((e) {
+          return BillModelPrint(
+            reference: e.reference,
+            description: e.description,
+            brand: e.brand,
+            type: e.type,
+            price: e.price,
+            discount: e.discount,
+            quantity: e.quantity,
+          );
+        }).toList(),
+        payments: billCode.payments.map((e) {
+          return BillPaymentModelPrint(
+              amount: e.amount, paymentMethod: e.paymentMethod);
+        }).toList(),
+      );
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+}
+
+class BillCodeModelSync {
+  String name;
+  String id;
+
+  BillCodeModelSync({
+    required this.name,
+    required this.id,
+  });
+
+  factory BillCodeModelSync.fromMap(Map<String, dynamic> map) {
+    return BillCodeModelSync(
+      name: map['name'],
+      id: map['_id'],
+    );
+  }
+
+  // To map
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      '_id': id,
+    };
+  }
+
+  updateSync() async {
+    try {
+      await SQLBillCodeModel.updateUnsyncedBill(id, name);
     } catch (error) {
       throw Exception(error);
     }

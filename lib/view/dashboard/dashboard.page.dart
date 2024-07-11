@@ -10,7 +10,6 @@ import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-type-select
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 import 'package:provider/provider.dart';
 
@@ -38,12 +37,16 @@ class _DashboardPageState extends State<DashboardPage> {
   ScrollController scrollController = ScrollController();
 
   @override
-  void initState() {
+  void didChangeDependencies() {
     Timer(const Duration(milliseconds: 250), () {
       fetchProductTypes();
       fetchProducts(1);
     });
+    super.didChangeDependencies();
+  }
 
+  @override
+  void initState() {
     scrollController.addListener(() {
       if (scrollController.hasClients &&
           scrollController.offset >=

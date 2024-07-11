@@ -99,6 +99,14 @@ class SQLProductModel {
     }
   }
 
+  static Future<List<SQLProductModel>> fetchByItemIDs(
+      List<String> itemIDs) async {
+    final db = await DatabaseUtils().database;
+    var result = await db.query("product",
+        where: "mongoID IN (${itemIDs.map((x) => "'$x'").join(",")})");
+    return result.map((e) => SQLProductModel.fromMap(e)).toList();
+  }
+
   static Future<void> updateStock(String itemID, int quantity) async {
     var db = await DatabaseUtils().database;
     try {
