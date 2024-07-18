@@ -10,7 +10,6 @@ class StockTransferModel {
   final List<StockTransferItemModel> items;
   final String createdBy;
   DateTime createdAt;
-  final String note;
 
   StockTransferModel({
     this.id,
@@ -19,8 +18,29 @@ class StockTransferModel {
     required this.items,
     required this.createdBy,
     required this.createdAt,
-    required this.note,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'storeID': storeID,
+      'items': items.map((x) => x.toMap()).toList(),
+      'createdBy': createdBy,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory StockTransferModel.fromMap(Map<String, dynamic> map) {
+    return StockTransferModel(
+      id: map['id'],
+      name: map['name'],
+      storeID: map['storeID'],
+      items: [],
+      createdBy: map['createdBy']['name'],
+      createdAt: DateTime.parse(map['createdAt']),
+    );
+  }
 
   create() async {
     var store = await StoreModel.getCurrentProfile();
@@ -42,12 +62,131 @@ class StockTransferModel {
                 })
             .toList(),
         "userID": createdBy,
-        "note": note,
       },
       Options(
         headers: {"store": store.code},
       ),
     );
+  }
+
+  static Future<void> send(Map<String, dynamic> data) async {
+    try {
+      var store = await StoreModel.getCurrentProfile();
+      await ApiUtils().postRequest("cashier/stock-transfer/send", data,
+          Options(headers: {"store": store?.code}));
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  static Future<void> receive(String id, String userCode) async {
+    try {
+      var store = await StoreModel.getCurrentProfile();
+      await ApiUtils().postRequest("cashier/stock-transfer/receive", {"id": id},
+          Options(headers: {"store": store?.code, "employee-code": userCode}));
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+}
+
+class StockTransferFetchmodel {
+  String? id;
+  final String name;
+  final Map<String, dynamic>? requestFrom;
+  final List<StockTransferFetchItemModel> items;
+  final String createdBy;
+  DateTime createdAt;
+
+  StockTransferFetchmodel({
+    this.id,
+    required this.name,
+    required this.requestFrom,
+    required this.items,
+    required this.createdBy,
+    required this.createdAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'requestFrom': requestFrom,
+      'items': items.map((x) => x.toMap()).toList(),
+      'createdBy': createdBy,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory StockTransferFetchmodel.fromMap(Map<String, dynamic> map) {
+    return StockTransferFetchmodel(
+      id: map['_id'],
+      name: map['name'],
+      requestFrom: map['requestFrom'],
+      items: [],
+      createdBy: map['createdBy']['name'],
+      createdAt: DateTime.parse(map['createdAt']),
+    );
+  }
+
+  factory StockTransferFetchmodel.fromMapWItems(Map<String, dynamic> map) {
+    return StockTransferFetchmodel(
+      id: map['_id'],
+      name: map['name'],
+      requestFrom: map['requestFrom'],
+      items: List<StockTransferFetchItemModel>.from(
+          map['items'].map((x) => StockTransferFetchItemModel.fromMap(x))),
+      createdBy: map['createdBy']['name'],
+      createdAt: DateTime.parse(map['createdAt']),
+    );
+  }
+
+  static Future<Map<String, dynamic>> fetchUnsent(int page) async {
+    var store = await StoreModel.getCurrentProfile();
+    var response = await ApiUtils().getRequest(
+        "cashier/stock-transfer/unsent",
+        {"page": page},
+        Options(
+          headers: {"store": store?.code},
+        ));
+
+    var data = response['data'];
+
+    return {
+      "data": List<StockTransferFetchmodel>.from(
+          data.map((x) => StockTransferFetchmodel.fromMap(x))),
+      "count": response['count']
+    };
+  }
+
+  static Future<Map<String, dynamic>> fetchUnreceived(int page) async {
+    var store = await StoreModel.getCurrentProfile();
+    var response = await ApiUtils().getRequest(
+        "cashier/stock-transfer/unreceived",
+        {"page": page},
+        Options(
+          headers: {"store": store?.code},
+        ));
+
+    var data = response['data'];
+
+    return {
+      "data": List<StockTransferFetchmodel>.from(
+          data.map((x) => StockTransferFetchmodel.fromMap(x))),
+      "count": response['count']
+    };
+  }
+
+  static Future<StockTransferFetchmodel> fetchByID(String id) async {
+    var store = await StoreModel.getCurrentProfile();
+    var response = await ApiUtils().getRequest(
+        "cashier/stock-transfer/$id",
+        {},
+        Options(
+          headers: {"store": store?.code},
+        ));
+
+    return StockTransferFetchmodel.fromMapWItems(response);
   }
 }
 
@@ -59,4 +198,50 @@ class StockTransferItemModel {
     required this.itemID,
     required this.quantity,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'itemID': itemID,
+      'quantity': quantity,
+    };
+  }
+
+  factory StockTransferItemModel.fromMap(Map<String, dynamic> map) {
+    return StockTransferItemModel(
+      itemID: map['itemID'],
+      quantity: map['quantity'],
+    );
+  }
+}
+
+class StockTransferFetchItemModel {
+  String id;
+  String reference;
+  String description;
+  int quantity;
+
+  StockTransferFetchItemModel({
+    required this.id,
+    required this.reference,
+    required this.description,
+    required this.quantity,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'reference': reference,
+      'description': description,
+      'quantity': quantity,
+    };
+  }
+
+  factory StockTransferFetchItemModel.fromMap(Map<String, dynamic> map) {
+    return StockTransferFetchItemModel(
+      id: map['itemID']['_id'],
+      reference: map['itemID']['reference'],
+      description: map['itemID']['description'],
+      quantity: map['quantity'],
+    );
+  }
 }

@@ -1,7 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:collection/collection.dart';
+import 'package:cstyle_cashier_3/model/model.product-image.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
+import 'package:cstyle_cashier_3/view/compare/components/product-image.component.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:expansion_tile_group/expansion_tile_group.dart';
@@ -26,28 +28,9 @@ class DashboardGridList extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              // Border radius
-              borderRadius: BorderRadius.circular(10),
-            ),
-            height: 200,
-            width: 200,
-            child: CarouselSlider(
-              items: e.images!.map((x) {
-                return FastCachedImage(
-                  url: x.imageUrl,
-                );
-              }).toList(),
-              options: CarouselOptions(
-                enlargeCenterPage: true,
-                autoPlay: true,
-                aspectRatio: 1,
-                enlargeStrategy: CenterPageEnlargeStrategy.height,
-                viewportFraction: 1.0,
-                initialPage: 0,
-              ),
-            ),
+          ProductImageComponent(
+            id: e.id,
+            autoPlay: true,
           ),
           Row(
             children: [
@@ -276,7 +259,9 @@ class DashboardGridList extends StatelessWidget {
                   )
                 ],
               ),
-              children: [buildChildren(e)],
+              children: [
+                buildChildren(e),
+              ],
             );
           }).toList(),
         );

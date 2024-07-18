@@ -27,9 +27,26 @@ class ProductImageModel {
     );
   }
 
-  static Future<List<ProductImageModel>> fetchByItemIDs(List<int> ids) async {
+  static Future<List<ProductImageModel>> fetchByItemIDs(
+      List<String> ids) async {
     try {
-      var images = await SQLProductImageModel.fetchByItemIDs(ids);
+      // var images = await SQLProductImageModel.fetchByItemIDs(ids);
+      // return images.map((x) {
+      //   return ProductImageModel(
+      //     id: x.id!,
+      //     imageUrl: x.imageUrl,
+      //     productId: x.productId,
+      //   );
+      // }).toList();
+      return [];
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  static Future<List<ProductImageModel>> fetchByItemID(String id) async {
+    try {
+      var images = await SQLProductImageModel.fetchByItemID(id);
       return images.map((x) {
         return ProductImageModel(
           id: x.id!,

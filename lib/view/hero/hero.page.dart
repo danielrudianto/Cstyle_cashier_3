@@ -19,7 +19,7 @@ class HeroPage extends StatefulWidget {
 }
 
 class _HeroPageState extends State<HeroPage> {
-  String loadingStatus = "Checking time with our online services.";
+  String loadingStatus = "Initializing";
 
   @override
   void initState() {
@@ -83,7 +83,7 @@ class _HeroPageState extends State<HeroPage> {
               loadingStatus = "Loading stock data from designated server";
             });
             var storeCode = value.code;
-            ProductStockModel.fetchServerStock(storeCode).then((stocks) async {
+            ProductStockModel.fetchServerStock(storeCode!).then((stocks) async {
               // Update local database stock
               try {
                 setState(() {
@@ -138,17 +138,19 @@ class _HeroPageState extends State<HeroPage> {
     setState(() {
       loadingStatus = "Checking time with our online services.";
     });
+
     try {
       DateTime ntpTime = await NTP.now();
+      print(ntpTime);
       DateTime localTime = DateTime.now();
 
       setState(() {
         if ((ntpTime.difference(localTime).inSeconds).abs() > 30) {
+          LoggerUtils().log(
+            "Time difference is ${ntpTime.difference(localTime).inSeconds.abs()}",
+            LogType.error,
+          );
           setState(() {
-            LoggerUtils().log(
-              "Time difference is ${ntpTime.difference(localTime).inSeconds.abs()}",
-              LogType.error,
-            );
             loadingStatus =
                 "Time difference is too large. Please set your time and date appropriately.";
             throw Exception("Time missmatch");
@@ -160,6 +162,7 @@ class _HeroPageState extends State<HeroPage> {
     } catch (e) {
       LoggerUtils().log(
           "Time sync process is error. Please try again later.", LogType.error);
+
       setState(() {
         loadingStatus = "Error fetching time.";
       });

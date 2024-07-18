@@ -26,7 +26,7 @@ class _SetupStorePageState extends State<SetupStorePage> {
         phoneNumber: value.phoneNumber,
       ).create().then((store) {
         LoggerUtils().log("Fetching stock from server", LogType.info);
-        ProductStockModel.fetchServerStock(value.code).then((stocks) async {
+        ProductStockModel.fetchServerStock(value.code!).then((stocks) async {
           await ProductStockModel.updateServerStock(stocks);
           LoggerUtils().log("Stock updated", LogType.info);
           SyncUtils.sync();

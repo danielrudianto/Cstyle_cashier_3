@@ -59,7 +59,7 @@ class ProductModel {
         await SQLProductModel.fetchByKeyword(selectedTypes, keyword, page);
     var productImages =
         await ProductImageModel.fetchByItemIDs(products.map((x) {
-      return x.id!;
+      return x.mongoID!;
     }).toList());
 
     for (var i = 0; i < products.length; i++) {

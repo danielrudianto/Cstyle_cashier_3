@@ -121,7 +121,7 @@ class AppbarPageView extends StatelessWidget {
                                 height: 20,
                               ),
                               Text(
-                                "Member",
+                                "Store",
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium!
@@ -131,89 +131,6 @@ class AppbarPageView extends StatelessWidget {
                                               255, 109, 78, 137)
                                           : Colors.grey.shade500,
                                       fontWeight: page == 1
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 25),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: page == 2
-                                  ? const Color.fromARGB(255, 109, 78, 137)
-                                  : Colors.transparent,
-                              width: 3,
-                            ),
-                          ),
-                        ),
-                        height: 80,
-                        child: InkWell(
-                          onTap: () {
-                            changePage(2);
-                          },
-                          child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Text(
-                                "History",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .copyWith(
-                                      color: page == 2
-                                          ? const Color.fromARGB(
-                                              255, 109, 78, 137)
-                                          : Colors.grey.shade500,
-                                      fontWeight: page == 2
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 25),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: page == 3
-                                  ? const Color.fromARGB(255, 109, 78, 137)
-                                  : Colors.transparent,
-                              width: 3,
-                            ),
-                          ),
-                        ),
-                        height: 80,
-                        // Border bottom
-                        child: InkWell(
-                          onTap: () {
-                            changePage(3);
-                          },
-                          child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Text(
-                                "Inventory",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .copyWith(
-                                      color: page == 3
-                                          ? const Color.fromARGB(
-                                              255, 109, 78, 137)
-                                          : Colors.grey.shade500,
-                                      fontWeight: page == 3
                                           ? FontWeight.bold
                                           : FontWeight.normal,
                                     ),

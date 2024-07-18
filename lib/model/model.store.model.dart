@@ -6,23 +6,23 @@ class StoreModel {
   String? id;
   final String name;
   final String address;
-  final String code;
-  final String phoneNumber;
+  String? code;
+  String? phoneNumber;
 
   StoreModel({
     this.id,
     required this.name,
     required this.address,
-    required this.code,
-    required this.phoneNumber,
+    this.code,
+    this.phoneNumber,
   });
 
   Future<StoreModel> create() async {
     var result = await SQLStoreModel(
       name: name,
-      address: address,
-      code: code,
-      phoneNumber: phoneNumber,
+      address: address!,
+      code: code!,
+      phoneNumber: phoneNumber!,
     ).create();
     if (result == null) {
       throw Exception("Failed to create new store");

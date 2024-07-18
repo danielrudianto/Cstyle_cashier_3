@@ -82,7 +82,8 @@ class DatabaseUtils {
         brandID TEXT NOT NULL,
         typeID TEXT NOT NULL,
         mongoID TEXT UNIQUE NOT NULL,
-        stock INTEGER NOT NULL DEFAULT 0
+        stock INTEGER NOT NULL DEFAULT 0,
+        isActive INTEGER NOT NULL DEFAULT 1
       )
     ''');
 

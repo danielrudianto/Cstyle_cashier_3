@@ -22,28 +22,19 @@ class SQLProductImageModel {
   factory SQLProductImageModel.fromMap(Map<String, dynamic> map) {
     return SQLProductImageModel(
       id: map['id'],
-      productId: map['productId'],
+      productId: map['productID'],
       imageUrl: map['imageUrl'],
     );
   }
 
-  static Future<List<SQLProductImageModel>> fetchByItemIDs(
-      List<int> ids) async {
-    List<SQLProductImageModel> result = [];
-    final db = await DatabaseUtils().database;
-    db
-        .query(
-      "product_image",
-      where: "productId in (${ids.join(',')})",
-    )
-        .then(
-      (value) {
-        result = value
-            .map((e) => SQLProductImageModel.fromMap(e))
-            .toList()
-            .cast<SQLProductImageModel>();
-      },
-    );
-    return result;
+  static Future<List<SQLProductImageModel>> fetchByItemID(String id) async {
+    try {
+      final db = await DatabaseUtils().database;
+      var result = await db
+          .query("product_image", where: "productID = ?", whereArgs: [id]);
+      return result.map((e) => SQLProductImageModel.fromMap(e)).toList();
+    } catch (error) {
+      throw Exception(error);
+    }
   }
 }

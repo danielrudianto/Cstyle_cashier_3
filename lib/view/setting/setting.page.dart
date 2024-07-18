@@ -248,7 +248,7 @@ class _SettingPageState extends State<SettingPage> {
                             child: GestureDetector(
                               onTap: () async {
                                 try {
-                                  String storeCode = storeModel!.code;
+                                  String storeCode = storeModel!.code!;
                                   await ProductStockModel.fetchServerStock(
                                       storeCode);
                                   ScaffoldMessenger.of(context).showSnackBar(

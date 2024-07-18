@@ -1,7 +1,7 @@
 import 'package:cstyle_cashier_3/db/db.store.model.dart';
 import 'package:cstyle_cashier_3/utils/api.utils.dart';
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
-import 'package:cstyle_cashier_3/view/member/member.page.dart';
+import 'package:cstyle_cashier_3/view/store/store.page.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 

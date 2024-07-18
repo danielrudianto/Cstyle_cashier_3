@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names, camel_case_types
+
 import 'package:cstyle_cashier_3/model/model.countries.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
@@ -5,17 +7,20 @@ import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/view/checkout/components/select-employee.dart';
+import 'package:cstyle_cashier_3/view/store/components/action-card.component.dart';
+import 'package:cstyle_cashier_3/view/store/components/stat-card.component.dart';
 import 'package:flag/flag.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 
-class MemberPage extends StatefulWidget {
-  const MemberPage({super.key});
+class StorePage extends StatefulWidget {
+  const StorePage({super.key});
 
   @override
-  State<MemberPage> createState() => _MemberPageState();
+  State<StorePage> createState() => _StorePageState();
 }
 
 enum language {
@@ -23,9 +28,11 @@ enum language {
   ID,
 }
 
-class _MemberPageState extends State<MemberPage> {
+class _StorePageState extends State<StorePage> {
   TextEditingController codeEditingController = TextEditingController();
   bool isLoading = false;
+  int memberCount = 0;
+
   Future<void> fetchByCode(String code) async {
     setState(() {
       isLoading = true;
@@ -681,62 +688,44 @@ class _MemberPageState extends State<MemberPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              color: Color.fromARGB(255, 151, 158, 249),
-              height: 300,
+              padding: const EdgeInsets.only(
+                top: 50,
+                bottom: 50,
+              ),
+              color: Color.fromARGB(0, 151, 157, 249),
               child: Center(
                 child: SizedBox(
                   width: 0.8 * ResponsiveUtils.getContainerSize(context),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      const Text(
-                        "Memberships",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 32, 92),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 35,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      const Text(
-                        "Join our membership program today to earn points and get exclusive offers!",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 32, 92),
-                          fontWeight: FontWeight.normal,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      // Create button
-                      GestureDetector(
-                        onTap: () {
-                          preOpenAddMember();
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: const Color.fromARGB(255, 0, 32, 92),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 35,
-                              vertical: 10,
-                            ),
-                            child: Text(
-                              "Add new member",
+                      SizedBox(
+                        // Width only 0.7
+                        width: 0.5 * ResponsiveUtils.getContainerSize(context),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Check Your Store Performance",
                               style: TextStyle(
-                                color: Color.fromARGB(255, 255, 255, 255),
+                                color: Color.fromARGB(255, 109, 41, 187),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 35,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            const Text(
+                              "Here you can check out your sales performance, track registered members, and monitor overall store activity.",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 0, 32, 92),
                                 fontWeight: FontWeight.normal,
                                 fontSize: 18,
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ],
@@ -744,89 +733,252 @@ class _MemberPageState extends State<MemberPage> {
                 ),
               ),
             ),
-            Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                Container(
-                  color: const Color.fromARGB(255, 151, 158, 249),
-                  height: 50,
-                ),
-                SizedBox(
-                  width: 0.8 * ResponsiveUtils.getContainerSize(context),
-                  child: Card(
-                    elevation: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              "Need to check your member's code?",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 0, 32, 92),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            TextFormField(
-                              controller: codeEditingController,
-                              readOnly: isLoading,
-                              decoration: InputDecoration(
-                                border: const OutlineInputBorder(),
-                                suffix: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: IconButton(
-                                    padding: const EdgeInsets.all(0),
-                                    icon: const Icon(
-                                      Icons.search,
-                                      size: 15,
-                                    ),
-                                    onPressed: () {
-                                      fetchByCode(codeEditingController.text)
-                                          .then((member) {})
-                                          .catchError((error) {});
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+            Center(
+              child: SizedBox(
+                width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "More to your store",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 109, 41, 187),
+                        fontSize: 25,
                       ),
                     ),
-                  ),
+                    const SizedBox(
+                      height: 35,
+                    ),
+                    StaggeredGrid.count(
+                      mainAxisSpacing: 25,
+                      crossAxisSpacing: 25,
+                      crossAxisCount: 3,
+                      children: [
+                        ActionCard(
+                          imageString: "assets/images/create.png",
+                          title: "Add new member",
+                          description:
+                              "Add new member. Please prepare the required data such as name and email.",
+                          onPressed: preOpenAddMember,
+                        ),
+                        ActionCard(
+                          imageString: "assets/images/check-stock.png",
+                          title: "Check stock",
+                          description: "Check stocks from other stores.",
+                          onPressed: () {
+                            router.push('/inventory/check-stock');
+                          },
+                        ),
+                        ActionCard(
+                          imageString: "assets/images/history.png",
+                          title: "Sales history",
+                          description: "Get past bills",
+                          onPressed: () {
+                            router.push('/history');
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Divider(
+                      color: Color.fromARGB(255, 184, 184, 184),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
             const SizedBox(
               height: 25,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Spacer(),
-                SizedBox(
-                  width: 0.8 * ResponsiveUtils.getContainerSize(context),
-                  child: TextButton(
-                    onPressed: () {
-                      router.push("member/list");
-                    },
-                    child: const Text(
-                      "View members here.",
-                      style: TextStyle(
-                        color: Colors.black,
+            Center(
+              child: SizedBox(
+                width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                child: Card(
+                  color: const Color.fromARGB(59, 240, 237, 245),
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 35,
+                      horizontal: 15,
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            "Your store stats",
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 66, 66, 66),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 25,
+                          ),
+                          // select
+                          Row(
+                            children: [
+                              DropdownMenu<String>(
+                                // white background
+                                inputDecorationTheme:
+                                    const InputDecorationTheme(
+                                  filled: true,
+                                  contentPadding: EdgeInsets.all(10.0),
+                                  // borer
+                                  border: OutlineInputBorder(),
+                                ),
+                                width: 0.4 *
+                                    ResponsiveUtils.getContainerSize(context),
+                                label: const Text("Assessment period"),
+                                dropdownMenuEntries: const [
+                                  DropdownMenuEntry(
+                                    label: "Today",
+                                    value: "0",
+                                  ),
+                                  DropdownMenuEntry(
+                                    label: "Last 7 days",
+                                    value: "7",
+                                  ),
+                                  DropdownMenuEntry(
+                                    label: "Last 30 days",
+                                    value: "30",
+                                  ),
+                                  DropdownMenuEntry(
+                                    label: "Overall",
+                                    value: "-1",
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                width: 15,
+                              ),
+                              const Expanded(
+                                child: Text(
+                                    "You can change the periode of your assessment here. By default it will be the today's assessment.",
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 66, 66, 66),
+                                    )),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 50,
+                          ),
+                          Row(
+                            children: [
+                              StatCard(
+                                number:
+                                    NumberFormat.compact().format(memberCount),
+                                title: "Member count",
+                                description: "Members registered in your store",
+                                onPressed: () {},
+                              ),
+                              StatCard(
+                                number:
+                                    NumberFormat.compact().format(memberCount),
+                                title: "Member count",
+                                description: "Members registered in your store",
+                                onPressed: () {},
+                              ),
+                              StatCard(
+                                number:
+                                    NumberFormat.compact().format(memberCount),
+                                title: "Member count",
+                                description: "Members registered in your store",
+                                onPressed: () {},
+                              ),
+                              StatCard(
+                                number:
+                                    NumberFormat.compact().format(memberCount),
+                                title: "Member count",
+                                description: "Members registered in your store",
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-                const Spacer(),
-              ],
+              ),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            Center(
+              child: SizedBox(
+                width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "More to your store",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 109, 41, 187),
+                        fontSize: 25,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 35,
+                    ),
+                    StaggeredGrid.count(
+                      mainAxisSpacing: 25,
+                      crossAxisSpacing: 25,
+                      crossAxisCount: 3,
+                      children: [
+                        ActionCard(
+                          imageString: "assets/images/report.png",
+                          title: "Daily report",
+                          description:
+                              "Get your daily report here, it contains payments and sales data.",
+                          onPressed: () {},
+                        ),
+                        ActionCard(
+                          imageString: "assets/images/send.png",
+                          title: "Send stock transfer",
+                          description: "Send stock to other stores.",
+                          onPressed: () {
+                            router.push('/inventory/stock-transfer/send');
+                          },
+                        ),
+                        ActionCard(
+                          imageString: "assets/images/receive.png",
+                          title: "Receive stock transfer",
+                          description:
+                              "Receive stock transfer from other stores / office.",
+                          onPressed: () {
+                            router.push('/inventory/stock-transfer/receive');
+                          },
+                        ),
+                        ActionCard(
+                          imageString:
+                              "assets/images/create-stock-transfer.png",
+                          title: "Create stock transfer",
+                          description:
+                              "Create stock transfer request to other stores / office.",
+                          onPressed: () {
+                            router.push('/inventory/stock-transfer/create');
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Divider(
+                      color: Color.fromARGB(255, 184, 184, 184),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(
               height: 25,

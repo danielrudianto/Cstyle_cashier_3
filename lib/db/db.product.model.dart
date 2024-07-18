@@ -1,4 +1,5 @@
 import 'package:cstyle_cashier_3/db/db.product_image.model.dart';
+import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
 
 class SQLProductModel {
@@ -66,7 +67,10 @@ class SQLProductModel {
     try {
       final db = await DatabaseUtils().database;
       var result = await db.query("product",
-          where: "barcode = ?", whereArgs: [barcode], limit: 1, offset: 0);
+          where: "barcode = ?  AND isActive = 1",
+          whereArgs: [barcode],
+          limit: 1,
+          offset: 0);
 
       if (result.isNotEmpty) {
         return SQLProductModel.fromMap(result.first);
@@ -83,7 +87,7 @@ class SQLProductModel {
     final db = await DatabaseUtils().database;
     if (selectedTypes.isEmpty) {
       var result = await db.query("product",
-          where: "reference LIKE ? OR description LIKE ?",
+          where: "reference LIKE ? OR description LIKE ? AND isActive = 1",
           limit: 25,
           offset: (page - 1) * 25,
           whereArgs: ["%$keyword%", "%$keyword%"]);
@@ -91,7 +95,7 @@ class SQLProductModel {
     } else {
       var result = await db.query("product",
           where:
-              "type IN (${selectedTypes.map((x) => "'${x.replaceAll("'", "'''")}'").join(",")}) AND (reference LIKE ? OR description LIKE ?)",
+              "type IN (${selectedTypes.map((x) => "'${x.replaceAll("'", "'''")}'").join(",")}) AND (reference LIKE ? OR description LIKE ?  AND isActive = 1)",
           limit: 25,
           offset: (page - 1) * 25,
           whereArgs: ["%$keyword%", "%$keyword%"]);
@@ -113,6 +117,18 @@ class SQLProductModel {
       await db.rawUpdate(
           "UPDATE product SET stock = stock - ? WHERE mongoID = ?;",
           [quantity, itemID]);
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  static Future<void> updateStockBulk(List<ProductStockModel> data) async {
+    var db = await DatabaseUtils().database;
+    try {
+      for (var item in data) {
+        await db.rawUpdate("UPDATE product SET stock = ? WHERE mongoID = ?;",
+            [item.stock, item.mongoID]);
+      }
     } catch (error) {
       throw Exception(error);
     }
