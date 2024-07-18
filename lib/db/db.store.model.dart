@@ -72,7 +72,7 @@ class SQLStoreModel {
   static Future<SQLStoreModel?> checkStoreUID(String uid) async {
     if (RegExp(r"^[0-9a-fA-F]{32}$").hasMatch(uid)) {
       var response =
-          await ApiUtils().getRequest("cashier/check/$uid", {}, null);
+          await ApiUtils().getRequest("cashier/stores/$uid", {}, null);
       return SQLStoreModel.fromMap(response);
     } else {
       throw Exception("Invalid Store UID");
