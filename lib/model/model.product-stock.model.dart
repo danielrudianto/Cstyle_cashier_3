@@ -105,11 +105,20 @@ class ProductStockFetchModel {
         }),
       );
 
-      var stores = result['store']
-          .map((e) => StoreModel(name: e.name, address: e.address));
-      var data = result['data']
-          .map((e) => ProductStockFetchItemModel.fromMap(e))
-          .toList();
+      List<StoreModel> stores = [];
+      List<ProductStockFetchItemModel> data = [];
+
+      result['store'].forEach((x) {
+        stores.add(StoreModel(name: x['name'], address: x['address']));
+      });
+
+      result['data'].forEach((x) {
+        try {
+          data.add(ProductStockFetchItemModel.fromMap(x));
+        } catch (e) {
+          print("error on paring data" + e.toString());
+        }
+      });
       var count = result['count'] as int;
       return ProductStockFetchModel(data: data, stores: stores, count: count);
     } catch (e) {
@@ -147,6 +156,9 @@ class ProductStockFetchItemModel {
   }
 
   factory ProductStockFetchItemModel.fromMap(Map<String, dynamic> map) {
+    print(map['stock']
+        .map((e) => ProductStockFetchStoreModel.fromMap(e))
+        .toList());
     return ProductStockFetchItemModel(
       id: map['id'],
       reference: map['reference'],
@@ -165,7 +177,7 @@ class ProductStockFetchStoreModel {
   int quantity;
 
   ProductStockFetchStoreModel({
-    required this.storeID,
+    this.storeID,
     required this.quantity,
   });
 
