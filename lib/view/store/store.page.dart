@@ -1,20 +1,22 @@
 // ignore_for_file: constant_identifier_names, camel_case_types
 
+import 'dart:io';
+
+import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/model/model.countries.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
+import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
-import 'package:cstyle_cashier_3/view/checkout/components/select-employee.dart';
 import 'package:cstyle_cashier_3/view/store/components/action-card.component.dart';
 import 'package:cstyle_cashier_3/view/store/components/stat-card.component.dart';
 import 'package:flag/flag.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StorePage extends StatefulWidget {
   const StorePage({super.key});
@@ -31,7 +33,12 @@ enum language {
 class _StorePageState extends State<StorePage> {
   TextEditingController codeEditingController = TextEditingController();
   bool isLoading = false;
+
+  int newMemberCount = 0;
   int memberCount = 0;
+  int billCount = 0;
+  int billValue = 0;
+  DateTime? lastUpdated;
 
   Future<void> fetchByCode(String code) async {
     setState(() {
@@ -679,6 +686,62 @@ class _StorePageState extends State<StorePage> {
         });
   }
 
+  _preUpdateStats(int period) async {
+    // Check for storage
+    setState(() {
+      isLoading = true;
+    });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    var lastSynced = prefs.getString("last_synced:$period") == null
+        ? null
+        : DateTime.parse(prefs.getString("last_synced:$period")!);
+    // check if online
+    final result = await InternetAddress.lookup('google.com');
+    var isOnline = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    if ((lastSynced == null ||
+            lastSynced
+                .isBefore(DateTime.now().subtract(const Duration(hours: 1)))) &&
+        isOnline) {
+      _fetcUpdateStats(period).then((value) {
+        prefs.setString("last_synced:$period", DateTime.now().toString());
+        prefs.setInt("new_member_count:$period", value[0]);
+        prefs.setInt("member_count:$period", value[1]);
+        prefs.setInt("bill_count:$period", value[2]);
+        prefs.setInt("bill_value:$period", value[3]);
+
+        setState(() {
+          lastUpdated = DateTime.parse(prefs.getString("last_synced:$period")!);
+          newMemberCount = prefs.getInt("new_member_count:$period") ?? 0;
+          memberCount = prefs.getInt("member_count:$period") ?? 0;
+          billCount = prefs.getInt("bill_count:$period") ?? 0;
+          billValue = prefs.getInt("bill_value:$period") ?? 0;
+          isLoading = false;
+        });
+      });
+    } else {
+      setState(() {
+        lastUpdated = DateTime.parse(prefs.getString("last_synced:$period")!);
+        newMemberCount = prefs.getInt("new_member_count:$period") ?? 0;
+        memberCount = prefs.getInt("member_count:$period") ?? 0;
+        billCount = prefs.getInt("bill_count:$period") ?? 0;
+        billValue = prefs.getInt("bill_value:$period") ?? 0;
+        isLoading = false;
+      });
+    }
+  }
+
+  _fetcUpdateStats(int period) {
+    return StoreModel.fetchStats(period);
+  }
+
+  @override
+  void initState() {
+    _preUpdateStats(1);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -695,18 +758,18 @@ class _StorePageState extends State<StorePage> {
               color: Color.fromARGB(0, 151, 157, 249),
               child: Center(
                 child: SizedBox(
-                  width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                  width: 1 * ResponsiveUtils.getContainerSize(context),
                   child: Row(
                     children: [
                       SizedBox(
                         // Width only 0.7
                         width: 0.5 * ResponsiveUtils.getContainerSize(context),
-                        child: Column(
+                        child: const Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "Check Your Store Performance",
                               style: TextStyle(
                                 color: Color.fromARGB(255, 109, 41, 187),
@@ -714,10 +777,10 @@ class _StorePageState extends State<StorePage> {
                                 fontSize: 35,
                               ),
                             ),
-                            const SizedBox(
+                            SizedBox(
                               height: 5,
                             ),
-                            const Text(
+                            Text(
                               "Here you can check out your sales performance, track registered members, and monitor overall store activity.",
                               style: TextStyle(
                                 color: Color.fromARGB(255, 0, 32, 92),
@@ -735,13 +798,13 @@ class _StorePageState extends State<StorePage> {
             ),
             Center(
               child: SizedBox(
-                width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                width: 1 * ResponsiveUtils.getContainerSize(context),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "More to your store",
+                      "Quick picks",
                       style: TextStyle(
                         color: Color.fromARGB(255, 109, 41, 187),
                         fontSize: 25,
@@ -795,7 +858,7 @@ class _StorePageState extends State<StorePage> {
             ),
             Center(
               child: SizedBox(
-                width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                width: 1 * ResponsiveUtils.getContainerSize(context),
                 child: Card(
                   color: const Color.fromARGB(59, 240, 237, 245),
                   elevation: 0,
@@ -824,35 +887,49 @@ class _StorePageState extends State<StorePage> {
                           // select
                           Row(
                             children: [
-                              DropdownMenu<String>(
-                                // white background
-                                inputDecorationTheme:
-                                    const InputDecorationTheme(
-                                  filled: true,
-                                  contentPadding: EdgeInsets.all(10.0),
-                                  // borer
-                                  border: OutlineInputBorder(),
-                                ),
-                                width: 0.4 *
-                                    ResponsiveUtils.getContainerSize(context),
-                                label: const Text("Assessment period"),
-                                dropdownMenuEntries: const [
-                                  DropdownMenuEntry(
-                                    label: "Today",
-                                    value: "0",
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  DropdownMenu<int>(
+                                    initialSelection: 1,
+                                    onSelected: (value) {
+                                      if (value != null) {
+                                        _preUpdateStats(value);
+                                      }
+                                    },
+                                    // white background
+                                    inputDecorationTheme:
+                                        const InputDecorationTheme(
+                                      filled: true,
+                                      contentPadding: EdgeInsets.all(10.0),
+                                      // borer
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    width: 0.4 *
+                                        ResponsiveUtils.getContainerSize(
+                                            context),
+                                    label: const Text("Assessment period"),
+                                    dropdownMenuEntries: const [
+                                      DropdownMenuEntry(
+                                        label: "Today",
+                                        value: 1,
+                                      ),
+                                      DropdownMenuEntry(
+                                        label: "Last 7 days",
+                                        value: 7,
+                                      ),
+                                      DropdownMenuEntry(
+                                        label: "Last 30 days",
+                                        value: 30,
+                                      ),
+                                      DropdownMenuEntry(
+                                        label: "Overall",
+                                        value: -1,
+                                      ),
+                                    ],
                                   ),
-                                  DropdownMenuEntry(
-                                    label: "Last 7 days",
-                                    value: "7",
-                                  ),
-                                  DropdownMenuEntry(
-                                    label: "Last 30 days",
-                                    value: "30",
-                                  ),
-                                  DropdownMenuEntry(
-                                    label: "Overall",
-                                    value: "-1",
-                                  ),
+                                  Text(
+                                      "Last synced at ${lastUpdated == null ? "Never" : DateFormat("dd/MM/yyyy HH:mm").format(lastUpdated!)}"),
                                 ],
                               ),
                               const SizedBox(
@@ -873,10 +950,11 @@ class _StorePageState extends State<StorePage> {
                           Row(
                             children: [
                               StatCard(
-                                number:
-                                    NumberFormat.compact().format(memberCount),
-                                title: "Member count",
-                                description: "Members registered in your store",
+                                number: NumberFormat.compact()
+                                    .format(newMemberCount),
+                                title: "New member count",
+                                description:
+                                    "New members registered in your store",
                                 onPressed: () {},
                               ),
                               StatCard(
@@ -888,16 +966,18 @@ class _StorePageState extends State<StorePage> {
                               ),
                               StatCard(
                                 number:
-                                    NumberFormat.compact().format(memberCount),
-                                title: "Member count",
-                                description: "Members registered in your store",
+                                    NumberFormat.compact().format(billCount),
+                                title: "Bills count",
+                                description:
+                                    "Bills created and uploaded to the server",
                                 onPressed: () {},
                               ),
                               StatCard(
                                 number:
-                                    NumberFormat.compact().format(memberCount),
-                                title: "Member count",
-                                description: "Members registered in your store",
+                                    NumberFormat.compact().format(billValue),
+                                title: "Bills value",
+                                description:
+                                    "Bills created and uploaded to the server",
                                 onPressed: () {},
                               ),
                             ],
@@ -914,7 +994,7 @@ class _StorePageState extends State<StorePage> {
             ),
             Center(
               child: SizedBox(
-                width: 0.8 * ResponsiveUtils.getContainerSize(context),
+                width: 1 * ResponsiveUtils.getContainerSize(context),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,

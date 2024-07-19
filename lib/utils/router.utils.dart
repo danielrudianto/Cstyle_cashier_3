@@ -35,6 +35,7 @@ final GoRouter router = GoRouter(
       path: "/checkout",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             child: const CheckoutPage(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
@@ -66,6 +67,7 @@ final GoRouter router = GoRouter(
       path: "/upload",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             opaque: false,
             child: UploadPage(),
             transitionsBuilder:
@@ -89,6 +91,7 @@ final GoRouter router = GoRouter(
       path: "/history/:id",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             opaque: false,
             child: BillViewPage(id: int.parse(state.pathParameters['id']!)),
             transitionsBuilder:
@@ -106,6 +109,7 @@ final GoRouter router = GoRouter(
       path: "/inventory/stock-transfer/create",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             opaque: false,
             child: CreateStockTransferPage(),
             transitionsBuilder:
@@ -123,6 +127,7 @@ final GoRouter router = GoRouter(
       path: "/inventory/stock-transfer/send",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             opaque: false,
             child: SendStockTransferPage(),
             transitionsBuilder:
@@ -140,6 +145,7 @@ final GoRouter router = GoRouter(
       path: "/inventory/stock-transfer/unsent",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             opaque: false,
             child: UnsentStockTransferPage(),
             transitionsBuilder:
@@ -157,6 +163,7 @@ final GoRouter router = GoRouter(
       path: "/inventory/stock-transfer/receive",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             opaque: false,
             child: ReceiveStockTransferPage(),
             transitionsBuilder:
@@ -174,6 +181,7 @@ final GoRouter router = GoRouter(
       path: "/inventory/stock-transfer/unreceived",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             opaque: false,
             child: UnreceivedStockTransferPage(),
             transitionsBuilder:
@@ -191,6 +199,7 @@ final GoRouter router = GoRouter(
       path: "/inventory/check-stock",
       pageBuilder: (context, state) {
         return CustomTransitionPage(
+            transitionDuration: const Duration(milliseconds: 200),
             opaque: false,
             child: CheckStockPage(),
             transitionsBuilder:
@@ -208,6 +217,7 @@ final GoRouter router = GoRouter(
         path: "/select-product/:id",
         pageBuilder: (context, state) {
           return CustomTransitionPage(
+              transitionDuration: const Duration(milliseconds: 200),
               opaque: false,
               child: ProductSelectorPage(storeID: state.pathParameters['id']!),
               transitionsBuilder:

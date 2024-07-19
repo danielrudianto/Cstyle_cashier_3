@@ -1,11 +1,11 @@
+import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/db/db.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
-import 'package:cstyle_cashier_3/view/checkout/components/select-employee.dart';
-import 'package:cstyle_cashier_3/view/clip-path/trapezoid.clip-path.dart';
+import 'package:cstyle_cashier_3/components/clip-path/trapezoid.clip-path.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

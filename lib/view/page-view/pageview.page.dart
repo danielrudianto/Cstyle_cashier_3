@@ -1,8 +1,6 @@
 import 'package:cstyle_cashier_3/model/model.cart.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/view/dashboard/dashboard.page.dart';
-import 'package:cstyle_cashier_3/view/history/history.page.dart';
-import 'package:cstyle_cashier_3/view/inventory/inventory.page.dart';
 import 'package:cstyle_cashier_3/view/store/store.page.dart';
 import 'package:cstyle_cashier_3/view/page-view/components/appbar-pageview.dart';
 import 'package:cstyle_cashier_3/view/setting/setting.page.dart';

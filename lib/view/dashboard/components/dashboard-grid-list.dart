@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/model/model.product-image.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
-import 'package:cstyle_cashier_3/view/compare/components/product-image.component.dart';
+import 'package:cstyle_cashier_3/components/product-image.component.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:expansion_tile_group/expansion_tile_group.dart';

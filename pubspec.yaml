@@ -58,6 +58,7 @@ dependencies:
       url: https://github.com/google/flutter-desktop-embedding
       path: plugins/window_size
   flag: ^7.0.0
+  share_plus: ^9.0.0
 
 dev_dependencies:
   flutter_test:

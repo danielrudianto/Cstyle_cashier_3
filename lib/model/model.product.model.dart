@@ -108,7 +108,7 @@ class ProductModel {
       int page, String? storeID, String keyword) async {
     var store = await StoreModel.getCurrentProfile();
     var result = await ApiUtils().postRequest(
-        "cashier/product",
+        "cashier/products",
         {
           "page": page,
           "targetStoreID": storeID == "0" ? null : storeID,

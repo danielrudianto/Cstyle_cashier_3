@@ -1,11 +1,11 @@
+import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
-import 'package:cstyle_cashier_3/view/checkout/components/select-employee.dart';
-import 'package:cstyle_cashier_3/view/clip-path/trapezoid.clip-path.dart';
+import 'package:cstyle_cashier_3/components/clip-path/trapezoid.clip-path.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/components/top-stock-transfer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -325,72 +325,6 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                             const SizedBox(
                               height: 15,
                             ),
-                            const Text(
-                              "Selected store",
-                              style: TextStyle(
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Container(
-                              child: store == null
-                                  ? const Text("No store selected")
-                                  : Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          store!.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        Text(
-                                          store!.address,
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.normal,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                            ),
-                            const SizedBox(
-                              height: 25,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    _fetchStores();
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 15,
-                                      horizontal: 25,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          const Color.fromARGB(255, 4, 30, 73),
-                                      borderRadius: BorderRadius.circular(25),
-                                    ),
-                                    child: const Text(
-                                      "Select store",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                                const Spacer(),
-                              ],
-                            ),
                           ],
                         ),
                       ),
@@ -542,334 +476,602 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                           ],
                         ),
                       ),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          // Radius 10
+                          borderRadius: BorderRadius.circular(10),
+                          // elevation
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+                              spreadRadius: 5,
+                              blurRadius: 7,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const CircleAvatar(
+                                  radius: 15,
+                                  backgroundColor:
+                                      Color.fromARGB(255, 201, 170, 252),
+                                  child: Text("2"),
+                                ),
+                                const SizedBox(
+                                  width: 15,
+                                ),
+                                Text(
+                                  "Select products",
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                const Spacer(),
+                                ElevatedButton(
+                                  onPressed: store == null
+                                      ? null
+                                      : _openProductSelector,
+                                  // Style same as the select store container
+                                  style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(
+                                      store == null
+                                          ? const Color.fromARGB(
+                                              255, 102, 102, 102)
+                                          : const Color.fromARGB(
+                                              255, 4, 30, 73),
+                                    ),
+                                    shape: MaterialStateProperty.all(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 15,
+                                      horizontal: 25,
+                                    ),
+                                    child: Text(
+                                      "Add product",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Table(
+                              // Want to have horizontal borders only
+                              border: const TableBorder(
+                                horizontalInside: BorderSide(
+                                  color: Colors.black54,
+                                  width: 1,
+                                ),
+                              ),
+                              // Need to have 3 columns
+                              columnWidths: const {
+                                0: FlexColumnWidth(2),
+                                1: FlexColumnWidth(3),
+                                2: FlexColumnWidth(2),
+                                3: FlexColumnWidth(1),
+                              },
+                              children: [
+                                const TableRow(
+                                  children: [
+                                    TableCell(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(15),
+                                        child: Text(
+                                          "Reference",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(15),
+                                        child: Text(
+                                          "Description",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(15),
+                                        child: Text(
+                                          "Quantity",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(15),
+                                        child: Text(
+                                          "",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                ...products.map((product) {
+                                  TextEditingController controller =
+                                      TextEditingController();
+
+                                  controller.text = product.quantity.toString();
+                                  return TableRow(children: [
+                                    TableCell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15),
+                                        child: Text(
+                                          product.reference,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge,
+                                        ),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15),
+                                        child: Text(
+                                          product.description,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge,
+                                        ),
+                                      ),
+                                    ),
+                                    TableCell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15),
+                                        child: TextFormField(
+                                          controller: controller,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          // Only can input digits
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly,
+                                          ],
+                                          // on change update the product data
+                                          onChanged: (value) {
+                                            product.quantity = value.isEmpty
+                                                ? 0
+                                                : int.parse(value);
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    TableCell(
+                                        child: Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: IconButton(
+                                        icon: Icon(
+                                          Icons.close,
+                                          color: Colors.grey.shade800,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            products.remove(product);
+                                          });
+                                        },
+                                      ),
+                                    )),
+                                  ]);
+                                }),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            // Textarea for note
+                            TextField(
+                              controller: noteController,
+                              maxLines: 3,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Note",
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            // Create another button
+                            Row(
+                              children: [
+                                const Spacer(),
+                                ElevatedButton(
+                                  onPressed: _createStockTransfer,
+                                  // Style same as the select store container
+                                  style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(
+                                      store == null ||
+                                              products.isEmpty ||
+                                              isSubmitting
+                                          ? const Color.fromARGB(
+                                              255, 102, 102, 102)
+                                          : const Color.fromARGB(
+                                              255, 4, 30, 73),
+                                    ),
+                                    shape: MaterialStateProperty.all(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 15,
+                                      horizontal: 25,
+                                    ),
+                                    child: Text(
+                                      "Create stock transfer",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                // Row(
-                //   children: [
-                //     const Spacer(),
-                //     SizedBox(
-                //       width: ResponsiveUtils.getContainerSize(context),
-                //       child: Column(
-                //         children: [
-                //           const SizedBox(
-                //             height: 15,
-                //           ),
-                //           Row(
-                //             children: [
-                //               IconButton(
-                //                   icon: Icon(Icons.arrow_back),
-                //                   onPressed: () {
-                //                     router.pop();
-                //                   }),
-                //               Text(
-                //                 "Create stock transfer",
-                //                 style: TextStyle(
-                //                   color: Color.fromARGB(255, 4, 30, 73),
-                //                   fontSize: 28,
-                //                   fontWeight: FontWeight.bold,
-                //                 ),
-                //               ),
-                //             ],
-                //           ),
-                //           const SizedBox(
-                //             height: 30,
-                //           ),
-                //           Container(
-                //             width: double.infinity,
-                //             padding: const EdgeInsets.all(20),
-                //             decoration: BoxDecoration(
-                //               color: Colors.white,
-                //               borderRadius: BorderRadius.circular(10),
-                //             ),
-                //             child: Column(
-                //               mainAxisAlignment: MainAxisAlignment.start,
-                //               crossAxisAlignment: CrossAxisAlignment.start,
-                //               children: [
-
-                //                 const SizedBox(
-                //                   height: 15,
-                //                 ),
-
-                //               ],
-                //             ),
-                //           ),
-                //           const SizedBox(
-                //             height: 30,
-                //           ),
-                //           Container(
-                //             width: double.infinity,
-                //             padding: const EdgeInsets.all(20),
-                //             decoration: BoxDecoration(
-                //               color: Colors.white,
-                //               borderRadius: BorderRadius.circular(10),
-                //             ),
-                //             child: Column(
-                //               mainAxisAlignment: MainAxisAlignment.start,
-                //               crossAxisAlignment: CrossAxisAlignment.start,
-                //               children: [
-                //                 Container(
-                //                   child: Column(
-                //                     children: [
-                //                       Row(
-                //                         children: [
-                //                           const Spacer(),
-                //                           ElevatedButton(
-                //                             onPressed: store == null
-                //                                 ? null
-                //                                 : _openProductSelector,
-                //                             // Style same as the select store container
-                //                             style: ButtonStyle(
-                //                               backgroundColor:
-                //                                   MaterialStateProperty.all(
-                //                                 store == null
-                //                                     ? const Color.fromARGB(
-                //                                         255, 102, 102, 102)
-                //                                     : const Color.fromARGB(
-                //                                         255, 4, 30, 73),
-                //                               ),
-                //                               shape: MaterialStateProperty.all(
-                //                                 RoundedRectangleBorder(
-                //                                   borderRadius:
-                //                                       BorderRadius.circular(25),
-                //                                 ),
-                //                               ),
-                //                             ),
-                //                             child: const Padding(
-                //                               padding: EdgeInsets.symmetric(
-                //                                 vertical: 15,
-                //                                 horizontal: 25,
-                //                               ),
-                //                               child: Text(
-                //                                 "Add product",
-                //                                 style: TextStyle(
-                //                                   color: Colors.white,
-                //                                 ),
-                //                               ),
-                //                             ),
-                //                           ),
-                //                         ],
-                //                       ),
-                //                       const SizedBox(
-                //                         height: 15,
-                //                       ),
-                //                       Table(
-                //                         // Want to have horizontal borders only
-                //                         border: const TableBorder(
-                //                           horizontalInside: BorderSide(
-                //                             color: Colors.black54,
-                //                             width: 1,
-                //                           ),
-                //                         ),
-                //                         // Need to have 3 columns
-                //                         columnWidths: const {
-                //                           0: FlexColumnWidth(2),
-                //                           1: FlexColumnWidth(3),
-                //                           2: FlexColumnWidth(2),
-                //                           3: FlexColumnWidth(1),
-                //                         },
-                //                         children: [
-                //                           const TableRow(
-                //                             children: [
-                //                               TableCell(
-                //                                 child: Padding(
-                //                                   padding: EdgeInsets.all(15),
-                //                                   child: Text(
-                //                                     "Reference",
-                //                                     style: TextStyle(
-                //                                       fontWeight:
-                //                                           FontWeight.bold,
-                //                                     ),
-                //                                   ),
-                //                                 ),
-                //                               ),
-                //                               TableCell(
-                //                                 child: Padding(
-                //                                   padding: EdgeInsets.all(15),
-                //                                   child: Text(
-                //                                     "Description",
-                //                                     style: TextStyle(
-                //                                       fontWeight:
-                //                                           FontWeight.bold,
-                //                                     ),
-                //                                   ),
-                //                                 ),
-                //                               ),
-                //                               TableCell(
-                //                                 child: Padding(
-                //                                   padding: EdgeInsets.all(15),
-                //                                   child: Text(
-                //                                     "Quantity",
-                //                                     style: TextStyle(
-                //                                       fontWeight:
-                //                                           FontWeight.bold,
-                //                                     ),
-                //                                   ),
-                //                                 ),
-                //                               ),
-                //                               TableCell(
-                //                                 child: Padding(
-                //                                   padding: EdgeInsets.all(15),
-                //                                   child: Text(
-                //                                     "",
-                //                                     style: TextStyle(
-                //                                       fontWeight:
-                //                                           FontWeight.bold,
-                //                                     ),
-                //                                   ),
-                //                                 ),
-                //                               ),
-                //                             ],
-                //                           ),
-                //                           ...products.map((product) {
-                //                             TextEditingController controller =
-                //                                 TextEditingController();
-
-                //                             controller.text =
-                //                                 product.quantity.toString();
-                //                             return TableRow(children: [
-                //                               TableCell(
-                //                                 child: Padding(
-                //                                   padding:
-                //                                       const EdgeInsets.all(15),
-                //                                   child: Text(
-                //                                     product.reference,
-                //                                     style: Theme.of(context)
-                //                                         .textTheme
-                //                                         .bodyLarge,
-                //                                   ),
-                //                                 ),
-                //                               ),
-                //                               TableCell(
-                //                                 child: Padding(
-                //                                   padding:
-                //                                       const EdgeInsets.all(15),
-                //                                   child: Text(
-                //                                     product.description,
-                //                                     style: Theme.of(context)
-                //                                         .textTheme
-                //                                         .bodyLarge,
-                //                                   ),
-                //                                 ),
-                //                               ),
-                //                               TableCell(
-                //                                 child: Padding(
-                //                                   padding:
-                //                                       const EdgeInsets.all(15),
-                //                                   child: TextFormField(
-                //                                     controller: controller,
-                //                                     keyboardType:
-                //                                         TextInputType.number,
-                //                                     decoration:
-                //                                         const InputDecoration(
-                //                                       border:
-                //                                           OutlineInputBorder(),
-                //                                     ),
-                //                                     // Only can input digits
-                //                                     inputFormatters: [
-                //                                       FilteringTextInputFormatter
-                //                                           .digitsOnly,
-                //                                     ],
-                //                                     // on change update the product data
-                //                                     onChanged: (value) {
-                //                                       product.quantity = value
-                //                                               .isEmpty
-                //                                           ? 0
-                //                                           : int.parse(value);
-                //                                     },
-                //                                   ),
-                //                                 ),
-                //                               ),
-                //                               TableCell(
-                //                                   child: Padding(
-                //                                 padding:
-                //                                     const EdgeInsets.all(15),
-                //                                 child: IconButton(
-                //                                   icon: Icon(
-                //                                     Icons.close,
-                //                                     color: Colors.grey.shade800,
-                //                                   ),
-                //                                   onPressed: () {
-                //                                     setState(() {
-                //                                       products.remove(product);
-                //                                     });
-                //                                   },
-                //                                 ),
-                //                               )),
-                //                             ]);
-                //                           }),
-                //                         ],
-                //                       ),
-                //                       const SizedBox(
-                //                         height: 15,
-                //                       ),
-                //                       // Textarea for note
-                //                       TextField(
-                //                         controller: noteController,
-                //                         maxLines: 3,
-                //                         decoration: const InputDecoration(
-                //                           border: OutlineInputBorder(),
-                //                           labelText: "Note",
-                //                         ),
-                //                       ),
-                //                       const SizedBox(
-                //                         height: 15,
-                //                       ),
-                //                       // Create another button
-                //                       Row(
-                //                         children: [
-                //                           const Spacer(),
-                //                           ElevatedButton(
-                //                             onPressed: _createStockTransfer,
-                //                             // Style same as the select store container
-                //                             style: ButtonStyle(
-                //                               backgroundColor:
-                //                                   MaterialStateProperty.all(
-                //                                 store == null ||
-                //                                         products.isEmpty ||
-                //                                         isSubmitting
-                //                                     ? const Color.fromARGB(
-                //                                         255, 102, 102, 102)
-                //                                     : const Color.fromARGB(
-                //                                         255, 4, 30, 73),
-                //                               ),
-                //                               shape: MaterialStateProperty.all(
-                //                                 RoundedRectangleBorder(
-                //                                   borderRadius:
-                //                                       BorderRadius.circular(25),
-                //                                 ),
-                //                               ),
-                //                             ),
-                //                             child: const Padding(
-                //                               padding: EdgeInsets.symmetric(
-                //                                 vertical: 15,
-                //                                 horizontal: 25,
-                //                               ),
-                //                               child: Text(
-                //                                 "Create stock transfer",
-                //                                 style: TextStyle(
-                //                                   color: Colors.white,
-                //                                 ),
-                //                               ),
-                //                             ),
-                //                           ),
-                //                         ],
-                //                       ),
-                //                     ],
-                //                   ),
-                //                 ),
-                //               ],
-                //             ),
-                //           ),
-                //           const Spacer(),
-                //         ],
-                //       ),
-                //     ),
-                //   ],
-                // ),
               ],
             ),
           ),
+          // Row(
+          //   children: [
+          //     const Spacer(),
+          //     SizedBox(
+          //       width: ResponsiveUtils.getContainerSize(context),
+          //       child: Column(
+          //         children: [
+          //           const SizedBox(
+          //             height: 15,
+          //           ),
+          //           Row(
+          //             children: [
+          //               IconButton(
+          //                   icon: Icon(Icons.arrow_back),
+          //                   onPressed: () {
+          //                     router.pop();
+          //                   }),
+          //               Text(
+          //                 "Create stock transfer",
+          //                 style: TextStyle(
+          //                   color: Color.fromARGB(255, 4, 30, 73),
+          //                   fontSize: 28,
+          //                   fontWeight: FontWeight.bold,
+          //                 ),
+          //               ),
+          //             ],
+          //           ),
+          //           const SizedBox(
+          //             height: 30,
+          //           ),
+          //           Container(
+          //             width: double.infinity,
+          //             padding: const EdgeInsets.all(20),
+          //             decoration: BoxDecoration(
+          //               color: Colors.white,
+          //               borderRadius: BorderRadius.circular(10),
+          //             ),
+          //             child: Column(
+          //               mainAxisAlignment: MainAxisAlignment.start,
+          //               crossAxisAlignment: CrossAxisAlignment.start,
+          //               children: [
+
+          //                 const SizedBox(
+          //                   height: 15,
+          //                 ),
+
+          //               ],
+          //             ),
+          //           ),
+          //           const SizedBox(
+          //             height: 30,
+          //           ),
+          //           Container(
+          //             width: double.infinity,
+          //             padding: const EdgeInsets.all(20),
+          //             decoration: BoxDecoration(
+          //               color: Colors.white,
+          //               borderRadius: BorderRadius.circular(10),
+          //             ),
+          //             child: Column(
+          //               mainAxisAlignment: MainAxisAlignment.start,
+          //               crossAxisAlignment: CrossAxisAlignment.start,
+          //               children: [
+          //                 Container(
+          //                   child: Column(
+          //                     children: [
+          //                       Row(
+          //                         children: [
+          //                           const Spacer(),
+          //                           ElevatedButton(
+          //                             onPressed: store == null
+          //                                 ? null
+          //                                 : _openProductSelector,
+          //                             // Style same as the select store container
+          //                             style: ButtonStyle(
+          //                               backgroundColor:
+          //                                   MaterialStateProperty.all(
+          //                                 store == null
+          //                                     ? const Color.fromARGB(
+          //                                         255, 102, 102, 102)
+          //                                     : const Color.fromARGB(
+          //                                         255, 4, 30, 73),
+          //                               ),
+          //                               shape: MaterialStateProperty.all(
+          //                                 RoundedRectangleBorder(
+          //                                   borderRadius:
+          //                                       BorderRadius.circular(25),
+          //                                 ),
+          //                               ),
+          //                             ),
+          //                             child: const Padding(
+          //                               padding: EdgeInsets.symmetric(
+          //                                 vertical: 15,
+          //                                 horizontal: 25,
+          //                               ),
+          //                               child: Text(
+          //                                 "Add product",
+          //                                 style: TextStyle(
+          //                                   color: Colors.white,
+          //                                 ),
+          //                               ),
+          //                             ),
+          //                           ),
+          //                         ],
+          //                       ),
+          //                       const SizedBox(
+          //                         height: 15,
+          //                       ),
+          //                       Table(
+          //                         // Want to have horizontal borders only
+          //                         border: const TableBorder(
+          //                           horizontalInside: BorderSide(
+          //                             color: Colors.black54,
+          //                             width: 1,
+          //                           ),
+          //                         ),
+          //                         // Need to have 3 columns
+          //                         columnWidths: const {
+          //                           0: FlexColumnWidth(2),
+          //                           1: FlexColumnWidth(3),
+          //                           2: FlexColumnWidth(2),
+          //                           3: FlexColumnWidth(1),
+          //                         },
+          //                         children: [
+          //                           const TableRow(
+          //                             children: [
+          //                               TableCell(
+          //                                 child: Padding(
+          //                                   padding: EdgeInsets.all(15),
+          //                                   child: Text(
+          //                                     "Reference",
+          //                                     style: TextStyle(
+          //                                       fontWeight:
+          //                                           FontWeight.bold,
+          //                                     ),
+          //                                   ),
+          //                                 ),
+          //                               ),
+          //                               TableCell(
+          //                                 child: Padding(
+          //                                   padding: EdgeInsets.all(15),
+          //                                   child: Text(
+          //                                     "Description",
+          //                                     style: TextStyle(
+          //                                       fontWeight:
+          //                                           FontWeight.bold,
+          //                                     ),
+          //                                   ),
+          //                                 ),
+          //                               ),
+          //                               TableCell(
+          //                                 child: Padding(
+          //                                   padding: EdgeInsets.all(15),
+          //                                   child: Text(
+          //                                     "Quantity",
+          //                                     style: TextStyle(
+          //                                       fontWeight:
+          //                                           FontWeight.bold,
+          //                                     ),
+          //                                   ),
+          //                                 ),
+          //                               ),
+          //                               TableCell(
+          //                                 child: Padding(
+          //                                   padding: EdgeInsets.all(15),
+          //                                   child: Text(
+          //                                     "",
+          //                                     style: TextStyle(
+          //                                       fontWeight:
+          //                                           FontWeight.bold,
+          //                                     ),
+          //                                   ),
+          //                                 ),
+          //                               ),
+          //                             ],
+          //                           ),
+          //                           ...products.map((product) {
+          //                             TextEditingController controller =
+          //                                 TextEditingController();
+
+          //                             controller.text =
+          //                                 product.quantity.toString();
+          //                             return TableRow(children: [
+          //                               TableCell(
+          //                                 child: Padding(
+          //                                   padding:
+          //                                       const EdgeInsets.all(15),
+          //                                   child: Text(
+          //                                     product.reference,
+          //                                     style: Theme.of(context)
+          //                                         .textTheme
+          //                                         .bodyLarge,
+          //                                   ),
+          //                                 ),
+          //                               ),
+          //                               TableCell(
+          //                                 child: Padding(
+          //                                   padding:
+          //                                       const EdgeInsets.all(15),
+          //                                   child: Text(
+          //                                     product.description,
+          //                                     style: Theme.of(context)
+          //                                         .textTheme
+          //                                         .bodyLarge,
+          //                                   ),
+          //                                 ),
+          //                               ),
+          //                               TableCell(
+          //                                 child: Padding(
+          //                                   padding:
+          //                                       const EdgeInsets.all(15),
+          //                                   child: TextFormField(
+          //                                     controller: controller,
+          //                                     keyboardType:
+          //                                         TextInputType.number,
+          //                                     decoration:
+          //                                         const InputDecoration(
+          //                                       border:
+          //                                           OutlineInputBorder(),
+          //                                     ),
+          //                                     // Only can input digits
+          //                                     inputFormatters: [
+          //                                       FilteringTextInputFormatter
+          //                                           .digitsOnly,
+          //                                     ],
+          //                                     // on change update the product data
+          //                                     onChanged: (value) {
+          //                                       product.quantity = value
+          //                                               .isEmpty
+          //                                           ? 0
+          //                                           : int.parse(value);
+          //                                     },
+          //                                   ),
+          //                                 ),
+          //                               ),
+          //                               TableCell(
+          //                                   child: Padding(
+          //                                 padding:
+          //                                     const EdgeInsets.all(15),
+          //                                 child: IconButton(
+          //                                   icon: Icon(
+          //                                     Icons.close,
+          //                                     color: Colors.grey.shade800,
+          //                                   ),
+          //                                   onPressed: () {
+          //                                     setState(() {
+          //                                       products.remove(product);
+          //                                     });
+          //                                   },
+          //                                 ),
+          //                               )),
+          //                             ]);
+          //                           }),
+          //                         ],
+          //                       ),
+          //                       const SizedBox(
+          //                         height: 15,
+          //                       ),
+          //                       // Textarea for note
+          //                       TextField(
+          //                         controller: noteController,
+          //                         maxLines: 3,
+          //                         decoration: const InputDecoration(
+          //                           border: OutlineInputBorder(),
+          //                           labelText: "Note",
+          //                         ),
+          //                       ),
+          //                       const SizedBox(
+          //                         height: 15,
+          //                       ),
+          //                       // Create another button
+          //                       Row(
+          //                         children: [
+          //                           const Spacer(),
+          //                           ElevatedButton(
+          //                             onPressed: _createStockTransfer,
+          //                             // Style same as the select store container
+          //                             style: ButtonStyle(
+          //                               backgroundColor:
+          //                                   MaterialStateProperty.all(
+          //                                 store == null ||
+          //                                         products.isEmpty ||
+          //                                         isSubmitting
+          //                                     ? const Color.fromARGB(
+          //                                         255, 102, 102, 102)
+          //                                     : const Color.fromARGB(
+          //                                         255, 4, 30, 73),
+          //                               ),
+          //                               shape: MaterialStateProperty.all(
+          //                                 RoundedRectangleBorder(
+          //                                   borderRadius:
+          //                                       BorderRadius.circular(25),
+          //                                 ),
+          //                               ),
+          //                             ),
+          //                             child: const Padding(
+          //                               padding: EdgeInsets.symmetric(
+          //                                 vertical: 15,
+          //                                 horizontal: 25,
+          //                               ),
+          //                               child: Text(
+          //                                 "Create stock transfer",
+          //                                 style: TextStyle(
+          //                                   color: Colors.white,
+          //                                 ),
+          //                               ),
+          //                             ),
+          //                           ),
+          //                         ],
+          //                       ),
+          //                     ],
+          //                   ),
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //           const Spacer(),
+          //         ],
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );

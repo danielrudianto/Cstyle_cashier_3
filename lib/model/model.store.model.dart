@@ -92,4 +92,19 @@ class StoreModel {
       throw Exception(error);
     }
   }
+
+  static Future<List<num>> fetchStats(int period) async {
+    try {
+      var store = await getCurrentProfile();
+      var stats = await ApiUtils().getRequest(
+          "cashier/stats",
+          {"period": period},
+          Options(headers: {
+            "store": store?.code,
+          }));
+      return List<num>.from(stats);
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
 }

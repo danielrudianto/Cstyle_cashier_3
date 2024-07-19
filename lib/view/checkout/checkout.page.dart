@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
@@ -7,7 +8,6 @@ import 'package:cstyle_cashier_3/utils/printing.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/text-formatter.utils.dart';
 import 'package:cstyle_cashier_3/view/checkout/components/add-member-checkout.dart';
-import 'package:cstyle_cashier_3/view/checkout/components/select-employee.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

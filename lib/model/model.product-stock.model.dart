@@ -31,7 +31,7 @@ class ProductStockModel {
       String storeCode) async {
     try {
       var response = await ApiUtils().getRequest(
-          "cashier/stock", {}, Options(headers: {"store": storeCode}));
+          "cashier/products/stock", {}, Options(headers: {"store": storeCode}));
 
       // return response.map((e) => ProductStockModel.fromMap(e)).toList();
       List<ProductStockModel> result = [];
@@ -95,7 +95,7 @@ class ProductStockFetchModel {
     try {
       var store = await StoreModel.getCurrentProfile();
       var result = await ApiUtils().postRequest(
-        "/cashier/stock",
+        "/cashier/products/stock",
         {
           "page": page,
           "keyword": keyword,
@@ -113,11 +113,7 @@ class ProductStockFetchModel {
       });
 
       result['data'].forEach((x) {
-        try {
-          data.add(ProductStockFetchItemModel.fromMap(x));
-        } catch (e) {
-          print("error on paring data" + e.toString());
-        }
+        data.add(ProductStockFetchItemModel.fromMap(x));
       });
       var count = result['count'] as int;
       return ProductStockFetchModel(data: data, stores: stores, count: count);
@@ -156,18 +152,18 @@ class ProductStockFetchItemModel {
   }
 
   factory ProductStockFetchItemModel.fromMap(Map<String, dynamic> map) {
-    print(map['stock']
-        .map((e) => ProductStockFetchStoreModel.fromMap(e))
-        .toList());
+    List<ProductStockFetchStoreModel> stocks = [];
+    map['stock'].forEach((x) {
+      stocks.add(ProductStockFetchStoreModel(
+          storeID: x['storeID'], quantity: x['quantity']));
+    });
     return ProductStockFetchItemModel(
       id: map['id'],
       reference: map['reference'],
       description: map['description'],
       brand: map['brand'],
       type: map['type'],
-      stock: map['stock']
-          .map((e) => ProductStockFetchStoreModel.fromMap(e))
-          .toList(),
+      stock: stocks,
     );
   }
 }

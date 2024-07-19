@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class DashboardTypeSelector extends StatefulWidget {
   final List<String> productTypes;
@@ -14,10 +15,18 @@ class DashboardTypeSelector extends StatefulWidget {
   });
 
   @override
-  State<DashboardTypeSelector> createState() => _DashboardTypeSelectorState();
+  State<DashboardTypeSelector> createState() => DashboardTypeSelectorState();
 }
 
-class _DashboardTypeSelectorState extends State<DashboardTypeSelector> {
+class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
+  late FocusNode searchFocusNode;
+
+  @override
+  void initState() {
+    searchFocusNode = FocusNode();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -49,6 +58,7 @@ class _DashboardTypeSelectorState extends State<DashboardTypeSelector> {
             height: 15,
           ),
           TextFormField(
+            focusNode: searchFocusNode,
             decoration: const InputDecoration(
               labelStyle: TextStyle(
                 color: Color.fromARGB(255, 122, 122, 122),
@@ -151,5 +161,10 @@ class _DashboardTypeSelectorState extends State<DashboardTypeSelector> {
         ],
       ),
     );
+  }
+
+  focus() {
+    print("called");
+    searchFocusNode.requestFocus();
   }
 }
