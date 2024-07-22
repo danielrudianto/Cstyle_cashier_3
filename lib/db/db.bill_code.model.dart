@@ -257,7 +257,6 @@ class SQLBillCodeModelPrint extends SQLBillCodeModel {
       throw Exception("Bill not found");
     } else {
       try {
-        var item = result.first;
         var billCode = SQLBillCodeModelPrint.fromMap(result.first);
         var items = await SQLBillModelPrint.fetchByBillCodeID(billCode.id!);
         var payments =
@@ -282,7 +281,6 @@ class SQLBillCodeModelPrint extends SQLBillCodeModel {
       throw Exception("Bill not found");
     } else {
       try {
-        var item = result.first;
         var billCode = SQLBillCodeModelPrint.fromMap(result.first);
         var items = await SQLBillModelPrint.fetchByBillCodeID(billCode.id!);
         var payments =

@@ -13,7 +13,6 @@ import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
-import 'package:share_plus/share_plus.dart';
 
 class ComparePage extends StatefulWidget {
   const ComparePage({super.key});
@@ -37,14 +36,14 @@ class _ComparePageState extends State<ComparePage> {
       }
 
       if (images != null) {
-        await Share.shareXFiles([
-          XFile.fromData(
-            images!,
-            mimeType: 'image/png',
-          ),
-        ],
-            text:
-                "Hi, I just asked CStyle to compare these products and here are the results.");
+        // await Share.shareXFiles([
+        //   XFile.fromData(
+        //     images!,
+        //     mimeType: 'image/png',
+        //   ),
+        // ],
+        //     text:
+        //         "Hi, I just asked CStyle to compare these products and here are the results.");
       }
     });
   }
@@ -288,8 +287,6 @@ class _ComparePageState extends State<ComparePage> {
 
   Future<List<pw.TableRow>> _buildPwRows(List<ProductModel> products) async {
     final image = await imageFromAssetBundle('assets/images/logo-bill.png');
-    final preferedImage =
-        await imageFromAssetBundle("assets/images/recommended.png");
     return <pw.TableRow>[
       pw.TableRow(children: [
         pw.Container(
@@ -331,7 +328,7 @@ class _ComparePageState extends State<ComparePage> {
             padding: const pw.EdgeInsets.all(8.0),
             child: pw.Text(
               "Images",
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 color: PdfColors.black,
               ),
             ),

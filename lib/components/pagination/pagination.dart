@@ -1,0 +1,45 @@
+import 'package:flutter/material.dart';
+
+class PaginationComponent extends StatelessWidget {
+  final int pageIndex;
+  final int dataCount;
+  final int pageSize;
+  final Function(int) onPageChange;
+
+  const PaginationComponent({
+    super.key,
+    required this.pageIndex,
+    required this.dataCount,
+    required this.pageSize,
+    required this.onPageChange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final totalPages = (dataCount / pageSize).ceil();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // Page number display
+        Text('Page ${pageIndex + 1} of $totalPages'),
+        IconButton(
+          icon: Icon(
+            size: 24,
+            Icons.chevron_left_rounded,
+            color: pageIndex == 0 ? Colors.black45 : Colors.black87,
+          ),
+          onPressed: pageIndex > 0 ? () => onPageChange(pageIndex - 1) : null,
+        ),
+        IconButton(
+          icon: Icon(
+            size: 24,
+            Icons.chevron_right_rounded,
+            color: pageIndex == totalPages ? Colors.black45 : Colors.black87,
+          ),
+          onPressed:
+              pageIndex < totalPages ? () => onPageChange(pageIndex + 1) : null,
+        ),
+      ],
+    );
+  }
+}

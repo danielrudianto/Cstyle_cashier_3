@@ -1,4 +1,3 @@
-import 'package:cstyle_cashier_3/db/db.cart.model.dart';
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
 
 class SQLCartCodeModel {

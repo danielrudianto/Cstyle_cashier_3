@@ -17,7 +17,6 @@ class CartItemModel {
     required this.description,
   });
 
-  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

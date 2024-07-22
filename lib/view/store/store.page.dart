@@ -744,326 +744,337 @@ class _StorePageState extends State<StorePage> {
 
   @override
   Widget build(BuildContext context) {
+    ScrollController scrollController = ScrollController();
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.only(
-                top: 50,
-                bottom: 50,
+      body: RawScrollbar(
+        controller: scrollController,
+        thumbColor: const Color.fromARGB(255, 161, 121, 220),
+        radius: const Radius.circular(8.0),
+        thickness: 8.0,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.only(
+                  top: 50,
+                  bottom: 50,
+                ),
+                color: Color.fromARGB(0, 151, 157, 249),
+                child: Center(
+                  child: SizedBox(
+                    width: 1 * ResponsiveUtils.getContainerSize(context),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          // Width only 0.7
+                          width:
+                              0.5 * ResponsiveUtils.getContainerSize(context),
+                          child: const Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Check Your Store Performance",
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 109, 41, 187),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 35,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                "Here you can check out your sales performance, track registered members, and monitor overall store activity.",
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 0, 32, 92),
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              color: Color.fromARGB(0, 151, 157, 249),
-              child: Center(
+              Center(
                 child: SizedBox(
                   width: 1 * ResponsiveUtils.getContainerSize(context),
-                  child: Row(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        // Width only 0.7
-                        width: 0.5 * ResponsiveUtils.getContainerSize(context),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Check Your Store Performance",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 109, 41, 187),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 35,
-                              ),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              "Here you can check out your sales performance, track registered members, and monitor overall store activity.",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 0, 32, 92),
-                                fontWeight: FontWeight.normal,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ],
+                      const Text(
+                        "Quick picks",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 109, 41, 187),
+                          fontSize: 25,
                         ),
+                      ),
+                      const SizedBox(
+                        height: 35,
+                      ),
+                      StaggeredGrid.count(
+                        mainAxisSpacing: 25,
+                        crossAxisSpacing: 25,
+                        crossAxisCount: 3,
+                        children: [
+                          ActionCard(
+                            imageString: "assets/images/create.png",
+                            title: "Add new member",
+                            description:
+                                "Add new member. Please prepare the required data such as name and email.",
+                            onPressed: preOpenAddMember,
+                          ),
+                          ActionCard(
+                            imageString: "assets/images/check-stock.png",
+                            title: "Check stock",
+                            description: "Check stocks from other stores.",
+                            onPressed: () {
+                              router.push('/inventory/check-stock');
+                            },
+                          ),
+                          ActionCard(
+                            imageString: "assets/images/history.png",
+                            title: "Sales history",
+                            description: "Get past bills",
+                            onPressed: () {
+                              router.push('/history');
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Divider(
+                        color: Color.fromARGB(255, 184, 184, 184),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-            Center(
-              child: SizedBox(
-                width: 1 * ResponsiveUtils.getContainerSize(context),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Quick picks",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 109, 41, 187),
-                        fontSize: 25,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 35,
-                    ),
-                    StaggeredGrid.count(
-                      mainAxisSpacing: 25,
-                      crossAxisSpacing: 25,
-                      crossAxisCount: 3,
-                      children: [
-                        ActionCard(
-                          imageString: "assets/images/create.png",
-                          title: "Add new member",
-                          description:
-                              "Add new member. Please prepare the required data such as name and email.",
-                          onPressed: preOpenAddMember,
-                        ),
-                        ActionCard(
-                          imageString: "assets/images/check-stock.png",
-                          title: "Check stock",
-                          description: "Check stocks from other stores.",
-                          onPressed: () {
-                            router.push('/inventory/check-stock');
-                          },
-                        ),
-                        ActionCard(
-                          imageString: "assets/images/history.png",
-                          title: "Sales history",
-                          description: "Get past bills",
-                          onPressed: () {
-                            router.push('/history');
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 25,
-                    ),
-                    Divider(
-                      color: Color.fromARGB(255, 184, 184, 184),
-                    ),
-                  ],
-                ),
+              const SizedBox(
+                height: 25,
               ),
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-            Center(
-              child: SizedBox(
-                width: 1 * ResponsiveUtils.getContainerSize(context),
-                child: Card(
-                  color: const Color.fromARGB(59, 240, 237, 245),
-                  elevation: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 35,
-                      horizontal: 15,
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            "Your store stats",
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 66, 66, 66),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
+              Center(
+                child: SizedBox(
+                  width: 1 * ResponsiveUtils.getContainerSize(context),
+                  child: Card(
+                    color: const Color.fromARGB(59, 240, 237, 245),
+                    elevation: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 35,
+                        horizontal: 15,
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              "Your store stats",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 66, 66, 66),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                          // select
-                          Row(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  DropdownMenu<int>(
-                                    initialSelection: 1,
-                                    onSelected: (value) {
-                                      if (value != null) {
-                                        _preUpdateStats(value);
-                                      }
-                                    },
-                                    // white background
-                                    inputDecorationTheme:
-                                        const InputDecorationTheme(
-                                      filled: true,
-                                      contentPadding: EdgeInsets.all(10.0),
-                                      // borer
-                                      border: OutlineInputBorder(),
+                            const SizedBox(
+                              height: 25,
+                            ),
+                            // select
+                            Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    DropdownMenu<int>(
+                                      initialSelection: 1,
+                                      onSelected: (value) {
+                                        if (value != null) {
+                                          _preUpdateStats(value);
+                                        }
+                                      },
+                                      // white background
+                                      inputDecorationTheme:
+                                          const InputDecorationTheme(
+                                        filled: true,
+                                        contentPadding: EdgeInsets.all(10.0),
+                                        // borer
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      width: 0.4 *
+                                          ResponsiveUtils.getContainerSize(
+                                              context),
+                                      label: const Text("Assessment period"),
+                                      dropdownMenuEntries: const [
+                                        DropdownMenuEntry(
+                                          label: "Today",
+                                          value: 1,
+                                        ),
+                                        DropdownMenuEntry(
+                                          label: "Last 7 days",
+                                          value: 7,
+                                        ),
+                                        DropdownMenuEntry(
+                                          label: "Last 30 days",
+                                          value: 30,
+                                        ),
+                                        DropdownMenuEntry(
+                                          label: "Overall",
+                                          value: -1,
+                                        ),
+                                      ],
                                     ),
-                                    width: 0.4 *
-                                        ResponsiveUtils.getContainerSize(
-                                            context),
-                                    label: const Text("Assessment period"),
-                                    dropdownMenuEntries: const [
-                                      DropdownMenuEntry(
-                                        label: "Today",
-                                        value: 1,
-                                      ),
-                                      DropdownMenuEntry(
-                                        label: "Last 7 days",
-                                        value: 7,
-                                      ),
-                                      DropdownMenuEntry(
-                                        label: "Last 30 days",
-                                        value: 30,
-                                      ),
-                                      DropdownMenuEntry(
-                                        label: "Overall",
-                                        value: -1,
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                      "Last synced at ${lastUpdated == null ? "Never" : DateFormat("dd/MM/yyyy HH:mm").format(lastUpdated!)}"),
-                                ],
-                              ),
-                              const SizedBox(
-                                width: 15,
-                              ),
-                              const Expanded(
-                                child: Text(
-                                    "You can change the periode of your assessment here. By default it will be the today's assessment.",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 66, 66, 66),
-                                    )),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 50,
-                          ),
-                          Row(
-                            children: [
-                              StatCard(
-                                number: NumberFormat.compact()
-                                    .format(newMemberCount),
-                                title: "New member count",
-                                description:
-                                    "New members registered in your store",
-                                onPressed: () {},
-                              ),
-                              StatCard(
-                                number:
-                                    NumberFormat.compact().format(memberCount),
-                                title: "Member count",
-                                description: "Members registered in your store",
-                                onPressed: () {},
-                              ),
-                              StatCard(
-                                number:
-                                    NumberFormat.compact().format(billCount),
-                                title: "Bills count",
-                                description:
-                                    "Bills created and uploaded to the server",
-                                onPressed: () {},
-                              ),
-                              StatCard(
-                                number:
-                                    NumberFormat.compact().format(billValue),
-                                title: "Bills value",
-                                description:
-                                    "Bills created and uploaded to the server",
-                                onPressed: () {},
-                              ),
-                            ],
-                          ),
-                        ],
+                                    Text(
+                                        "Last synced at ${lastUpdated == null ? "Never" : DateFormat("dd/MM/yyyy HH:mm").format(lastUpdated!)}"),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  width: 15,
+                                ),
+                                const Expanded(
+                                  child: Text(
+                                      "You can change the periode of your assessment here. By default it will be the today's assessment.",
+                                      style: TextStyle(
+                                        color: Color.fromARGB(255, 66, 66, 66),
+                                      )),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 50,
+                            ),
+                            Row(
+                              children: [
+                                StatCard(
+                                  number: NumberFormat.compact()
+                                      .format(newMemberCount),
+                                  title: "New member count",
+                                  description:
+                                      "New members registered in your store",
+                                  onPressed: () {},
+                                ),
+                                StatCard(
+                                  number: NumberFormat.compact()
+                                      .format(memberCount),
+                                  title: "Member count",
+                                  description:
+                                      "Members registered in your store",
+                                  onPressed: () {},
+                                ),
+                                StatCard(
+                                  number:
+                                      NumberFormat.compact().format(billCount),
+                                  title: "Bills count",
+                                  description:
+                                      "Bills created and uploaded to the server",
+                                  onPressed: () {},
+                                ),
+                                StatCard(
+                                  number:
+                                      NumberFormat.compact().format(billValue),
+                                  title: "Bills value",
+                                  description:
+                                      "Bills created and uploaded to the server",
+                                  onPressed: () {},
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-            Center(
-              child: SizedBox(
-                width: 1 * ResponsiveUtils.getContainerSize(context),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "More to your store",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 109, 41, 187),
-                        fontSize: 25,
+              const SizedBox(
+                height: 25,
+              ),
+              Center(
+                child: SizedBox(
+                  width: 1 * ResponsiveUtils.getContainerSize(context),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "More to your store",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 109, 41, 187),
+                          fontSize: 25,
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 35,
-                    ),
-                    StaggeredGrid.count(
-                      mainAxisSpacing: 25,
-                      crossAxisSpacing: 25,
-                      crossAxisCount: 3,
-                      children: [
-                        ActionCard(
-                          imageString: "assets/images/report.png",
-                          title: "Daily report",
-                          description:
-                              "Get your daily report here, it contains payments and sales data.",
-                          onPressed: () {},
-                        ),
-                        ActionCard(
-                          imageString: "assets/images/send.png",
-                          title: "Send stock transfer",
-                          description: "Send stock to other stores.",
-                          onPressed: () {
-                            router.push('/inventory/stock-transfer/send');
-                          },
-                        ),
-                        ActionCard(
-                          imageString: "assets/images/receive.png",
-                          title: "Receive stock transfer",
-                          description:
-                              "Receive stock transfer from other stores / office.",
-                          onPressed: () {
-                            router.push('/inventory/stock-transfer/receive');
-                          },
-                        ),
-                        ActionCard(
-                          imageString:
-                              "assets/images/create-stock-transfer.png",
-                          title: "Create stock transfer",
-                          description:
-                              "Create stock transfer request to other stores / office.",
-                          onPressed: () {
-                            router.push('/inventory/stock-transfer/create');
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 25,
-                    ),
-                    Divider(
-                      color: Color.fromARGB(255, 184, 184, 184),
-                    ),
-                  ],
+                      const SizedBox(
+                        height: 35,
+                      ),
+                      StaggeredGrid.count(
+                        mainAxisSpacing: 25,
+                        crossAxisSpacing: 25,
+                        crossAxisCount: 3,
+                        children: [
+                          ActionCard(
+                            imageString: "assets/images/report.png",
+                            title: "Daily report",
+                            description:
+                                "Get your daily report here, it contains payments and sales data.",
+                            onPressed: () {},
+                          ),
+                          ActionCard(
+                            imageString: "assets/images/send.png",
+                            title: "Send stock transfer",
+                            description: "Send stock to other stores.",
+                            onPressed: () {
+                              router.push('/inventory/stock-transfer/send');
+                            },
+                          ),
+                          ActionCard(
+                            imageString: "assets/images/receive.png",
+                            title: "Receive stock transfer",
+                            description:
+                                "Receive stock transfer from other stores / office.",
+                            onPressed: () {
+                              router.push('/inventory/stock-transfer/receive');
+                            },
+                          ),
+                          ActionCard(
+                            imageString:
+                                "assets/images/create-stock-transfer.png",
+                            title: "Create stock transfer",
+                            description:
+                                "Create stock transfer request to other stores / office.",
+                            onPressed: () {
+                              router.push('/inventory/stock-transfer/create');
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 25,
+                      ),
+                      Divider(
+                        color: Color.fromARGB(255, 184, 184, 184),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-          ],
+              const SizedBox(
+                height: 25,
+              ),
+            ],
+          ),
         ),
       ),
     );

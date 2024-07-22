@@ -6,6 +6,8 @@ import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/components/clip-path/trapezoid.clip-path.dart';
+import 'package:cstyle_cashier_3/view/product-selector/product-selector.page.dart';
+import 'package:cstyle_cashier_3/view/stock-transfer/components/store-selector.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/components/top-stock-transfer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -28,94 +30,14 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
   List<ProductModelStockTransfer> products = [];
   TextEditingController noteController = TextEditingController();
 
-  _fetchStores() {
-    setState(() {
-      isFetchingStores = true;
-    });
-
-    StoreModel.fetchStores().then((value) {
-      setState(() {
-        stores = value;
-      });
-      _showStorePicker();
-    }).catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(error.toString()),
-      ));
-    }).whenComplete(() {
-      setState(() {
-        isFetchingStores = false;
-      });
-    });
-  }
-
-  _showStorePicker() {
-    showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: Container(
-            width: 400,
-            padding: const EdgeInsets.all(20),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Select store",
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 4, 30, 73),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  const Text(
-                    "Select the store you want to transfer stock from",
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 4, 30, 73),
-                      fontSize: 16,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: stores.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        onTap: () {
-                          router.pop(stores[index]);
-                        },
-                        title: Text(stores[index].name),
-                        subtitle: Text(stores[index].address),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    ).then((value) {
-      if (value != null) {
-        setState(() {
-          store = value;
-        });
-      }
-    });
-  }
-
   _openProductSelector() {
-    router.push("/select-product/${store!.id}").then((value) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            child: ProductSelectorPage(),
+          );
+        }).then((value) {
       if (value != null) {
         var product = value as ProductModel;
         setState(() {
@@ -134,6 +56,25 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
         });
       }
     });
+    // router.push("/select-product/${store!.id}").then((value) {
+    //   if (value != null) {
+    //     var product = value as ProductModel;
+    //     setState(() {
+    //       products.add(
+    //         ProductModelStockTransfer(
+    //           id: product.id,
+    //           reference: product.reference,
+    //           description: product.description,
+    //           brand: product.brand,
+    //           type: product.type,
+    //           price: product.price,
+    //           stock: product.stock ?? 0,
+    //           quantity: 1,
+    //         ),
+    //       );
+    //     });
+    //   }
+    // });
   }
 
   _createStockTransfer() {
@@ -231,7 +172,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
     return Scaffold(
       body: Column(
         children: [
-          TopStockTransfer(),
+          const TopStockTransfer(),
           SingleChildScrollView(
             child: Stack(
               alignment: Alignment.topCenter,
@@ -407,72 +348,11 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                             const SizedBox(
                               height: 15,
                             ),
-                            const Text(
-                              "Selected store",
-                              style: TextStyle(
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Container(
-                              child: store == null
-                                  ? const Text("No store selected")
-                                  : Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          store!.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        Text(
-                                          store!.address!,
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.normal,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                            ),
-                            const SizedBox(
-                              height: 25,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    _fetchStores();
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 15,
-                                      horizontal: 25,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          const Color.fromARGB(255, 4, 30, 73),
-                                      borderRadius: BorderRadius.circular(25),
-                                    ),
-                                    child: const Text(
-                                      "Select store",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                                const Spacer(),
-                              ],
-                            ),
+                            StoreSelector(onStoreSelected: (value) {
+                              setState(() {
+                                store = value;
+                              });
+                            }),
                           ],
                         ),
                       ),

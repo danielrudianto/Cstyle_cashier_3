@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
-import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
@@ -157,8 +156,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
       selectedPrinter = await checkPrinter();
     }
 
+    // ignore: unnecessary_null_comparison
     if (selectedPrinter != null) {
       showDialog<UserModel?>(
+          // ignore: use_build_context_synchronously
           context: context,
           builder: (context) {
             return const Dialog(
@@ -173,7 +174,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         }
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Printer has not been set up."),
       ));
     }

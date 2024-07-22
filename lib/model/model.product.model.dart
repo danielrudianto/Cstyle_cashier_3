@@ -104,7 +104,7 @@ class ProductModel {
     return true;
   }
 
-  static Future<List<ProductModel>> fetchServerProducts(
+  static Future<dynamic> fetchServerProducts(
       int page, String? storeID, String keyword) async {
     var store = await StoreModel.getCurrentProfile();
     var result = await ApiUtils().postRequest(
@@ -131,7 +131,10 @@ class ProductModel {
       ));
     }
 
-    return products;
+    return {
+      "data": products,
+      "count": result['count'],
+    };
   }
 }
 

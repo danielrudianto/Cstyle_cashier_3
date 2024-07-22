@@ -8,21 +8,7 @@ ThemeData themeData = ThemeData(
   appBarTheme: AppBarTheme(
     backgroundColor: const Color.fromARGB(255, 130, 131, 130),
   ),
-  backgroundColor: Colors.white,
   scaffoldBackgroundColor: Colors.white,
-  colorScheme: const ColorScheme(
-    primary: Color.fromARGB(255, 220, 216, 215),
-    secondary: Color.fromARGB(255, 180, 181, 181),
-    surface: Colors.white,
-    background: Color.fromARGB(255, 245, 245, 245),
-    error: Colors.red,
-    onPrimary: Colors.black,
-    onSecondary: Colors.black,
-    onSurface: Colors.black,
-    onBackground: Colors.black,
-    onError: Colors.white,
-    brightness: Brightness.light,
-  ),
   textTheme: TextTheme(
     bodyMedium: TextStyle(
       color: Colors.grey.shade500,
@@ -60,4 +46,17 @@ ThemeData themeData = ThemeData(
       fontFamily: "Lato",
     ),
   ),
+  colorScheme: const ColorScheme(
+    primary: Color.fromARGB(255, 220, 216, 215),
+    secondary: Color.fromARGB(255, 180, 181, 181),
+    surface: Colors.white,
+    background: Color.fromARGB(255, 245, 245, 245),
+    error: Colors.red,
+    onPrimary: Colors.black,
+    onSecondary: Colors.black,
+    onSurface: Colors.black,
+    onBackground: Colors.black,
+    onError: Colors.white,
+    brightness: Brightness.light,
+  ).copyWith(background: Colors.white),
 );

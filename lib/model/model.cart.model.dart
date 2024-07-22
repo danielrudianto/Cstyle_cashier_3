@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cstyle_cashier_3/db/db.cart.model.dart';
 import 'package:cstyle_cashier_3/db/db.cart_code.model.dart';
 import 'package:cstyle_cashier_3/model/model.cart-item.model.dart';
@@ -109,7 +107,6 @@ class CartModel {
   }
 
   static Future<void> deleteByID(int id) async {
-    final db = await DatabaseUtils().database;
     try {
       SQLCartCodeModel.delete(id);
     } catch (error) {

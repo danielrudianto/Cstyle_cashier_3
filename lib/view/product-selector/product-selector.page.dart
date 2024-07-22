@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
@@ -46,7 +47,8 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
       searchController.text,
     ).then((value) {
       setState(() {
-        products = value;
+        products = value['data'];
+        productCount = value['count'];
       });
     }).catchError((error) {
       closeDialog(null);
@@ -82,139 +84,99 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        closeDialog(null);
-      },
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: const Color.fromARGB(50, 0, 0, 0),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: GestureDetector(
-            onTap: () {},
-            child: Container(
-              width: 0.8 * ResponsiveUtils.getContainerSize(context),
-              height: 0.8 * MediaQuery.of(context).size.height,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(
-                    10,
-                  ),
-                  topRight: Radius.circular(
-                    10,
+    return Container(
+      width: 400,
+      padding: const EdgeInsets.all(20),
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: searchController,
+                    decoration: const InputDecoration(
+                      hintText: "Search product",
+                      prefixIcon: Icon(Icons.search),
+                    ),
                   ),
                 ),
-              ),
+                IconButton(
+                  onPressed: () {
+                    closeDialog(null);
+                  },
+                  icon: Icon(Icons.close),
+                )
+              ],
+            ),
+
+            Expanded(
               child: isLoading
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
-                  : Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: searchController,
-                                    decoration: const InputDecoration(
-                                      hintText: "Search product",
-                                      prefixIcon: Icon(Icons.search),
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    closeDialog(null);
-                                  },
-                                  icon: Icon(Icons.close),
-                                )
-                              ],
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(
+                            products[index].reference,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-
-                            Expanded(
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: products.length,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    title: Text(
-                                      products[index].reference,
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    subtitle: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          products[index].description,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: Colors.grey.shade800,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Current stock: ${NumberFormat.decimalPattern().format(products[index].stock)}",
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: Colors.grey.shade800,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    onTap: () {
-                                      closeDialog(products[index]);
-                                    },
-                                  );
-                                },
+                          ),
+                          subtitle: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                products[index].description,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.grey.shade800,
+                                  fontSize: 13,
+                                ),
                               ),
-                            ),
-                            // Paginator
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    fetchProducts(page - 1);
-                                  },
-                                  icon: Icon(Icons.arrow_back),
+                              Text(
+                                "Current stock: ${NumberFormat.decimalPattern().format(products[index].stock)}",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.grey.shade800,
+                                  fontSize: 13,
                                 ),
-                                Text("$page"),
-                                IconButton(
-                                  onPressed: products.length < 10
-                                      ? null
-                                      : () {
-                                          fetchProducts(page + 1);
-                                        },
-                                  icon: Icon(Icons.arrow_forward),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            closeDialog(products[index]);
+                          },
+                        );
+                      },
                     ),
             ),
-          ),
+            // Paginator
+
+            PaginationComponent(
+                pageIndex: page - 1,
+                dataCount: productCount,
+                pageSize: 20,
+                onPageChange: (selectedPage) {
+                  setState(() {
+                    page = selectedPage + 1;
+                  });
+
+                  fetchProducts(page);
+                })
+          ],
         ),
       ),
     );
