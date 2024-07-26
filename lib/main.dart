@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'Cstyle Cashier Application',
-      theme: themeData,
+      theme: darkThemeData,
       routerConfig: router,
     );
   }

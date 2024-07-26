@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
@@ -114,24 +113,17 @@ class SQLCartModelPrint extends SQLCartModel {
   String type;
 
   SQLCartModelPrint({
-    int? id,
-    required String itemID,
-    required int quantity,
-    required double price,
-    required double discount,
-    required int cartCodeID,
+    super.id,
+    required super.itemID,
+    required super.quantity,
+    required super.price,
+    required super.discount,
+    required super.cartCodeID,
     required this.reference,
     required this.description,
     required this.brand,
     required this.type,
-  }) : super(
-          id: id,
-          itemID: itemID,
-          quantity: quantity,
-          price: price,
-          discount: discount,
-          cartCodeID: cartCodeID,
-        );
+  });
 
   @override
   Map<String, dynamic> toMap() {

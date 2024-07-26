@@ -1,13 +1,12 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/model/model.product-image.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/components/product-image.component.dart';
+import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:expansion_tile_group/expansion_tile_group.dart';
-import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -23,144 +22,147 @@ class DashboardGridList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget buildChildren(ProductModel e) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ProductImageComponent(
-            id: e.id,
-            autoPlay: true,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: 150,
-                child: Column(
+    _showProductDialog(
+        ProductModel e, List<ProductImageModel> images, int stock) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              child: Container(
+                width: images.isEmpty ? 350 : 565,
+                height: 250,
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      "Brand",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall,
+                    images.isEmpty
+                        ? const SizedBox()
+                        : Expanded(
+                            child: ProductImageComponent(
+                              id: e.id,
+                              autoPlay: true,
+                              bordered: false,
+                            ),
+                          ),
+                    SizedBox(
+                      width: images.isEmpty ? 0 : 15,
                     ),
-                    Text(
-                      e.brand,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Divider(
-                      color: Colors.grey.shade200,
-                      thickness: 1,
-                    ),
-                    Text(
-                      "Reference",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                    Text(
-                      e.reference,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Divider(
-                      color: Colors.grey.shade200,
-                      thickness: 1,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  e.reference,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                            Text(e.description,
+                                style: Theme.of(context).textTheme.bodyLarge),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Text(e.brand,
+                                style: Theme.of(context).textTheme.bodySmall),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Rp. ${NumberFormat("#,##0.00").format(e.price)}",
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            InkWell(
+                              onTap: () {
+                                router.pop("add");
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: stock == 0
+                                      ? Theme.of(context).disabledColor
+                                      : Theme.of(context).secondaryHeaderColor,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 7.5,
+                                  horizontal: 25,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.add_shopping_cart_rounded),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                    Text(
+                                      stock == 0
+                                          ? "Not Available"
+                                          : "Available",
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.verified,
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  "100% Original Products",
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.credit_card,
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  "Pay on delivery",
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(
-                width: 250,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Type",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                    Text(
-                      e.type,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Divider(
-                      color: Colors.grey.shade200,
-                      thickness: 1,
-                    ),
-                    Text(
-                      "Description",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                    Text(
-                      e.description,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Divider(
-                      color: Colors.grey.shade200,
-                      thickness: 1,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 150,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Type",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                    Text(
-                      e.type,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Divider(
-                      color: Colors.grey.shade200,
-                      thickness: 1,
-                    ),
-                    Text(
-                      "Barcode",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                    Text(
-                      e.barcode == null || e.barcode == "" ? "N/A" : e.barcode!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    Divider(
-                      color: Colors.grey.shade200,
-                      thickness: 1,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          )
-        ],
-      );
+            );
+          }).then((value) {
+        if (value == 'add') {
+          onAddProduct(e);
+        }
+      });
     }
 
     return Padding(
@@ -170,98 +172,137 @@ class DashboardGridList extends StatelessWidget {
       ),
       child: Consumer2<CompareNotifier, CartNotifier>(
           builder: (_, compareNotifier, cartNotifier, child) {
-        return ExpansionTileGroup(
-          toggleType: ToggleType.expandOnlyCurrent,
+        return Column(
           children: products.mapIndexed((index, e) {
-            return ExpansionTileItem(
-              key: Key(index.toString()),
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.shade300,
-                  width: 1,
+            return InkWell(
+              onTap:
+                  ((e.stock ?? 0) - cartNotifier.checkProductQuantity(e.id)) <=
+                          0
+                      ? () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text(
+                                "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
+                              ),
+                              action: SnackBarAction(
+                                label: "OK",
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                },
+                              ),
+                            ),
+                          );
+                        }
+                      : () {
+                          onAddProduct(e);
+                        },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                padding: const EdgeInsets.only(
+                  left: 15,
+                  right: 15,
+                  top: 16,
+                  bottom: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Checkbox(
+                        side: BorderSide(
+                          color: Theme.of(context).dividerColor,
+                        ),
+                        checkColor: Colors.white,
+                        activeColor: const Color.fromARGB(255, 109, 78, 137),
+                        value: compareNotifier.hasProduct(e.id),
+                        onChanged: (value) {
+                          LoggerUtils().log(
+                              "User has change ${e.id} to $value. Prepared to be compared.",
+                              LogType.info);
+
+                          if (value != null && value == false) {
+                            Provider.of<CompareNotifier>(context, listen: false)
+                                .deselectProduct(e.id);
+                          } else if (value != null && value == true) {
+                            Provider.of<CompareNotifier>(context, listen: false)
+                                .selectProduct(e);
+                          }
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      flex: 12,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            e.reference,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(
+                            height: 2,
+                          ),
+                          Text(
+                            e.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        NumberFormat.decimalPattern("en-US").format(e.price),
+                        textAlign: TextAlign.end,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        NumberFormat.decimalPattern("en-US").format(
+                            (e.stock ?? 0) -
+                                cartNotifier.checkProductQuantity(e.id)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 40,
+                      child: IconButton(
+                        onPressed: () async {
+                          List<ProductImageModel> images =
+                              await ProductImageModel.fetchByItemID(e.id);
+                          _showProductDialog(
+                              e,
+                              images,
+                              (e.stock ?? 0) -
+                                  cartNotifier.checkProductQuantity(e.id));
+                        },
+                        icon: const Icon(Icons.view_array),
+                      ),
+                    )
+                  ],
                 ),
               ),
-              isHasTrailing: false,
-              tilePadding: const EdgeInsets.only(
-                left: 15,
-                right: 15,
-                top: 5,
-                bottom: 5,
-              ),
-              title: Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Checkbox(
-                      side: BorderSide(
-                        color: Colors.grey.shade300,
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: const Color.fromARGB(255, 109, 78, 137),
-                      value: compareNotifier.hasProduct(e.id),
-                      onChanged: (value) {
-                        LoggerUtils().log(
-                            "User has change ${e.id} to $value. Prepared to be compared.",
-                            LogType.info);
-
-                        if (value != null && value == false) {
-                          Provider.of<CompareNotifier>(context, listen: false)
-                              .deselectProduct(e.id);
-                        } else if (value != null && value == true) {
-                          Provider.of<CompareNotifier>(context, listen: false)
-                              .selectProduct(e);
-                        }
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      e.reference,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 12,
-                    child: Text(
-                      e.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      NumberFormat.decimalPattern("en-US").format(e.price),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      NumberFormat.decimalPattern("en-US").format(
-                          (e.stock ?? 0) -
-                              cartNotifier.checkProductQuantity(e.id)),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 40,
-                    child: IconButton(
-                      onPressed: ((e.stock ?? 0) -
-                                  cartNotifier.checkProductQuantity(e.id)) <=
-                              0
-                          ? null
-                          : () {
-                              onAddProduct(e);
-                            },
-                      icon: const Icon(Icons.add_shopping_cart),
-                    ),
-                  )
-                ],
-              ),
-              children: [
-                buildChildren(e),
-              ],
             );
           }).toList(),
         );

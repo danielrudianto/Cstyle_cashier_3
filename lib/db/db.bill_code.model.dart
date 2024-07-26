@@ -151,6 +151,7 @@ class SQLBillCodeModelCreate extends SQLBillCodeModel {
     super.syncedAt,
   });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'name': name,

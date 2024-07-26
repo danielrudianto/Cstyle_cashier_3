@@ -64,7 +64,7 @@ class _UnreceivedStockTransferPageState
   @override
   void initState() {
     fetchUnreceivedStockTransfers(1);
-    Future.delayed(Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         isOpened = true;
       });
@@ -129,7 +129,7 @@ class _UnreceivedStockTransferPageState
                                     onPressed: () {
                                       closeDialog(null);
                                     },
-                                    icon: Icon(Icons.close),
+                                    icon: const Icon(Icons.close),
                                   )
                                 ],
                               ),
@@ -165,7 +165,7 @@ class _UnreceivedStockTransferPageState
                                             fetchUnreceivedStockTransfers(
                                                 page - 1);
                                           },
-                                    icon: Icon(Icons.arrow_back),
+                                    icon: const Icon(Icons.arrow_back),
                                   ),
                                   Text("$page"),
                                   IconButton(
@@ -175,7 +175,7 @@ class _UnreceivedStockTransferPageState
                                             fetchUnreceivedStockTransfers(
                                                 page + 1);
                                           },
-                                    icon: Icon(Icons.arrow_forward),
+                                    icon: const Icon(Icons.arrow_forward),
                                   ),
                                 ],
                               ),

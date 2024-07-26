@@ -1,10 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
+import 'package:cstyle_cashier_3/components/thousand-separator/thousand-separator.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/printing.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
+import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/utils/text-formatter.utils.dart';
 import 'package:cstyle_cashier_3/view/checkout/components/add-member-checkout.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
@@ -24,7 +26,6 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  String storeInitial = "S";
   int selectedIndex = 0;
   String? employeeID;
   String? memberID;
@@ -40,16 +41,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
         0.0;
   }
 
-  TextEditingController amountController = TextEditingController();
+  double get totalPayment {
+    return payments.fold(
+        0.0, (previousValue, element) => previousValue + element['amount']);
+  }
+
+  bool isPaymentMethodExists(String e) {
+    return payments.where((element) => element['method'] == e).isNotEmpty;
+  }
 
   void _calculateChange() {
-    var totalPayment = 0.0;
-
-    for (var payment in payments) {
-      totalPayment += payment['amount'];
-    }
-
-    var totalCart = Provider.of<CartNotifier>(context, listen: false)
+    var value = Provider.of<CartNotifier>(context, listen: false)
         .selectedCart!
         .products
         .fold(
@@ -62,54 +64,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     100);
 
     setState(() {
-      change = totalCart - totalPayment;
+      change = value - totalPayment;
     });
-  }
-
-  void _addPayment() {
-    // First check the amount controller
-    var amount = amountController.text;
-    var formattedAmount = amount.replaceAll(" ", "");
-    if (formattedAmount.isEmpty) {
-      LoggerUtils().log("Amount cannot be empty", LogType.error);
-      return;
-    }
-
-    if (double.tryParse(formattedAmount) == null) {
-      LoggerUtils().log("Amount must be a number", LogType.error);
-      return;
-    }
-
-    // If a payment method has been selected previously, then add it to that method
-    if (payments.where((element) => element['id'] == selectedIndex).isEmpty) {
-      setState(() {
-        payments.add({
-          'id': selectedIndex,
-          'method': selectedIndex == 0
-              ? "Cash"
-              : selectedIndex == 1
-                  ? "QRIS"
-                  : selectedIndex == 2
-                      ? "Card"
-                      : selectedIndex == 3
-                          ? "Bank Transfer"
-                          : selectedIndex == 4
-                              ? "PayPal"
-                              : "Voucher",
-          'amount': double.parse(formattedAmount),
-        });
-      });
-    } else {
-      setState(() {
-        payments
-            .where((element) => element['id'] == selectedIndex)
-            .first
-            .update('amount', (value) => value + double.parse(formattedAmount));
-      });
-    }
-
-    // Calculate the change
-    _calculateChange();
   }
 
   Future<void> _preCheckout() async {
@@ -117,6 +73,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("No payment method selected!"),
+        ),
+      );
+      return;
+    }
+
+    var value = Provider.of<CartNotifier>(context, listen: false)
+        .selectedCart!
+        .products
+        .fold(
+            0.0,
+            (previousValue, element) =>
+                previousValue +
+                element.price *
+                    element.quantity *
+                    (100 - element.discount) /
+                    100);
+
+    if (totalPayment < value) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              "Payment must be greater than or equal to the total amount!"),
         ),
       );
       return;
@@ -151,7 +129,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return;
     }
 
-    Printer? selectedPrinter = null;
+    Printer? selectedPrinter;
     while (selectedPrinter == null) {
       selectedPrinter = await checkPrinter();
     }
@@ -223,29 +201,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       await Provider.of<CartNotifier>(context, listen: false)
           .deleteCurrentCart();
-      Navigator.pop(context);
+      router.pop();
     } catch (error) {
       LoggerUtils().log(error.toString(), LogType.error);
     }
-  }
-
-  @override
-  void initState() {
-    StoreModel.getCurrentProfile().then((value) {
-      setState(() {
-        storeInitial = value!.name.substring(0, 1);
-      });
-    });
-
-    Future.delayed(const Duration(milliseconds: 300), () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              "Now, you can navigate payments using F1 - F6 keys while focusing on the amount."),
-        ),
-      );
-    });
-    super.initState();
   }
 
   Future<dynamic> openMembershipSelector() {
@@ -258,590 +217,618 @@ class _CheckoutPageState extends State<CheckoutPage> {
         });
   }
 
-  Widget _tabSection() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(
-            "assets/images/logo.webp",
-            width: 150,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            "Thank you for your order!",
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Row(children: [
-                ...[
-                  "Cash",
-                  "QRIS",
-                  "Card",
-                  "Bank Transfer",
-                  "PayPal",
-                  "Voucher"
-                ].mapIndexed((index, element) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = index;
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(
-                        left: 5,
-                        right: 5,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selectedIndex == index
-                            ? Colors.blue.shade100
-                            : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        element,
-                        style: TextStyle(
-                          color: selectedIndex == index
-                              ? Colors.blue
-                              : Colors.grey.shade600,
-                        ),
-                      ),
-                    ),
-                  );
-                })
-              ]),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: "Amount",
-                    ),
-                    keyboardType: TextInputType.number,
-                    controller: amountController,
-                    inputFormatters: [
-                      CustomTextInputFormatter(),
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.\s]')),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 34, 34, 34),
-                        ),
-                        onPressed: _addPayment,
-                        child: Text(
-                          "Add payment",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  const Text(
-                    "Changes are only allowed to be made in cash payments. Please ensure that the cash payment amount is sufficient to cover the total payment amount.",
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  GestureDetector(
-                    onTap: _preCheckout,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 5,
-                        horizontal: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: const Row(
-                        children: [
-                          Expanded(
-                            child: Text("Checkout",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                )),
-                          ),
-                          Icon(
-                            Icons.arrow_forward,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return CallbackShortcuts(
-      bindings: <ShortcutActivator, VoidCallback>{
-        const SingleActivator(LogicalKeyboardKey.f1): () {
-          setState(() {
-            selectedIndex = 0;
-          });
-        },
-        const SingleActivator(LogicalKeyboardKey.f2): () {
-          setState(() {
-            selectedIndex = 1;
-          });
-        },
-        const SingleActivator(LogicalKeyboardKey.f3): () {
-          setState(() {
-            selectedIndex = 2;
-          });
-        },
-        const SingleActivator(LogicalKeyboardKey.f4): () {
-          setState(() {
-            selectedIndex = 3;
-          });
-        },
-        const SingleActivator(LogicalKeyboardKey.f5): () {
-          setState(() {
-            selectedIndex = 4;
-          });
-        },
-        const SingleActivator(LogicalKeyboardKey.f6): () {
-          setState(() {
-            selectedIndex = 5;
-          });
-        },
-      },
-      child: Focus(
-        autofocus: true,
-        child: Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: ResponsiveUtils.getContainerSize(context),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Consumer<CartNotifier>(builder: (_, value, __) {
-                      return Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    context.pop();
-                                  },
-                                  icon: const Icon(
-                                    Icons.arrow_back,
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).canvasColor,
+        ),
+        body: SingleChildScrollView(
+          child: Consumer<CartNotifier>(builder: (_, value, __) {
+            return Center(
+              child: Container(
+                width: ResponsiveUtils.getContainerSize(context),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Text(
+                      "CHECKOUT",
+                      // all caps
+
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineLarge!
+                          .copyWith(
+                              fontWeight: FontWeight.bold, letterSpacing: -1.2),
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Container(
+                                // add border 1px solid grey
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(0),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 1,
                                   ),
+                                  color: Colors.transparent,
                                 ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                CircleAvatar(
-                                  backgroundColor: Colors.black,
-                                  child: Text(storeInitial,
-                                      style:
-                                          const TextStyle(color: Colors.white)),
-                                ),
-                                const SizedBox(
-                                  width: 20,
-                                ),
-                                Text(
-                                  "Checkout",
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    openMembershipSelector().then((value) {
-                                      if (value != null) {
-                                        setState(() {
-                                          memberID = value;
-                                        });
-                                      }
-                                    }).catchError((error) {
-                                      LoggerUtils().log(error, LogType.error);
-                                    });
-                                  },
-                                  child: Container(
-                                      width: 100,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 2.5,
-                                        horizontal: 5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        color: memberID == null
-                                            ? const Color.fromARGB(
-                                                255, 248, 215, 152)
-                                            : const Color.fromARGB(
-                                                206, 204, 241, 179),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              memberID == null
-                                                  ? "Non-member"
-                                                  : memberID!,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: memberID == null
-                                                    ? const Color.fromARGB(
-                                                        255, 175, 98, 27)
-                                                    : Colors.green.shade600,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                          memberID != null
-                                              ? SizedBox(
-                                                  width: 15,
-                                                  height: 15,
-                                                  child: IconButton(
-                                                    padding:
-                                                        const EdgeInsets.all(0),
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        memberID = null;
-                                                      });
-                                                    },
-                                                    icon: const Icon(
-                                                      Icons.close,
-                                                      size: 12,
-                                                    ),
-                                                  ),
-                                                )
-                                              : const SizedBox(),
-                                        ],
-                                      )),
-                                )
-                              ],
-                            ),
-                            Expanded(
-                              child: SingleChildScrollView(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ...(value.selectedCart?.products ?? [])
-                                        .map((e) {
-                                      return ListTile(
-                                        isThreeLine: false,
-                                        title: Text(
-                                          e.description,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontFamily: "Lato",
-                                          ),
-                                        ),
-                                        subtitle: RichText(
-                                          text: TextSpan(
-                                            text: "Qty:   ",
-                                            style: TextStyle(
-                                              color: Colors.grey.shade500,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.normal,
-                                              fontFamily: "Lato",
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                        horizontal: 20,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(0),
+                                        color: Colors.black87,
+                                      ),
+                                      child: Text(
+                                        "1. PAYMENT OPTIONS",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(
+                                              color: Colors.white,
                                             ),
-                                            children: [
-                                              TextSpan(
-                                                text: e.quantity.toString(),
-                                                style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: "Lato",
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        trailing: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              NumberFormat.decimalPatternDigits(
-                                                locale: "en-US",
-                                                decimalDigits: 2,
-                                              ).format(e.quantity *
-                                                  (e.price *
-                                                      (100 - e.discount)) /
-                                                  110),
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: "Lato",
-                                              ),
-                                            ),
-                                            e.quantity > 1
-                                                ? Text(
-                                                    "${NumberFormat.decimalPatternDigits(
-                                                      locale: "en-US",
-                                                      decimalDigits: 2,
-                                                    ).format((e.price * (100 - e.discount)) / 110)} each",
-                                                    style: const TextStyle(
-                                                      color: Colors.grey,
-                                                      fontSize: 12,
-                                                    ),
-                                                  )
-                                                : const SizedBox(),
-                                          ],
-                                        ),
-                                      );
-                                    }),
-                                    ListTile(
-                                      title: const Text(
-                                        "Subtotal",
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: "Lato",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      trailing: Text(
-                                        NumberFormat.decimalPatternDigits(
-                                          locale: "en-US",
-                                          decimalDigits: 2,
-                                        ).format(
-                                          (value.selectedCart?.products ?? [])
-                                                  .fold(
-                                                0.0,
-                                                (previousValue, element) =>
-                                                    previousValue +
-                                                    (element.quantity *
-                                                        element.price),
-                                              ) /
-                                              1.11,
-                                        ),
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: "Lato",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
                                       ),
                                     ),
-                                    Divider(
-                                      color: Colors.grey.shade400,
-                                    ),
-                                    ListTile(
-                                      title: Text(
-                                        "Discount",
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                        horizontal: 20,
+                                      ),
+                                      child: Text(
+                                        "Thank you for your order!",
                                         style: Theme.of(context)
                                             .textTheme
-                                            .bodyMedium,
-                                      ),
-                                      subtitle: Text(
-                                        "Special discount applied for you.",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                      trailing: Text(
-                                        NumberFormat.decimalPatternDigits(
-                                          locale: "en-US",
-                                          decimalDigits: 2,
-                                        ).format(
-                                          (value.selectedCart?.products ?? [])
-                                              .fold(
-                                            0.0,
-                                            (previousValue, element) =>
-                                                previousValue +
-                                                (element.quantity *
-                                                    element.price *
-                                                    element.discount /
-                                                    110),
-                                          ),
-                                        ),
+                                            .bodyLarge,
                                       ),
                                     ),
-                                    ListTile(
-                                      title: Text(
-                                        "Value Added Tax",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                      subtitle: Text(
-                                        "National-wide tax applied for you.",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                      trailing: Text(
-                                        NumberFormat.decimalPatternDigits(
-                                          locale: "en_US",
-                                          decimalDigits: 2,
-                                        ).format(
-                                          (value.selectedCart?.products ?? [])
-                                                  .fold(
-                                                0.0,
-                                                (previousValue, element) =>
-                                                    previousValue +
-                                                    (element.quantity *
-                                                        element.price *
-                                                        (100 -
-                                                            element.discount) /
-                                                        100),
-                                              ) *
-                                              11 /
-                                              111,
-                                        ),
-                                      ),
-                                    ),
-                                    Divider(
-                                      color: Colors.grey.shade400,
-                                    ),
-                                    ListTile(
-                                      title: Text(
-                                        "Total",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                      trailing: Text(
-                                        NumberFormat.decimalPatternDigits(
-                                          locale: "en-US",
-                                          decimalDigits: 2,
-                                        ).format(
-                                            (value.selectedCart?.products ?? [])
-                                                .fold(
-                                          0.0,
-                                          (previousValue, element) =>
-                                              previousValue +
-                                              (element.quantity *
-                                                  element.price *
-                                                  (100 - element.discount) /
-                                                  100),
-                                        )),
-                                      ),
-                                    ),
-                                    Divider(
-                                      color: Colors.grey.shade400,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    const Text(
-                                      "Payments",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: "Lato",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    ...payments.map((e) {
-                                      return ListTile(
-                                        leading: IconButton(
-                                          onPressed: () {
+                                    ...[
+                                      "Cash",
+                                      "Card",
+                                      "Bank Transfer",
+                                      "PayPal",
+                                      "QRIS",
+                                      "Voucher"
+                                    ].map((e) {
+                                      return ExpansionTile(
+                                        onExpansionChanged: (value) {
+                                          if (!value) {
                                             setState(() {
                                               payments.removeWhere((element) =>
-                                                  element['method'] ==
-                                                  e['method']);
+                                                  element['method'] == e);
                                             });
-                                            _calculateChange();
-                                          },
-                                          icon: const Icon(
-                                            Icons.close,
-                                            size: 12,
-                                          ),
-                                        ),
+                                          } else {
+                                            setState(() {
+                                              payments.add({
+                                                'method': e,
+                                                'amount': 0.0,
+                                              });
+                                            });
+                                          }
+                                        },
                                         title: Text(
-                                          e['method'],
+                                          e,
                                           style: Theme.of(context)
                                               .textTheme
-                                              .bodyMedium,
+                                              .bodyLarge,
                                         ),
-                                        trailing: Text(
-                                          NumberFormat.decimalPatternDigits(
-                                            locale: "en-US",
-                                            decimalDigits: 2,
-                                          ).format(e['amount']),
+                                        trailing: isPaymentMethodExists(e)
+                                            ? const Icon(
+                                                Icons.check,
+                                                color: Colors.green,
+                                              )
+                                            : const Icon(
+                                                Icons.add,
+                                                color: Colors.grey,
+                                              ),
+                                        childrenPadding:
+                                            const EdgeInsets.symmetric(
+                                          vertical: 10,
+                                          horizontal: 20,
                                         ),
+                                        children: [
+                                          TextField(
+                                            // outlined
+                                            decoration: const InputDecoration(
+                                              labelText: "Amount",
+                                              border: OutlineInputBorder(),
+                                            ),
+                                            // only allow number
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                  RegExp(r'[0-9.]')),
+                                              DecimalFormatter(
+                                                  decimalDigits: 0),
+                                            ],
+                                            // thousand separator
+                                            keyboardType: TextInputType.number,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                var index = payments.indexWhere(
+                                                    (element) =>
+                                                        element['method'] == e);
+                                                payments[index]['amount'] =
+                                                    value.isEmpty
+                                                        ? 0
+                                                        : double.parse(
+                                                            value.replaceAll(
+                                                                ",", ""));
+
+                                                _calculateChange();
+                                              });
+                                            },
+                                          ),
+                                        ],
                                       );
                                     }),
-                                    change >= 0
-                                        ? const SizedBox()
-                                        : ListTile(
-                                            title: Text(
-                                              "Changes",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium,
-                                            ),
-                                            trailing: Text(
-                                              NumberFormat.decimalPatternDigits(
-                                                locale: "en-US",
-                                                decimalDigits: 2,
-                                              ).format(change),
-                                            ),
-                                          )
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Container(
+                                // add border 1px solid grey
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(0),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 1,
+                                  ),
+                                  color: Colors.transparent,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                        horizontal: 20,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(0),
+                                        color: Colors.black87,
+                                      ),
+                                      child: Text(
+                                        "2. MEMBERSHIPS",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(
+                                              color: Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                        horizontal: 20,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Join our membership programs to get more benefits!",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge,
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          // member selector button
+                                          InkWell(
+                                            onTap: () {
+                                              openMembershipSelector();
+                                            },
+                                            child: Container(
+                                              height: 50,
+                                              width: 200,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context)
+                                                    .secondaryHeaderColor,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  "Select Membership",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelLarge
+                                                      ?.copyWith(
+                                                        color: Colors.white,
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      );
-                    }),
-                  ),
-                  Expanded(
-                    child: _tabSection(),
-                  ),
-                ],
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        SizedBox(
+                          width: 400,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(0),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                        horizontal: 20,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(0),
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor
+                                            .withOpacity(0.8),
+                                      ),
+                                      child: Text(
+                                        "IN YOUR BAG",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(
+                                              color: Colors.white,
+                                            ),
+                                      ),
+                                    ),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      itemBuilder: (context, index) {
+                                        return ListTile(
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                            vertical: 5,
+                                            horizontal: 15,
+                                          ),
+                                          title: Text(
+                                            value.selectedCart!.products[index]
+                                                .reference,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                value
+                                                    .selectedCart!
+                                                    .products[index]
+                                                    .description,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    "${NumberFormat().format(value.selectedCart!.products[index].quantity)} x ${value.selectedCart!.products[index].discount == 0 ? NumberFormat("#,##0.00").format(value.selectedCart!.products[index].price / 1.11) : NumberFormat("#,##0.00").format(
+                                                        (value
+                                                                    .selectedCart!
+                                                                    .products[
+                                                                        index]
+                                                                    .price /
+                                                                1.11) -
+                                                            ((value
+                                                                        .selectedCart!
+                                                                        .products[
+                                                                            index]
+                                                                        .price *
+                                                                    value
+                                                                        .selectedCart!
+                                                                        .products[
+                                                                            index]
+                                                                        .discount /
+                                                                    100) /
+                                                                1.11),
+                                                      )}",
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.normal,
+                                                        ),
+                                                  ),
+                                                  const Spacer(),
+                                                  Text(
+                                                    value
+                                                                .selectedCart!
+                                                                .products[index]
+                                                                .discount ==
+                                                            0
+                                                        ? NumberFormat(
+                                                                "#,##0.00")
+                                                            .format(value
+                                                                    .selectedCart!
+                                                                    .products[
+                                                                        index]
+                                                                    .quantity *
+                                                                value
+                                                                    .selectedCart!
+                                                                    .products[
+                                                                        index]
+                                                                    .price /
+                                                                1.11)
+                                                        : NumberFormat(
+                                                                "#,##0.00")
+                                                            .format(
+                                                            value
+                                                                        .selectedCart!
+                                                                        .products[
+                                                                            index]
+                                                                        .quantity *
+                                                                    (value
+                                                                            .selectedCart!
+                                                                            .products[
+                                                                                index]
+                                                                            .price /
+                                                                        1.11) -
+                                                                ((value
+                                                                            .selectedCart!
+                                                                            .products[
+                                                                                index]
+                                                                            .price *
+                                                                        value
+                                                                            .selectedCart!
+                                                                            .products[index]
+                                                                            .discount /
+                                                                        100) /
+                                                                    1.11),
+                                                          ),
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.normal,
+                                                        ),
+                                                  ),
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      itemCount:
+                                          value.selectedCart!.products.length,
+                                    ),
+                                    const SizedBox(
+                                      height: 5,
+                                    ),
+                                    Divider(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 5,
+                                        horizontal: 15,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            "Subtotal",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge,
+                                          ),
+                                          const Spacer(),
+                                          Text(
+                                            NumberFormat("#,##0.00").format(
+                                                value.totalPrice / 1.11),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge!
+                                                .copyWith(
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 5,
+                                        horizontal: 15,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            "Tax",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge,
+                                          ),
+                                          const Spacer(),
+                                          Text(
+                                            NumberFormat("#,##0.00").format(
+                                                value.totalPrice -
+                                                    value.totalPrice / 1.11),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge!
+                                                .copyWith(
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 5,
+                                        horizontal: 15,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            "Total",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge,
+                                          ),
+                                          const Spacer(),
+                                          Text(
+                                            NumberFormat("#,##0.00")
+                                                .format(value.totalPrice),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Text(
+                                "Payments",
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: payments.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index == payments.length) {
+                                    return ListTile(
+                                      title: Text(
+                                        "Changes",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                      trailing: Text(
+                                        change <= 0
+                                            ? "0.00"
+                                            : NumberFormat("#,##0.00").format(
+                                                -change,
+                                              ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                    );
+                                  } else {
+                                    return ListTile(
+                                      title: Text(
+                                        payments[index]['method'],
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium!
+                                            .copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      trailing: Text(
+                                        NumberFormat("#,##0.00").format(
+                                          payments[index]['amount'],
+                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium!
+                                            .copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              // Button
+                              InkWell(
+                                onTap: () {
+                                  _preCheckout();
+                                },
+                                child: Container(
+                                  height: 50,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "Checkout",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-        ),
-      ),
-    );
+            );
+          }),
+        ));
   }
 }

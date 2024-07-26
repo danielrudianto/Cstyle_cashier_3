@@ -304,7 +304,7 @@ class _StorePageState extends State<StorePage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
-              child: Container(
+              child: SizedBox(
                 width: 400,
                 child: SingleChildScrollView(
                   child: Column(
@@ -662,7 +662,8 @@ class _StorePageState extends State<StorePage> {
                                 ),
                                 width: double.infinity,
                                 decoration: BoxDecoration(
-                                  color: Color.fromARGB(255, 151, 158, 249),
+                                  color:
+                                      const Color.fromARGB(255, 151, 158, 249),
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: const Text(
@@ -704,7 +705,7 @@ class _StorePageState extends State<StorePage> {
             lastSynced
                 .isBefore(DateTime.now().subtract(const Duration(hours: 1)))) &&
         isOnline) {
-      _fetcUpdateStats(period).then((value) {
+      _fetchUpdateStats(period).then((value) {
         prefs.setString("last_synced:$period", DateTime.now().toString());
         prefs.setInt("new_member_count:$period", value[0]);
         prefs.setInt("member_count:$period", value[1]);
@@ -732,7 +733,7 @@ class _StorePageState extends State<StorePage> {
     }
   }
 
-  _fetcUpdateStats(int period) {
+  _fetchUpdateStats(int period) {
     return StoreModel.fetchStats(period);
   }
 
@@ -763,7 +764,7 @@ class _StorePageState extends State<StorePage> {
                   top: 50,
                   bottom: 50,
                 ),
-                color: Color.fromARGB(0, 151, 157, 249),
+                color: const Color.fromARGB(0, 151, 157, 249),
                 child: Center(
                   child: SizedBox(
                     width: 1 * ResponsiveUtils.getContainerSize(context),
@@ -833,6 +834,7 @@ class _StorePageState extends State<StorePage> {
                             description:
                                 "Add new member. Please prepare the required data such as name and email.",
                             onPressed: preOpenAddMember,
+                            buttonLabel: "Register",
                           ),
                           ActionCard(
                             imageString: "assets/images/check-stock.png",
@@ -841,6 +843,7 @@ class _StorePageState extends State<StorePage> {
                             onPressed: () {
                               router.push('/inventory/check-stock');
                             },
+                            buttonLabel: "Check",
                           ),
                           ActionCard(
                             imageString: "assets/images/history.png",
@@ -849,13 +852,14 @@ class _StorePageState extends State<StorePage> {
                             onPressed: () {
                               router.push('/history');
                             },
+                            buttonLabel: "View",
                           ),
                         ],
                       ),
                       const SizedBox(
                         height: 25,
                       ),
-                      Divider(
+                      const Divider(
                         color: Color.fromARGB(255, 184, 184, 184),
                       ),
                     ],
@@ -1030,6 +1034,7 @@ class _StorePageState extends State<StorePage> {
                             description:
                                 "Get your daily report here, it contains payments and sales data.",
                             onPressed: () {},
+                            buttonLabel: "Download",
                           ),
                           ActionCard(
                             imageString: "assets/images/send.png",
@@ -1038,6 +1043,7 @@ class _StorePageState extends State<StorePage> {
                             onPressed: () {
                               router.push('/inventory/stock-transfer/send');
                             },
+                            buttonLabel: "Create",
                           ),
                           ActionCard(
                             imageString: "assets/images/receive.png",
@@ -1047,6 +1053,7 @@ class _StorePageState extends State<StorePage> {
                             onPressed: () {
                               router.push('/inventory/stock-transfer/receive');
                             },
+                            buttonLabel: "Create",
                           ),
                           ActionCard(
                             imageString:
@@ -1057,13 +1064,14 @@ class _StorePageState extends State<StorePage> {
                             onPressed: () {
                               router.push('/inventory/stock-transfer/create');
                             },
+                            buttonLabel: "Create",
                           ),
                         ],
                       ),
                       const SizedBox(
                         height: 25,
                       ),
-                      Divider(
+                      const Divider(
                         color: Color.fromARGB(255, 184, 184, 184),
                       ),
                     ],

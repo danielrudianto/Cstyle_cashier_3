@@ -32,10 +32,17 @@ class _StoreSelectorState extends State<StoreSelector> {
   @override
   Widget build(BuildContext context) {
     return DropdownMenu<StoreModel?>(
-      label: Text("Store"),
+      label: const Text("Store"),
       width: 400,
       dropdownMenuEntries: stores.map((e) {
-        return DropdownMenuEntry(value: e, label: e.name);
+        return DropdownMenuEntry(
+          value: e,
+          label: e.name,
+          leadingIcon: const Icon(
+            Icons.store,
+            color: Color.fromARGB(255, 206, 206, 206),
+          ),
+        );
       }).toList(),
       // outline text box
       onSelected: (value) {
@@ -49,9 +56,13 @@ class _StoreSelectorState extends State<StoreSelector> {
         filled: true,
         contentPadding: EdgeInsets.all(10.0),
         // borer
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: Color.fromARGB(255, 107, 76, 136)),
+        ),
         // border when focused
-        focusedBorder: OutlineInputBorder(),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color.fromARGB(255, 107, 76, 136)),
+        ),
       ),
     );
   }

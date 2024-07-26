@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:cstyle_cashier_3/model/model.product-type.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
-import 'package:cstyle_cashier_3/utils/router.utils.dart';
+import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-checkout.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-grid-list.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-header.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-type-selector.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +21,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<DashboardTypeSelectorState> typeSelectorState =
       GlobalKey<DashboardTypeSelectorState>();
 
@@ -165,103 +164,83 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyF, control: true): () {
-          typeSelectorState.currentState?.focus();
-        }
-      },
-      child: Focus(
-        autofocus: true,
-        child: Consumer<CompareNotifier>(builder: (_, value, __) {
-          return Scaffold(
-            key: scaffoldKey,
-            floatingActionButton: value.selectedComparisson.length <= 1
-                ? null
-                : FloatingActionButton(
-                    tooltip: "Compare products",
-                    child: const Icon(
-                      Icons.compare_arrows,
-                    ),
-                    onPressed: () {
-                      router.push("/compare");
-                    },
-                  ),
-            body: BarcodeKeyboardListener(
-              bufferDuration: const Duration(milliseconds: 500),
-              onBarcodeScanned: (barcode) {
-                LoggerUtils().log("Barcode scanned: $barcode", LogType.info);
-                ProductModel.fetchByBarcode(barcode).then((product) {
-                  if (product == null) {
-                    LoggerUtils().log("Product not found", LogType.error);
-                    showSnackbar("Product not found.");
-                  } else {
-                    LoggerUtils().log("Product found", LogType.info);
-                    addProductToCart(product);
-                  }
-                }).catchError((error) {
-                  LoggerUtils().log(error.toString(), LogType.error);
-                  showSnackbar("Product not found");
-                });
-              },
-              useKeyDownEvent: true,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DashboardTypeSelector(
-                          key: typeSelectorState,
-                          productTypes:
-                              productTypeNames.map((x) => x.name).toList(),
-                          selectedTypes: selectedProductTypes,
-                          onUpdateSelectedTypes: (List<String> types) {
-                            setState(() {
-                              selectedProductTypes = types;
-                            });
+    return Consumer<CompareNotifier>(builder: (_, value, __) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        key: scaffoldKey,
+        body: BarcodeKeyboardListener(
+          bufferDuration: const Duration(milliseconds: 500),
+          onBarcodeScanned: (barcode) {
+            LoggerUtils().log("Barcode scanned: $barcode", LogType.info);
+            ProductModel.fetchByBarcode(barcode).then((product) {
+              if (product == null) {
+                LoggerUtils().log("Product not found", LogType.error);
+                showSnackbar("Product not found.");
+              } else {
+                LoggerUtils().log("Product found", LogType.info);
+                addProductToCart(product);
+              }
+            }).catchError((error) {
+              LoggerUtils().log(error.toString(), LogType.error);
+              showSnackbar("Product not found");
+            });
+          },
+          useKeyDownEvent: true,
+          child: Column(
+            children: [
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DashboardTypeSelector(
+                      key: typeSelectorState,
+                      productTypes:
+                          productTypeNames.map((x) => x.name).toList(),
+                      selectedTypes: selectedProductTypes,
+                      onUpdateSelectedTypes: (List<String> types) {
+                        setState(() {
+                          selectedProductTypes = types;
+                        });
 
-                            fetchProducts(1);
-                          },
-                          onSearch: (value) {
-                            onSearch(value);
-                          },
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              const DashboardHeader(),
-                              Expanded(
-                                child: RawScrollbar(
-                                  controller: scrollController,
-                                  thumbColor:
-                                      const Color.fromARGB(255, 161, 121, 220),
-                                  radius: const Radius.circular(8.0),
-                                  thickness: 8.0,
-                                  child: SingleChildScrollView(
-                                    controller: scrollController,
-                                    child: DashboardGridList(
-                                      products: products,
-                                      onAddProduct:
-                                          (ProductModel product) async {
-                                        await addProductToCart(product);
-                                      },
-                                    ),
-                                  ),
+                        fetchProducts(1);
+                      },
+                      onSearch: (value) {
+                        onSearch(value);
+                      },
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          const DashboardHeader(),
+                          Expanded(
+                            child: RawScrollbar(
+                              controller: scrollController,
+                              thumbColor:
+                                  const Color.fromARGB(255, 161, 121, 220),
+                              radius: const Radius.circular(8.0),
+                              thickness: 8.0,
+                              child: SingleChildScrollView(
+                                controller: scrollController,
+                                child: DashboardGridList(
+                                  products: products,
+                                  onAddProduct: (ProductModel product) async {
+                                    await addProductToCart(product);
+                                  },
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    const DashboardCheckout(),
+                  ],
+                ),
               ),
-            ),
-          );
-        }),
-      ),
-    );
+            ],
+          ),
+        ),
+      );
+    });
   }
 }

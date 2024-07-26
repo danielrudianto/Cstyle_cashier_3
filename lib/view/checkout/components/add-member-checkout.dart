@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class AddMemberCheckout extends StatefulWidget {
   const AddMemberCheckout({super.key});

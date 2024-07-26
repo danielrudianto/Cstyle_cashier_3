@@ -142,26 +142,18 @@ class ProductModelStockTransfer extends ProductModel {
   int quantity;
 
   ProductModelStockTransfer({
-    required String id,
-    required String reference,
-    required String description,
-    required String brand,
-    required String type,
-    String? barcode,
-    required double price,
-    required int stock,
+    required super.id,
+    required super.reference,
+    required super.description,
+    required super.brand,
+    required super.type,
+    super.barcode,
+    required super.price,
+    required int super.stock,
     required this.quantity,
-  }) : super(
-          id: id,
-          reference: reference,
-          description: description,
-          brand: brand,
-          type: type,
-          barcode: barcode,
-          price: price,
-          stock: stock,
-        );
+  });
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

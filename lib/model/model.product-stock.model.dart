@@ -105,11 +105,23 @@ class ProductStockFetchModel {
         }),
       );
 
-      List<StoreModel> stores = [];
+      List<StoreModel> stores = [
+        StoreModel(
+          id: null,
+          name: "OFFICE",
+          address: "Jalan Kerobokan no. 87A, Denpasar",
+        )
+      ];
       List<ProductStockFetchItemModel> data = [];
 
       result['store'].forEach((x) {
-        stores.add(StoreModel(name: x['name'], address: x['address']));
+        stores.add(
+          StoreModel(
+            name: x['name'],
+            address: x['address'],
+            id: x['_id'],
+          ),
+        );
       });
 
       result['data'].forEach((x) {

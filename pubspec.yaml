@@ -59,7 +59,9 @@ dependencies:
       path: plugins/window_size
   flag: ^7.0.0
   share_plus: ^9.0.0
+  table_sticky_headers: ^2.0.5
 
+  pdf: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

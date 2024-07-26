@@ -6,7 +6,6 @@ import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/components/clip-path/trapezoid.clip-path.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -151,7 +150,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                           ),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color.fromARGB(255, 0, 32, 92),
+                              backgroundColor: const Color.fromARGB(255, 0, 32, 92),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
                                 // padding vertical 15, horizontal 35
@@ -328,7 +327,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                              icon: Icon(Icons.arrow_back),
+                              icon: const Icon(Icons.arrow_back),
                               onPressed: () {
                                 router.pop();
                               }),
@@ -356,7 +355,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+                                  const Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
                               spreadRadius: 5,
                               blurRadius: 7,
                               offset: const Offset(0, 3),
@@ -390,7 +389,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                             ElevatedButton(
                               // dark blue background
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color.fromARGB(255, 0, 32, 92),
+                                backgroundColor: const Color.fromARGB(255, 0, 32, 92),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(25),
                                   // padding vertical 15, horizontal 35
@@ -429,7 +428,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+                                  const Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
                               spreadRadius: 5,
                               blurRadius: 7,
                               offset: const Offset(0, 3),
@@ -486,7 +485,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                                   // dark blue background
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        Color.fromARGB(255, 0, 32, 92),
+                                        const Color.fromARGB(255, 0, 32, 92),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(25),
                                       // padding vertical 15, horizontal 35

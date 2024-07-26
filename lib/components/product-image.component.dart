@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 class ProductImageComponent extends StatefulWidget {
   final String id;
   bool autoPlay;
+  bool bordered;
 
   ProductImageComponent({
     super.key,
     required this.id,
     required this.autoPlay,
+    required this.bordered,
   });
 
   @override
@@ -43,7 +45,7 @@ class _ProductImageComponentState extends State<ProductImageComponent> {
         borderRadius: BorderRadius.circular(0),
         // Border 1px solid
         border: Border.all(
-          color: Colors.grey.shade200,
+          color: widget.bordered ? Colors.grey.shade300 : Colors.transparent,
           width: 1,
         ),
       ),

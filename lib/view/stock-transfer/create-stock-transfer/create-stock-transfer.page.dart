@@ -9,10 +9,8 @@ import 'package:cstyle_cashier_3/components/clip-path/trapezoid.clip-path.dart';
 import 'package:cstyle_cashier_3/view/product-selector/product-selector.page.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/components/store-selector.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/components/top-stock-transfer.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 class CreateStockTransferPage extends StatefulWidget {
   const CreateStockTransferPage({super.key});
@@ -34,7 +32,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
     showDialog(
         context: context,
         builder: (context) {
-          return Dialog(
+          return const Dialog(
             child: ProductSelectorPage(),
           );
         }).then((value) {
@@ -56,25 +54,6 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
         });
       }
     });
-    // router.push("/select-product/${store!.id}").then((value) {
-    //   if (value != null) {
-    //     var product = value as ProductModel;
-    //     setState(() {
-    //       products.add(
-    //         ProductModelStockTransfer(
-    //           id: product.id,
-    //           reference: product.reference,
-    //           description: product.description,
-    //           brand: product.brand,
-    //           type: product.type,
-    //           price: product.price,
-    //           stock: product.stock ?? 0,
-    //           quantity: 1,
-    //         ),
-    //       );
-    //     });
-    //   }
-    // });
   }
 
   _createStockTransfer() {
@@ -181,7 +160,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                   clipper: TrapezoidClipPath(),
                   child: Container(
                     width: double.infinity,
-                    color: Color.fromARGB(255, 211, 212, 253),
+                    color: const Color.fromARGB(255, 211, 212, 253),
                     height: 500,
                   ),
                 ),
@@ -189,7 +168,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                   clipper: InversedTrapezoidClipPath(),
                   child: Container(
                     width: double.infinity,
-                    color: Color.fromARGB(180, 124, 136, 248),
+                    color: const Color.fromARGB(180, 124, 136, 248),
                     height: 500,
                   ),
                 ),
@@ -207,7 +186,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                              icon: Icon(Icons.arrow_back),
+                              icon: const Icon(Icons.arrow_back),
                               onPressed: () {
                                 router.pop();
                               }),
@@ -234,8 +213,8 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                           // elevation
                           boxShadow: [
                             BoxShadow(
-                              color:
-                                  Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+                              color: const Color.fromARGB(0, 0, 0, 0)
+                                  .withOpacity(0.1),
                               spreadRadius: 5,
                               blurRadius: 7,
                               offset: const Offset(0, 3),
@@ -289,7 +268,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                              icon: Icon(Icons.arrow_back),
+                              icon: const Icon(Icons.arrow_back),
                               onPressed: () {
                                 router.pop();
                               }),
@@ -316,8 +295,8 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                           // elevation
                           boxShadow: [
                             BoxShadow(
-                              color:
-                                  Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+                              color: const Color.fromARGB(0, 0, 0, 0)
+                                  .withOpacity(0.1),
                               spreadRadius: 5,
                               blurRadius: 7,
                               offset: const Offset(0, 3),
@@ -369,8 +348,8 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                           // elevation
                           boxShadow: [
                             BoxShadow(
-                              color:
-                                  Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+                              color: const Color.fromARGB(0, 0, 0, 0)
+                                  .withOpacity(0.1),
                               spreadRadius: 5,
                               blurRadius: 7,
                               offset: const Offset(0, 3),
@@ -405,8 +384,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                   style: ButtonStyle(
                                     backgroundColor: MaterialStateProperty.all(
                                       store == null
-                                          ? const Color.fromARGB(
-                                              255, 102, 102, 102)
+                                          ? Color.fromARGB(255, 182, 182, 182)
                                           : const Color.fromARGB(
                                               255, 4, 30, 73),
                                     ),

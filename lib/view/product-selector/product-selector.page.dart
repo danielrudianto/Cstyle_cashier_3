@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
-import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
-import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -17,7 +15,6 @@ class ProductSelectorPage extends StatefulWidget {
 }
 
 class _ProductSelectorPageState extends State<ProductSelectorPage> {
-  bool isOpened = false;
   bool isLoading = false;
   List<ProductModel> products = [];
   int page = 1;
@@ -27,13 +24,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
   Timer? debounceTime;
 
   closeDialog(data) {
-    setState(() {
-      isOpened = false;
-    });
-
-    Future.delayed(Duration(milliseconds: 300), () {
-      router.pop(data);
-    });
+    router.pop(data);
   }
 
   fetchProducts(int selectedPage) {
@@ -64,11 +55,6 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
   @override
   void initState() {
     fetchProducts(1);
-    Future.delayed(Duration(milliseconds: 100), () {
-      setState(() {
-        isOpened = true;
-      });
-    });
 
     searchController.addListener(() {
       if (debounceTime != null) {
@@ -109,7 +95,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                   onPressed: () {
                     closeDialog(null);
                   },
-                  icon: Icon(Icons.close),
+                  icon: const Icon(Icons.close),
                 )
               ],
             ),

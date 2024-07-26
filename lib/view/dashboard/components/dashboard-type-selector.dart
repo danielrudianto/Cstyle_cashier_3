@@ -1,5 +1,7 @@
+import 'package:cstyle_cashier_3/utils/router.utils.dart';
+import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class DashboardTypeSelector extends StatefulWidget {
   final List<String> productTypes;
@@ -43,17 +45,11 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
             width: 1.0,
           ),
         ),
+        color: Theme.of(context).cardColor,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 10,
-          ),
-          Text(
-            "Filters",
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
           const SizedBox(
             height: 15,
           ),
@@ -125,7 +121,7 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                   ),
                   title: Text(
                     "All",
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
                 ...widget.productTypes.map((e) {
@@ -151,13 +147,44 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                     ),
                     title: Text(
                       e,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   );
                 })
               ],
             ),
           ),
+          Divider(
+            color: Theme.of(context).dividerColor,
+          ),
+          Row(
+            children: [
+              Consumer<CompareNotifier>(builder: (_, value, __) {
+                return IconButton(
+                  // size
+                  iconSize: 25,
+                  onPressed: value.selectedComparisson.length >= 2
+                      ? () {
+                          router.push("/compare");
+                        }
+                      : null,
+                  icon: Icon(Icons.compare_arrows_rounded,
+                      color: value.selectedComparisson.length >= 2
+                          ? Theme.of(context).iconTheme.color
+                          : Theme.of(context).disabledColor),
+                );
+              }),
+              IconButton(
+                onPressed: () {
+                  router.push("/upload");
+                },
+                icon: Icon(
+                  Icons.cloud_upload,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );

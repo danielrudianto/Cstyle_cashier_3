@@ -17,29 +17,44 @@ class PaginationComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final totalPages = (dataCount / pageSize).ceil();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        // Page number display
-        Text('Page ${pageIndex + 1} of $totalPages'),
-        IconButton(
-          icon: Icon(
-            size: 24,
-            Icons.chevron_left_rounded,
-            color: pageIndex == 0 ? Colors.black45 : Colors.black87,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: 15,
+        horizontal: 25,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Page number display
+          Text(
+            'Page ${pageIndex + 1} of $totalPages',
+            style: const TextStyle(
+              fontSize: 12,
+            ),
           ),
-          onPressed: pageIndex > 0 ? () => onPageChange(pageIndex - 1) : null,
-        ),
-        IconButton(
-          icon: Icon(
-            size: 24,
-            Icons.chevron_right_rounded,
-            color: pageIndex == totalPages ? Colors.black45 : Colors.black87,
+          const SizedBox(
+            width: 15,
           ),
-          onPressed:
-              pageIndex < totalPages ? () => onPageChange(pageIndex + 1) : null,
-        ),
-      ],
+          IconButton(
+            icon: Icon(
+              size: 24,
+              Icons.chevron_left_rounded,
+              color: pageIndex == 0 ? Colors.black45 : Colors.black87,
+            ),
+            onPressed: pageIndex > 0 ? () => onPageChange(pageIndex - 1) : null,
+          ),
+          IconButton(
+            icon: Icon(
+              size: 24,
+              Icons.chevron_right_rounded,
+              color: pageIndex == totalPages ? Colors.black45 : Colors.black87,
+            ),
+            onPressed: pageIndex < totalPages
+                ? () => onPageChange(pageIndex + 1)
+                : null,
+          ),
+        ],
+      ),
     );
   }
 }

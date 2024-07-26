@@ -29,7 +29,6 @@ class AppbarPageView extends StatelessWidget {
         right: 15,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
         // Border bottom
         border: Border(
           bottom: BorderSide(
@@ -139,49 +138,9 @@ class AppbarPageView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 25),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: page == 4
-                                  ? const Color.fromARGB(255, 109, 78, 137)
-                                  : Colors.transparent,
-                              width: 3,
-                            ),
-                          ),
-                        ),
-                        height: 80,
-                        child: InkWell(
-                          onTap: () {
-                            changePage(4);
-                          },
-                          child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Text(
-                                "Setting",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
                     ],
                   ),
                 ),
-              ),
-            ),
-            Flexible(
-              fit: FlexFit.loose,
-              flex: 1,
-              child: IconButton(
-                icon: Icon(Icons.upload_file, color: Colors.grey.shade500),
-                onPressed: () {
-                  router.push("/upload");
-                },
               ),
             ),
             Flexible(
@@ -198,7 +157,9 @@ class AppbarPageView extends StatelessWidget {
                   ),
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.inventory, color: Colors.grey.shade500),
+                  icon: Icon(
+                    Icons.inventory,
+                  ),
                   onPressed: value.cartCount == 0
                       ? null
                       : () {
@@ -211,27 +172,11 @@ class AppbarPageView extends StatelessWidget {
               // Fit to right
               fit: FlexFit.loose,
               flex: 1,
-              child: Badge(
-                backgroundColor: const Color.fromARGB(255, 109, 78, 137),
-                label: Text(
-                  value.selectedCart == null
-                      ? "0"
-                      : NumberFormat.compact()
-                          .format(value.selectedCart!.products.length),
-                  style: const TextStyle(
-                    fontSize: 8,
-                    color: Colors.white,
-                  ),
-                ),
-                child: IconButton(
-                  icon: Icon(Icons.shopping_bag, color: Colors.grey.shade500),
-                  onPressed: value.selectedCart == null
-                      ? null
-                      : () {
-                          onOpenCart();
-                        },
-                ),
-              ),
+              child: IconButton(
+                  icon: Icon(Icons.settings),
+                  onPressed: () {
+                    router.push("/settings");
+                  }),
             )
           ],
         );

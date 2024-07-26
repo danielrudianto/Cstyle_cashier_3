@@ -31,7 +31,7 @@ class _BillViewPageState extends State<BillViewPage> {
       isOpened = false;
     });
 
-    Future.delayed(Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       router.pop(data);
     });
   }
@@ -39,7 +39,7 @@ class _BillViewPageState extends State<BillViewPage> {
   @override
   void initState() {
     fetchData();
-    Future.delayed(Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         isOpened = true;
       });
@@ -54,7 +54,7 @@ class _BillViewPageState extends State<BillViewPage> {
         closeDialog(null);
       },
       child: AnimatedOpacity(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         opacity: isOpened ? 1 : 0,
         child: Container(
           width: double.infinity,
@@ -96,13 +96,13 @@ class _BillViewPageState extends State<BillViewPage> {
                                     onPressed: () {
                                       closeDialog("print");
                                     },
-                                    icon: Icon(Icons.print),
+                                    icon: const Icon(Icons.print),
                                   ),
                                   IconButton(
                                     onPressed: () {
                                       closeDialog(null);
                                     },
-                                    icon: Icon(Icons.close),
+                                    icon: const Icon(Icons.close),
                                   )
                                 ],
                               ),

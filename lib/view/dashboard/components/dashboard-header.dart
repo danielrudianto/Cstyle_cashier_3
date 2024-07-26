@@ -26,58 +26,30 @@ class DashboardHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            flex: 1,
-            child: Text(
-              "#",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              "Reference",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.left,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
-            ),
+            flex: 2,
+            child: Text("#",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium),
           ),
           Expanded(
             flex: 12,
-            child: Text(
-              "Description",
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.left,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
-            ),
+            child: Text("Product",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+                style: Theme.of(context).textTheme.bodyMedium),
           ),
           Expanded(
-            flex: 2,
-            child: Text(
-              "Price",
-              textAlign: TextAlign.left,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
-            ),
+            flex: 5,
+            child: Text("Price",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium),
           ),
           Expanded(
-            flex: 2,
-            child: Text(
-              "In stock",
-              textAlign: TextAlign.left,
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
-            ),
+            flex: 5,
+            child: Text("In stock",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium),
           ),
           const SizedBox(
             width: 40,

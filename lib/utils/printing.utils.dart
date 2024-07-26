@@ -48,7 +48,7 @@ class PrintingUtils {
                   ),
                 ),
                 pw.Text(
-                  store!.address,
+                  store.address,
                   style: pw.TextStyle(
                     font: regularFont,
                     fontSize: 8,

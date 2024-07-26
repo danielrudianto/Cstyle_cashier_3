@@ -1,19 +1,18 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ActionCard extends StatelessWidget {
   final String imageString;
   final String title;
   final String description;
   final Function onPressed;
-  const ActionCard({
-    super.key,
-    required this.imageString,
-    required this.title,
-    required this.description,
-    required this.onPressed,
-  });
+  final String buttonLabel;
+  const ActionCard(
+      {super.key,
+      required this.imageString,
+      required this.title,
+      required this.description,
+      required this.onPressed,
+      required this.buttonLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +81,9 @@ class ActionCard extends StatelessWidget {
                 ),
                 color: Colors.transparent,
               ),
-              child: const Text(
-                "Learn More",
-                style: TextStyle(
+              child: Text(
+                buttonLabel,
+                style: const TextStyle(
                   color: Color.fromARGB(255, 109, 41, 187),
                 ),
               ),

@@ -174,12 +174,7 @@ class _HeroPageState extends State<HeroPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(
-        255,
-        161,
-        121,
-        220,
-      ),
+      backgroundColor: Color.fromARGB(255, 161, 121, 220),
       body: Center(
         child: Column(
           children: [

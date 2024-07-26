@@ -1,7 +1,5 @@
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/db/db.product.model.dart';
-import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
-import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
@@ -154,7 +152,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
     return Scaffold(
       body: Column(
         children: [
-          TopStockTransfer(),
+          const TopStockTransfer(),
           SingleChildScrollView(
             child: Stack(
               alignment: Alignment.topCenter,
@@ -189,7 +187,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                              icon: Icon(Icons.arrow_back),
+                              icon: const Icon(Icons.arrow_back),
                               onPressed: () {
                                 router.pop();
                               }),
@@ -217,7 +215,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+                                  const Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
                               spreadRadius: 5,
                               blurRadius: 7,
                               offset: const Offset(0, 3),
@@ -251,7 +249,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                             ElevatedButton(
                               // dark blue background
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color.fromARGB(255, 0, 32, 92),
+                                backgroundColor: const Color.fromARGB(255, 0, 32, 92),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(25),
                                   // padding vertical 15, horizontal 35
@@ -290,7 +288,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+                                  const Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
                               spreadRadius: 5,
                               blurRadius: 7,
                               offset: const Offset(0, 3),
@@ -331,7 +329,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                                   // dark blue background
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        Color.fromARGB(255, 0, 32, 92),
+                                        const Color.fromARGB(255, 0, 32, 92),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(25),
                                       // padding vertical 15, horizontal 35

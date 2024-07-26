@@ -125,7 +125,11 @@ class _ComparePageState extends State<ComparePage> {
             return Container(
               padding: const EdgeInsets.all(8.0),
               child: Center(
-                child: ProductImageComponent(autoPlay: false, id: e.id),
+                child: ProductImageComponent(
+                  autoPlay: false,
+                  id: e.id,
+                  bordered: true,
+                ),
               ),
             );
           })
@@ -293,7 +297,7 @@ class _ComparePageState extends State<ComparePage> {
           padding: const pw.EdgeInsets.all(8.0),
           child: pw.Text(
             "Product name",
-            style: pw.TextStyle(
+            style: const pw.TextStyle(
               color: PdfColors.black,
             ),
           ),
@@ -313,7 +317,7 @@ class _ComparePageState extends State<ComparePage> {
                 ),
                 pw.Text(
                   e.description,
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     color: PdfColors.black,
                   ),
                 ),
@@ -347,7 +351,7 @@ class _ComparePageState extends State<ComparePage> {
             padding: const pw.EdgeInsets.all(8.0),
             child: pw.Text(
               "Brand",
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 color: PdfColors.black,
               ),
             ),
@@ -357,7 +361,7 @@ class _ComparePageState extends State<ComparePage> {
               padding: const pw.EdgeInsets.all(8.0),
               child: pw.Text(
                 e.brand,
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   color: PdfColors.black,
                 ),
               ),
@@ -371,7 +375,7 @@ class _ComparePageState extends State<ComparePage> {
             padding: const pw.EdgeInsets.all(8.0),
             child: pw.Text(
               "Type",
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 color: PdfColors.black,
               ),
             ),
@@ -381,7 +385,7 @@ class _ComparePageState extends State<ComparePage> {
               padding: const pw.EdgeInsets.all(8.0),
               child: pw.Text(
                 e.type,
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   color: PdfColors.black,
                 ),
               ),
@@ -395,7 +399,7 @@ class _ComparePageState extends State<ComparePage> {
             padding: const pw.EdgeInsets.all(8.0),
             child: pw.Text(
               "Price",
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 color: PdfColors.black,
               ),
             ),
@@ -404,7 +408,7 @@ class _ComparePageState extends State<ComparePage> {
             return pw.Container(
               padding: const pw.EdgeInsets.all(8.0),
               child: pw.Text(NumberFormat.decimalPattern().format(e.price),
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     color: PdfColors.grey800,
                   )),
             );
@@ -417,7 +421,7 @@ class _ComparePageState extends State<ComparePage> {
             padding: const pw.EdgeInsets.all(8.0),
             child: pw.Text(
               "Notes",
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 color: PdfColors.black,
               ),
             ),
@@ -444,7 +448,7 @@ class _ComparePageState extends State<ComparePage> {
             padding: const pw.EdgeInsets.all(8.0),
             child: pw.Text(
               "Status",
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 color: PdfColors.black,
               ),
             ),
@@ -455,7 +459,7 @@ class _ComparePageState extends State<ComparePage> {
               child: prefered == index
                   ? pw.Text(
                       "Recommended",
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         color: PdfColors.green,
                       ),
                     )
@@ -463,7 +467,7 @@ class _ComparePageState extends State<ComparePage> {
                       padding: const pw.EdgeInsets.all(8.0),
                       child: pw.Text(
                         "-",
-                        style: pw.TextStyle(
+                        style: const pw.TextStyle(
                           color: PdfColors.grey800,
                         ),
                       ),
@@ -480,7 +484,7 @@ class _ComparePageState extends State<ComparePage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: _shareProductsComparison,
-        child: Icon(Icons.share),
+        child: const Icon(Icons.share),
       ),
       body: Consumer<CompareNotifier>(builder: (_, value, __) {
         return SingleChildScrollView(
@@ -491,7 +495,7 @@ class _ComparePageState extends State<ComparePage> {
                 clipper: TrapezoidClipPath(),
                 child: Container(
                   width: double.infinity,
-                  color: Color.fromARGB(255, 211, 212, 253),
+                  color: const Color.fromARGB(255, 211, 212, 253),
                   height: 500,
                 ),
               ),
@@ -499,7 +503,7 @@ class _ComparePageState extends State<ComparePage> {
                 clipper: InversedTrapezoidClipPath(),
                 child: Container(
                   width: double.infinity,
-                  color: Color.fromARGB(180, 124, 136, 248),
+                  color: const Color.fromARGB(180, 124, 136, 248),
                   height: 500,
                 ),
               ),
@@ -517,11 +521,11 @@ class _ComparePageState extends State<ComparePage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                            icon: Icon(Icons.arrow_back),
+                            icon: const Icon(Icons.arrow_back),
                             onPressed: () {
                               router.pop();
                             }),
-                        Text(
+                        const Text(
                           "Compare products",
                           style: TextStyle(
                             color: Color.fromARGB(255, 4, 30, 73),
@@ -553,7 +557,7 @@ class _ComparePageState extends State<ComparePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             "Hi! Here are your products to compare. Please note that this feature is only available for 2 - 3 products at a time. You can also share this table via Whatsapp application using the share button on the top right corner.",
                             style: TextStyle(color: Colors.grey),
                           ),

@@ -516,8 +516,8 @@ class _PageViewPageState extends State<PageViewPage> {
             // Check stock first
             var validation = await cartNotifier.checkStock();
             if (!validation) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text("Insufficient stock")));
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Insufficient stock")));
             } else {
               GoRouter.of(context).push("/checkout");
             }
@@ -657,7 +657,6 @@ class _PageViewPageState extends State<PageViewPage> {
               children: const [
                 DashboardPage(),
                 StorePage(),
-                SettingPage(),
               ],
             ),
           )

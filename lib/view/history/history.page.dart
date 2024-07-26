@@ -57,6 +57,7 @@ class _HistoryPageState extends State<HistoryPage> {
         print(name, printer);
       }
     }
+    return null;
   }
 
   Future<void> print(String name, Printer printer) async {
@@ -68,7 +69,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   void initState() {
-    Future.delayed(Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       _loadData();
     });
     super.initState();
@@ -81,7 +82,7 @@ class _HistoryPageState extends State<HistoryPage> {
         child: Column(
           children: [
             Container(
-              color: Color.fromARGB(255, 151, 158, 249),
+              color: const Color.fromARGB(255, 151, 158, 249),
               height: 300,
               child: Center(
                 child: SizedBox(
@@ -154,7 +155,7 @@ class _HistoryPageState extends State<HistoryPage> {
                               return ListTile(
                                 onTap: () {
                                   router
-                                      .push("/history/" + x.id.toString())
+                                      .push("/history/${x.id}")
                                       .then((value) {
                                     if (value == "print") {
                                       prePrint(x.name);
@@ -177,8 +178,8 @@ class _HistoryPageState extends State<HistoryPage> {
                                 subtitle: Text(
                                     DateFormat('dd MMM yyyy').format(x.date)),
                                 leading: x.mongoID != null
-                                    ? Icon(Icons.sync)
-                                    : Icon(
+                                    ? const Icon(Icons.sync)
+                                    : const Icon(
                                         Icons.sync_disabled_outlined,
                                       ),
                               );

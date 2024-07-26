@@ -20,7 +20,7 @@ class StoreModel {
   Future<StoreModel> create() async {
     var result = await SQLStoreModel(
       name: name,
-      address: address!,
+      address: address,
       code: code!,
       phoneNumber: phoneNumber!,
     ).create();

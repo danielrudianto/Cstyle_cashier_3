@@ -41,11 +41,12 @@ class _SettingPageState extends State<SettingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              color: Color.fromARGB(255, 151, 158, 249),
+              color: const Color.fromARGB(255, 151, 158, 249),
               height: 300,
               child: Center(
                 child: SizedBox(
@@ -235,7 +236,7 @@ class _SettingPageState extends State<SettingPage> {
                       padding: const EdgeInsets.all(15),
                       child: Column(
                         children: [
-                          Align(
+                          const Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
                                 'Please be cautious when doing an override.'),
@@ -252,7 +253,7 @@ class _SettingPageState extends State<SettingPage> {
                                   await ProductStockModel.fetchServerStock(
                                       storeCode);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                       content: Text(
                                         "Stock overridden successfully",
                                       ),
@@ -260,7 +261,7 @@ class _SettingPageState extends State<SettingPage> {
                                   );
                                 } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                       content: Text(
                                         "Failed to override stock",
                                       ),
