@@ -1,16 +1,14 @@
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
+import 'package:cstyle_cashier_3/components/store-selector/store-selector.dart';
+import 'package:cstyle_cashier_3/components/thousand-separator/thousand-separator.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
-import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
-import 'package:cstyle_cashier_3/utils/router.utils.dart';
-import 'package:cstyle_cashier_3/components/clip-path/trapezoid.clip-path.dart';
 import 'package:cstyle_cashier_3/view/product-selector/product-selector.page.dart';
-import 'package:cstyle_cashier_3/view/stock-transfer/components/store-selector.dart';
-import 'package:cstyle_cashier_3/view/stock-transfer/components/top-stock-transfer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class CreateStockTransferPage extends StatefulWidget {
   const CreateStockTransferPage({super.key});
@@ -27,6 +25,26 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
   StoreModel? store;
   List<ProductModelStockTransfer> products = [];
   TextEditingController noteController = TextEditingController();
+
+  get isValid {
+    return store != null && products.isNotEmpty;
+  }
+
+  _openStoreSelector() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Dialog(
+            child: StoreSelector(),
+          );
+        }).then((value) {
+      if (value != null) {
+        setState(() {
+          store = value as StoreModel;
+        });
+      }
+    });
+  }
 
   _openProductSelector() {
     showDialog(
@@ -51,6 +69,82 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
               quantity: 1,
             ),
           );
+        });
+      }
+    });
+  }
+
+  _openQuantitySelector(int quantity, int index) {
+    TextEditingController controller =
+        TextEditingController(text: NumberFormat("#,##0").format(quantity));
+    showModalBottomSheet(
+      showDragHandle: true,
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(
+            10,
+          ),
+          width: 400,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  label: Text("Quantity"),
+                ),
+                // input formatters
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  DecimalFormatter(decimalDigits: 0),
+                ],
+                // keyboard
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              InkWell(
+                onTap: () {
+                  var quantity = controller.text.isEmpty
+                      ? 0
+                      : int.parse(
+                          controller.text.replaceAll(",", ""),
+                        );
+                  Navigator.of(context).pop(quantity);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 5,
+                    horizontal: 25,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).secondaryHeaderColor,
+                    // radius
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Text(
+                    "Save",
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ).then((value) {
+      // if integer
+      if (value is int) {
+        setState(() {
+          products[index].quantity = value;
         });
       }
     });
@@ -82,15 +176,6 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
       );
       return;
     }
-
-    // Create the stock transfer
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Creating stock transfer",
-        ),
-      ),
-    );
 
     // No products can be 0
     if (products.any((element) => element.quantity == 0)) {
@@ -126,8 +211,9 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
             ),
           );
 
-          Future.delayed(const Duration(seconds: 1), () {
-            router.pop();
+          setState(() {
+            products.clear();
+            store = null;
           });
         }).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -148,790 +234,367 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          const TopStockTransfer(),
-          SingleChildScrollView(
-            child: Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                ClipPath(
-                  clipper: TrapezoidClipPath(),
-                  child: Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 211, 212, 253),
-                    height: 500,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(
+          height: 15,
+        ),
+        Text(
+          "Create stock transfer request",
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
+        const SizedBox(
+          height: 35,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                // add border 1px solid grey
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(0),
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
                   ),
+                  color: Colors.transparent,
                 ),
-                ClipPath(
-                  clipper: InversedTrapezoidClipPath(),
-                  child: Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(180, 124, 136, 248),
-                    height: 500,
-                  ),
-                ),
-                SizedBox(
-                  width: ResponsiveUtils.getContainerSize(context),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        height: 15,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 20,
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(0),
+                        color: Colors.black87,
+                      ),
+                      child: Text(
+                        "1. REQUEST OPTIONS",
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium!
+                            .copyWith(
+                              color: Colors.white,
+                            ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(
+                        15,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          IconButton(
-                              icon: const Icon(Icons.arrow_back),
-                              onPressed: () {
-                                router.pop();
-                              }),
-                          const Text(
-                            "Create stock transfer request",
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 4, 30, 73),
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Text(
+                            "Date",
+                            style: Theme.of(context).textTheme.labelSmall,
                           ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          // Radius 10
-                          borderRadius: BorderRadius.circular(10),
-                          // elevation
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color.fromARGB(0, 0, 0, 0)
-                                  .withOpacity(0.1),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor:
-                                      Color.fromARGB(255, 201, 170, 252),
-                                  child: Text("1"),
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                Text(
-                                  "Select store",
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 25,
-                ),
-                SizedBox(
-                  width: ResponsiveUtils.getContainerSize(context),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                              icon: const Icon(Icons.arrow_back),
-                              onPressed: () {
-                                router.pop();
-                              }),
-                          const Text(
-                            "Create stock transfer request",
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 4, 30, 73),
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Text(
+                            DateFormat("dd MMMM yyyy").format(DateTime.now()),
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          // Radius 10
-                          borderRadius: BorderRadius.circular(10),
-                          // elevation
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color.fromARGB(0, 0, 0, 0)
-                                  .withOpacity(0.1),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor:
-                                      Color.fromARGB(255, 201, 170, 252),
-                                  child: Text("1"),
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                Text(
-                                  "Select store",
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            StoreSelector(onStoreSelected: (value) {
-                              setState(() {
-                                store = value;
-                              });
-                            }),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          // Radius 10
-                          borderRadius: BorderRadius.circular(10),
-                          // elevation
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color.fromARGB(0, 0, 0, 0)
-                                  .withOpacity(0.1),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor:
-                                      Color.fromARGB(255, 201, 170, 252),
-                                  child: Text("2"),
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                Text(
-                                  "Select products",
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                                const Spacer(),
-                                ElevatedButton(
-                                  onPressed: store == null
-                                      ? null
-                                      : _openProductSelector,
-                                  // Style same as the select store container
-                                  style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
-                                      store == null
-                                          ? Color.fromARGB(255, 182, 182, 182)
-                                          : const Color.fromARGB(
-                                              255, 4, 30, 73),
-                                    ),
-                                    shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                    ),
-                                  ),
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 15,
-                                      horizontal: 25,
-                                    ),
-                                    child: Text(
-                                      "Add product",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Table(
-                              // Want to have horizontal borders only
-                              border: const TableBorder(
-                                horizontalInside: BorderSide(
-                                  color: Colors.black54,
-                                  width: 1,
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                "Store",
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                onPressed: () {
+                                  _openStoreSelector();
+                                },
+                                icon: const Icon(
+                                  Icons.add,
                                 ),
                               ),
-                              // Need to have 3 columns
-                              columnWidths: const {
-                                0: FlexColumnWidth(2),
-                                1: FlexColumnWidth(3),
-                                2: FlexColumnWidth(2),
-                                3: FlexColumnWidth(1),
-                              },
-                              children: [
-                                const TableRow(
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          store == null
+                              ? const Text("Store not selected")
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TableCell(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(15),
-                                        child: Text(
-                                          "Reference",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
+                                    Text(
+                                      store!.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge,
                                     ),
-                                    TableCell(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(15),
-                                        child: Text(
-                                          "Description",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(15),
-                                        child: Text(
-                                          "Quantity",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(15),
-                                        child: Text(
-                                          "",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
+                                    Text(
+                                      store!.address,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
                                     ),
                                   ],
                                 ),
-                                ...products.map((product) {
-                                  TextEditingController controller =
-                                      TextEditingController();
-
-                                  controller.text = product.quantity.toString();
-                                  return TableRow(children: [
-                                    TableCell(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(15),
-                                        child: Text(
-                                          product.reference,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge,
-                                        ),
-                                      ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(
+              width: 15,
+            ),
+            SizedBox(
+              width: 400,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(0),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(0),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 20,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(0),
+                            color: Theme.of(context)
+                                .secondaryHeaderColor
+                                .withOpacity(0.8),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                "YOUR REQUEST",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium!
+                                    .copyWith(
+                                      color: Colors.white,
                                     ),
-                                    TableCell(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(15),
-                                        child: Text(
-                                          product.description,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge,
-                                        ),
-                                      ),
-                                    ),
-                                    TableCell(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(15),
-                                        child: TextFormField(
-                                          controller: controller,
-                                          keyboardType: TextInputType.number,
-                                          decoration: const InputDecoration(
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          // Only can input digits
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .digitsOnly,
-                                          ],
-                                          // on change update the product data
-                                          onChanged: (value) {
-                                            product.quantity = value.isEmpty
-                                                ? 0
-                                                : int.parse(value);
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    TableCell(
-                                        child: Padding(
-                                      padding: const EdgeInsets.all(15),
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.close,
-                                          color: Colors.grey.shade800,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            products.remove(product);
-                                          });
-                                        },
-                                      ),
-                                    )),
-                                  ]);
-                                }),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            // Textarea for note
-                            TextField(
-                              controller: noteController,
-                              maxLines: 3,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: "Note",
                               ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            // Create another button
-                            Row(
-                              children: [
-                                const Spacer(),
-                                ElevatedButton(
-                                  onPressed: _createStockTransfer,
-                                  // Style same as the select store container
-                                  style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
-                                      store == null ||
-                                              products.isEmpty ||
-                                              isSubmitting
-                                          ? const Color.fromARGB(
-                                              255, 102, 102, 102)
-                                          : const Color.fromARGB(
-                                              255, 4, 30, 73),
-                                    ),
-                                    shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                    ),
-                                  ),
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 15,
-                                      horizontal: 25,
-                                    ),
-                                    child: Text(
-                                      "Create stock transfer",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                              const Spacer(),
+                              IconButton(
+                                onPressed: _openProductSelector,
+                                icon: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        products.isEmpty
+                            ? Container(
+                                padding: const EdgeInsets.all(
+                                  20,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "You have not selected any products",
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                              )
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: products.length,
+                                itemBuilder: (context, index) {
+                                  return ListTile(
+                                    title: Text(
+                                      products[index].reference,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          products[index].description,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                        ),
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        Row(
+                                          children: [
+                                            SizedBox(
+                                              width: 200,
+                                              child: TextField(
+                                                onTap: () {
+                                                  _openQuantitySelector(
+                                                    products[index].quantity,
+                                                    index,
+                                                  );
+                                                },
+                                                readOnly: true,
+                                                controller:
+                                                    TextEditingController(
+                                                  text: NumberFormat("#,##0")
+                                                      .format(products[index]
+                                                          .quantity),
+                                                ),
+                                                textAlign: TextAlign.center,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    products[index].quantity =
+                                                        value.isEmpty
+                                                            ? 0
+                                                            : int.parse(
+                                                                value
+                                                                    .replaceAll(
+                                                                        ",",
+                                                                        ""),
+                                                              );
+                                                  });
+                                                },
+                                                // only allow positive integer
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter
+                                                      .allow(RegExp(r'[0-9.]')),
+                                                  DecimalFormatter(
+                                                      decimalDigits: 0),
+                                                ],
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium,
+                                                maxLines: 1,
+                                                // decoration
+                                                decoration: InputDecoration(
+                                                  prefix:
+                                                      products[index]
+                                                                  .quantity ==
+                                                              1
+                                                          ? IconButton(
+                                                              icon: Icon(
+                                                                Icons.close,
+                                                                size: Theme.of(
+                                                                        context)
+                                                                    .textTheme
+                                                                    .bodyMedium!
+                                                                    .fontSize,
+                                                              ),
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  products
+                                                                      .removeAt(
+                                                                          index);
+                                                                });
+                                                              },
+                                                            )
+                                                          : IconButton(
+                                                              icon: Icon(
+                                                                Icons
+                                                                    .exposure_minus_1,
+                                                                size: Theme.of(
+                                                                        context)
+                                                                    .textTheme
+                                                                    .bodyMedium!
+                                                                    .fontSize,
+                                                              ),
+                                                              onPressed:
+                                                                  products[index]
+                                                                              .quantity ==
+                                                                          1
+                                                                      ? null
+                                                                      : () {
+                                                                          setState(
+                                                                              () {
+                                                                            products[index].quantity--;
+                                                                          });
+                                                                        },
+                                                            ),
+                                                  suffix: IconButton(
+                                                    icon: Icon(
+                                                      Icons.exposure_plus_1,
+                                                      size: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyMedium!
+                                                          .fontSize,
+                                                    ),
+                                                    onPressed: () {
+                                                      setState(() {
+                                                        products[index]
+                                                            .quantity++;
+                                                      });
+                                                    },
+                                                  ),
+                                                  border: InputBorder.none,
+                                                ),
+                                                keyboardType:
+                                                    TextInputType.number,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  InkWell(
+                    onTap: isValid ? _createStockTransfer : null,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 15,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isValid
+                            ? Theme.of(context).secondaryHeaderColor
+                            : Theme.of(context).disabledColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        "Submit",
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              color: isValid
+                                  ? Colors.white
+                                  : Theme.of(context).disabledColor,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          // Row(
-          //   children: [
-          //     const Spacer(),
-          //     SizedBox(
-          //       width: ResponsiveUtils.getContainerSize(context),
-          //       child: Column(
-          //         children: [
-          //           const SizedBox(
-          //             height: 15,
-          //           ),
-          //           Row(
-          //             children: [
-          //               IconButton(
-          //                   icon: Icon(Icons.arrow_back),
-          //                   onPressed: () {
-          //                     router.pop();
-          //                   }),
-          //               Text(
-          //                 "Create stock transfer",
-          //                 style: TextStyle(
-          //                   color: Color.fromARGB(255, 4, 30, 73),
-          //                   fontSize: 28,
-          //                   fontWeight: FontWeight.bold,
-          //                 ),
-          //               ),
-          //             ],
-          //           ),
-          //           const SizedBox(
-          //             height: 30,
-          //           ),
-          //           Container(
-          //             width: double.infinity,
-          //             padding: const EdgeInsets.all(20),
-          //             decoration: BoxDecoration(
-          //               color: Colors.white,
-          //               borderRadius: BorderRadius.circular(10),
-          //             ),
-          //             child: Column(
-          //               mainAxisAlignment: MainAxisAlignment.start,
-          //               crossAxisAlignment: CrossAxisAlignment.start,
-          //               children: [
-
-          //                 const SizedBox(
-          //                   height: 15,
-          //                 ),
-
-          //               ],
-          //             ),
-          //           ),
-          //           const SizedBox(
-          //             height: 30,
-          //           ),
-          //           Container(
-          //             width: double.infinity,
-          //             padding: const EdgeInsets.all(20),
-          //             decoration: BoxDecoration(
-          //               color: Colors.white,
-          //               borderRadius: BorderRadius.circular(10),
-          //             ),
-          //             child: Column(
-          //               mainAxisAlignment: MainAxisAlignment.start,
-          //               crossAxisAlignment: CrossAxisAlignment.start,
-          //               children: [
-          //                 Container(
-          //                   child: Column(
-          //                     children: [
-          //                       Row(
-          //                         children: [
-          //                           const Spacer(),
-          //                           ElevatedButton(
-          //                             onPressed: store == null
-          //                                 ? null
-          //                                 : _openProductSelector,
-          //                             // Style same as the select store container
-          //                             style: ButtonStyle(
-          //                               backgroundColor:
-          //                                   MaterialStateProperty.all(
-          //                                 store == null
-          //                                     ? const Color.fromARGB(
-          //                                         255, 102, 102, 102)
-          //                                     : const Color.fromARGB(
-          //                                         255, 4, 30, 73),
-          //                               ),
-          //                               shape: MaterialStateProperty.all(
-          //                                 RoundedRectangleBorder(
-          //                                   borderRadius:
-          //                                       BorderRadius.circular(25),
-          //                                 ),
-          //                               ),
-          //                             ),
-          //                             child: const Padding(
-          //                               padding: EdgeInsets.symmetric(
-          //                                 vertical: 15,
-          //                                 horizontal: 25,
-          //                               ),
-          //                               child: Text(
-          //                                 "Add product",
-          //                                 style: TextStyle(
-          //                                   color: Colors.white,
-          //                                 ),
-          //                               ),
-          //                             ),
-          //                           ),
-          //                         ],
-          //                       ),
-          //                       const SizedBox(
-          //                         height: 15,
-          //                       ),
-          //                       Table(
-          //                         // Want to have horizontal borders only
-          //                         border: const TableBorder(
-          //                           horizontalInside: BorderSide(
-          //                             color: Colors.black54,
-          //                             width: 1,
-          //                           ),
-          //                         ),
-          //                         // Need to have 3 columns
-          //                         columnWidths: const {
-          //                           0: FlexColumnWidth(2),
-          //                           1: FlexColumnWidth(3),
-          //                           2: FlexColumnWidth(2),
-          //                           3: FlexColumnWidth(1),
-          //                         },
-          //                         children: [
-          //                           const TableRow(
-          //                             children: [
-          //                               TableCell(
-          //                                 child: Padding(
-          //                                   padding: EdgeInsets.all(15),
-          //                                   child: Text(
-          //                                     "Reference",
-          //                                     style: TextStyle(
-          //                                       fontWeight:
-          //                                           FontWeight.bold,
-          //                                     ),
-          //                                   ),
-          //                                 ),
-          //                               ),
-          //                               TableCell(
-          //                                 child: Padding(
-          //                                   padding: EdgeInsets.all(15),
-          //                                   child: Text(
-          //                                     "Description",
-          //                                     style: TextStyle(
-          //                                       fontWeight:
-          //                                           FontWeight.bold,
-          //                                     ),
-          //                                   ),
-          //                                 ),
-          //                               ),
-          //                               TableCell(
-          //                                 child: Padding(
-          //                                   padding: EdgeInsets.all(15),
-          //                                   child: Text(
-          //                                     "Quantity",
-          //                                     style: TextStyle(
-          //                                       fontWeight:
-          //                                           FontWeight.bold,
-          //                                     ),
-          //                                   ),
-          //                                 ),
-          //                               ),
-          //                               TableCell(
-          //                                 child: Padding(
-          //                                   padding: EdgeInsets.all(15),
-          //                                   child: Text(
-          //                                     "",
-          //                                     style: TextStyle(
-          //                                       fontWeight:
-          //                                           FontWeight.bold,
-          //                                     ),
-          //                                   ),
-          //                                 ),
-          //                               ),
-          //                             ],
-          //                           ),
-          //                           ...products.map((product) {
-          //                             TextEditingController controller =
-          //                                 TextEditingController();
-
-          //                             controller.text =
-          //                                 product.quantity.toString();
-          //                             return TableRow(children: [
-          //                               TableCell(
-          //                                 child: Padding(
-          //                                   padding:
-          //                                       const EdgeInsets.all(15),
-          //                                   child: Text(
-          //                                     product.reference,
-          //                                     style: Theme.of(context)
-          //                                         .textTheme
-          //                                         .bodyLarge,
-          //                                   ),
-          //                                 ),
-          //                               ),
-          //                               TableCell(
-          //                                 child: Padding(
-          //                                   padding:
-          //                                       const EdgeInsets.all(15),
-          //                                   child: Text(
-          //                                     product.description,
-          //                                     style: Theme.of(context)
-          //                                         .textTheme
-          //                                         .bodyLarge,
-          //                                   ),
-          //                                 ),
-          //                               ),
-          //                               TableCell(
-          //                                 child: Padding(
-          //                                   padding:
-          //                                       const EdgeInsets.all(15),
-          //                                   child: TextFormField(
-          //                                     controller: controller,
-          //                                     keyboardType:
-          //                                         TextInputType.number,
-          //                                     decoration:
-          //                                         const InputDecoration(
-          //                                       border:
-          //                                           OutlineInputBorder(),
-          //                                     ),
-          //                                     // Only can input digits
-          //                                     inputFormatters: [
-          //                                       FilteringTextInputFormatter
-          //                                           .digitsOnly,
-          //                                     ],
-          //                                     // on change update the product data
-          //                                     onChanged: (value) {
-          //                                       product.quantity = value
-          //                                               .isEmpty
-          //                                           ? 0
-          //                                           : int.parse(value);
-          //                                     },
-          //                                   ),
-          //                                 ),
-          //                               ),
-          //                               TableCell(
-          //                                   child: Padding(
-          //                                 padding:
-          //                                     const EdgeInsets.all(15),
-          //                                 child: IconButton(
-          //                                   icon: Icon(
-          //                                     Icons.close,
-          //                                     color: Colors.grey.shade800,
-          //                                   ),
-          //                                   onPressed: () {
-          //                                     setState(() {
-          //                                       products.remove(product);
-          //                                     });
-          //                                   },
-          //                                 ),
-          //                               )),
-          //                             ]);
-          //                           }),
-          //                         ],
-          //                       ),
-          //                       const SizedBox(
-          //                         height: 15,
-          //                       ),
-          //                       // Textarea for note
-          //                       TextField(
-          //                         controller: noteController,
-          //                         maxLines: 3,
-          //                         decoration: const InputDecoration(
-          //                           border: OutlineInputBorder(),
-          //                           labelText: "Note",
-          //                         ),
-          //                       ),
-          //                       const SizedBox(
-          //                         height: 15,
-          //                       ),
-          //                       // Create another button
-          //                       Row(
-          //                         children: [
-          //                           const Spacer(),
-          //                           ElevatedButton(
-          //                             onPressed: _createStockTransfer,
-          //                             // Style same as the select store container
-          //                             style: ButtonStyle(
-          //                               backgroundColor:
-          //                                   MaterialStateProperty.all(
-          //                                 store == null ||
-          //                                         products.isEmpty ||
-          //                                         isSubmitting
-          //                                     ? const Color.fromARGB(
-          //                                         255, 102, 102, 102)
-          //                                     : const Color.fromARGB(
-          //                                         255, 4, 30, 73),
-          //                               ),
-          //                               shape: MaterialStateProperty.all(
-          //                                 RoundedRectangleBorder(
-          //                                   borderRadius:
-          //                                       BorderRadius.circular(25),
-          //                                 ),
-          //                               ),
-          //                             ),
-          //                             child: const Padding(
-          //                               padding: EdgeInsets.symmetric(
-          //                                 vertical: 15,
-          //                                 horizontal: 25,
-          //                               ),
-          //                               child: Text(
-          //                                 "Create stock transfer",
-          //                                 style: TextStyle(
-          //                                   color: Colors.white,
-          //                                 ),
-          //                               ),
-          //                             ),
-          //                           ),
-          //                         ],
-          //                       ),
-          //                     ],
-          //                   ),
-          //                 ),
-          //               ],
-          //             ),
-          //           ),
-          //           const Spacer(),
-          //         ],
-          //       ),
-          //     ),
-          //   ],
-          // ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }

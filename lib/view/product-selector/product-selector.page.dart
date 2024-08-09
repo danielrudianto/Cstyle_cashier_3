@@ -72,6 +72,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
   Widget build(BuildContext context) {
     return Container(
       width: 400,
+      height: 400,
       padding: const EdgeInsets.all(20),
       child: Material(
         color: Colors.transparent,

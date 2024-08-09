@@ -88,6 +88,18 @@ class StockTransferModel {
       throw Exception(e);
     }
   }
+
+  static Future<void> reject(String id, String userCode, String note) async {
+    try {
+      var store = await StoreModel.getCurrentProfile();
+      await ApiUtils().postRequest(
+          "cashier/stock-transfer/reject",
+          {"id": id, "rejectNote": note},
+          Options(headers: {"store": store?.code, "employee-code": userCode}));
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 }
 
 class StockTransferFetchmodel {

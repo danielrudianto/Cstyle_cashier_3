@@ -47,9 +47,10 @@ class PaginationComponent extends StatelessWidget {
             icon: Icon(
               size: 24,
               Icons.chevron_right_rounded,
-              color: pageIndex == totalPages ? Colors.black45 : Colors.black87,
+              color:
+                  pageIndex + 1 == totalPages ? Colors.black45 : Colors.black87,
             ),
-            onPressed: pageIndex < totalPages
+            onPressed: pageIndex + 1 < totalPages
                 ? () => onPageChange(pageIndex + 1)
                 : null,
           ),

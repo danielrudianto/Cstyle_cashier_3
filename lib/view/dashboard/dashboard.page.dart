@@ -40,7 +40,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   void didChangeDependencies() {
-    Timer(const Duration(milliseconds: 250), () {
+    Timer(const Duration(milliseconds: 300), () {
       fetchProductTypes();
       fetchProducts(1);
     });

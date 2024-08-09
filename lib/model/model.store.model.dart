@@ -71,6 +71,14 @@ class StoreModel {
     }
   }
 
+  static Future<void> removeCurrentProfile() async {
+    try {
+      await SQLStoreModel.removeCurrentProfile();
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
   static Future<List<StoreModel>> fetchStores() async {
     try {
       var store = await getCurrentProfile();

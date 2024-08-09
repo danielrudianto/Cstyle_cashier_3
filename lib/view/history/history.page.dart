@@ -77,160 +77,21 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              color: const Color.fromARGB(255, 151, 158, 249),
-              height: 300,
-              child: Center(
-                child: SizedBox(
-                  width: 0.8 * ResponsiveUtils.getContainerSize(context),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "History",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 32, 92),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 35,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      const Text(
-                        "View your transaction history here",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 32, 92),
-                          fontWeight: FontWeight.normal,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      // Create button
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: const Color.fromARGB(255, 0, 32, 92),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 35,
-                              vertical: 10,
-                            ),
-                            child: Text(
-                              "Get today's daily report",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 255, 255, 255),
-                                fontWeight: FontWeight.normal,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-                width: 0.8 * ResponsiveUtils.getContainerSize(context),
-                child: Column(
-                  children: [
-                    bills.isEmpty
-                        ? const Text("Data not found")
-                        : ListView(
-                            shrinkWrap: true,
-                            children: bills.map((x) {
-                              return ListTile(
-                                onTap: () {
-                                  router
-                                      .push("/history/${x.id}")
-                                      .then((value) {
-                                    if (value == "print") {
-                                      prePrint(x.name);
-                                    }
-                                  });
-                                },
-                                contentPadding: const EdgeInsets.only(
-                                  top: 10,
-                                  left: 5,
-                                  right: 5,
-                                  bottom: 10,
-                                ),
-                                shape: const Border(
-                                  bottom: BorderSide(
-                                    color: Colors.black12,
-                                    width: 1,
-                                  ),
-                                ),
-                                title: Text(x.name),
-                                subtitle: Text(
-                                    DateFormat('dd MMM yyyy').format(x.date)),
-                                leading: x.mongoID != null
-                                    ? const Icon(Icons.sync)
-                                    : const Icon(
-                                        Icons.sync_disabled_outlined,
-                                      ),
-                              );
-                            }).toList(),
-                          ),
-                    // pagination
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            if (page > 1) {
-                              setState(() {
-                                page--;
-                              });
-                              _loadData();
-                            }
-                          },
-                          icon: const Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.black45,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        Text("$page"),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            if (bills.length == 10) {
-                              setState(() {
-                                page++;
-                              });
-                              _loadData();
-                            }
-                          },
-                          icon: const Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.black45,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-          ],
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(
+          height: 10,
         ),
-      ),
+        Text(
+          "History",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
     );
   }
 }

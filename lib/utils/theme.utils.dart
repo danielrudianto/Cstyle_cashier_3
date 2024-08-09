@@ -9,7 +9,7 @@ ThemeData themeData = ThemeData(
   appBarTheme: const AppBarTheme(
     backgroundColor: Color.fromARGB(255, 130, 131, 130),
   ),
-  scaffoldBackgroundColor: Colors.white,
+  scaffoldBackgroundColor: const Color.fromARGB(255, 253, 251, 255),
   dividerColor: Colors.grey.shade500,
   textTheme: TextTheme(
     bodySmall: TextStyle(
@@ -53,8 +53,14 @@ ThemeData themeData = ThemeData(
     ),
     headlineMedium: const TextStyle(
       fontWeight: FontWeight.bold,
-      color: Colors.white,
+      color: Colors.black,
       fontSize: 16,
+      fontFamily: "Montserrat",
+    ),
+    headlineLarge: const TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.black,
+      fontSize: 18,
       fontFamily: "Montserrat",
     ),
   ),
@@ -71,20 +77,18 @@ ThemeData themeData = ThemeData(
     ),
     actionTextColor: Color.fromARGB(255, 109, 78, 137),
   ),
-  cardColor: Color.fromARGB(255, 255, 255, 255),
+  cardColor: const Color.fromARGB(255, 255, 255, 255),
   colorScheme: const ColorScheme(
     primary: Color.fromARGB(255, 220, 216, 215),
     secondary: Color.fromARGB(255, 180, 181, 181),
     surface: Colors.white,
-    background: Color.fromARGB(255, 245, 245, 245),
     error: Colors.red,
     onPrimary: Colors.black,
     onSecondary: Colors.black,
     onSurface: Colors.black,
-    onBackground: Colors.black,
     onError: Colors.white,
     brightness: Brightness.light,
-  ).copyWith(background: Colors.white),
+  ).copyWith(surface: Colors.white),
 );
 
 ThemeData darkThemeData = ThemeData(
@@ -95,7 +99,7 @@ ThemeData darkThemeData = ThemeData(
   appBarTheme: const AppBarTheme(
     backgroundColor: Color.fromARGB(255, 130, 131, 130),
   ),
-  scaffoldBackgroundColor: Color.fromARGB(255, 41, 41, 41),
+  scaffoldBackgroundColor: const Color.fromARGB(255, 41, 41, 41),
   dividerColor: Colors.grey.shade500,
   textTheme: TextTheme(
     bodySmall: TextStyle(
@@ -125,11 +129,11 @@ ThemeData darkThemeData = ThemeData(
       fontFamily: "Montserrat",
       fontSize: 20,
     ),
-    titleMedium: const TextStyle(
+    labelLarge: const TextStyle(
       color: Colors.white,
       fontWeight: FontWeight.bold,
       fontFamily: "Montserrat",
-      fontSize: 20,
+      fontSize: 15,
     ),
     headlineSmall: const TextStyle(
       fontWeight: FontWeight.bold,
@@ -141,6 +145,12 @@ ThemeData darkThemeData = ThemeData(
       fontWeight: FontWeight.bold,
       color: Colors.white,
       fontSize: 16,
+      fontFamily: "Montserrat",
+    ),
+    headlineLarge: const TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      fontSize: 18,
       fontFamily: "Montserrat",
     ),
   ),
@@ -165,13 +175,11 @@ ThemeData darkThemeData = ThemeData(
     primary: Color.fromARGB(255, 220, 216, 215),
     secondary: Color.fromARGB(255, 180, 181, 181),
     surface: Colors.black,
-    background: Color.fromARGB(255, 245, 245, 245),
     error: Colors.red,
     onPrimary: Colors.black,
     onSecondary: Colors.black,
     onSurface: Colors.black,
-    onBackground: Colors.black,
     onError: Colors.white,
     brightness: Brightness.dark,
-  ).copyWith(background: Colors.black),
+  ).copyWith(surface: Colors.black),
 );

@@ -54,7 +54,7 @@ class _AddMemberCheckoutState extends State<AddMemberCheckout> {
       height: 300,
       width: 480,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(

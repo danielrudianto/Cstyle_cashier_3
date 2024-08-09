@@ -1,6 +1,5 @@
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-checkout-footer.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +34,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                       topRight: Radius.circular(10),
                     ),
                   ),
-                  child: Column(
+                  child: const Column(
                     children: <Widget>[
                       //form field
                       Flexible(
@@ -86,7 +85,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
           color: Theme.of(context).cardColor,
         ),
         child: value.selectedCart == null ||
-                value.selectedCart!.products!.isEmpty
+                value.selectedCart!.products.isEmpty
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

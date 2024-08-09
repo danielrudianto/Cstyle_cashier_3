@@ -16,12 +16,15 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Card(
-        // Border
-        shape: RoundedRectangleBorder(
+      child: Container(
+        margin: const EdgeInsets.only(
+          right: 10,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(
-            color: Color.fromARGB(255, 0, 32, 92),
+          border: Border.all(
+            color: Theme.of(context).secondaryHeaderColor,
           ),
         ),
         child: Padding(
@@ -34,11 +37,13 @@ class StatCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       number,
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 46, 46, 46),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 40,
-                      ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineLarge!
+                          .copyWith(
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                   IconButton(
@@ -47,7 +52,7 @@ class StatCard extends StatelessWidget {
                     },
                     icon: Icon(
                       Icons.help_outline,
-                      color: Colors.grey.shade400,
+                      color: Theme.of(context).dividerColor,
                     ),
                   ),
                 ],
@@ -57,19 +62,14 @@ class StatCard extends StatelessWidget {
               ),
               Text(
                 title,
-                style: const TextStyle(
-                  color: Color.fromARGB(255, 46, 46, 46),
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(
                 height: 5,
               ),
               Text(
                 description,
-                style: const TextStyle(
-                  color: Color.fromARGB(255, 112, 112, 112),
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),

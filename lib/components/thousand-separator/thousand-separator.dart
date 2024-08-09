@@ -16,7 +16,7 @@ class DecimalFormatter extends TextInputFormatter {
     if (decimalDigits == 0) {
       newText = newValue.text.replaceAll(RegExp('[^0-9]'), '');
     } else {
-      newText = newValue.text.replaceAll(RegExp('[^0-9\.]'), '');
+      newText = newValue.text.replaceAll(RegExp('[^0-9.]'), '');
     }
 
     if (newText.contains('.')) {
@@ -24,13 +24,13 @@ class DecimalFormatter extends TextInputFormatter {
       if (newText.trim() == '.') {
         return newValue.copyWith(
           text: '0.',
-          selection: TextSelection.collapsed(offset: 2),
+          selection: const TextSelection.collapsed(offset: 2),
         );
       }
       //in case if user tries to input multiple "."s or tries to input
       //more than the decimal place
       else if ((newText.split(".").length > 2) ||
-          (newText.split(".")[1].length > this.decimalDigits)) {
+          (newText.split(".")[1].length > decimalDigits)) {
         return oldValue;
       } else
         return newValue;

@@ -1,11 +1,9 @@
+import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/db/db.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
-import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
-import 'package:cstyle_cashier_3/utils/router.utils.dart';
-import 'package:cstyle_cashier_3/components/clip-path/trapezoid.clip-path.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -19,19 +17,66 @@ class ReceiveStockTransferPage extends StatefulWidget {
 
 class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
   bool isSubmitting = false;
+  bool isLoading = false;
+  bool isLoadingStockTransfer = false;
+  bool isConfirm = true;
+
+  int page = 1;
+  int dataCount = 0;
 
   StockTransferFetchmodel? stockTransferModel;
+  List<StockTransferFetchmodel> stockTransfers = [];
+  TextEditingController controller = TextEditingController();
 
-  _openStockTransferSelector() {
-    router.push("/inventory/stock-transfer/unreceived").then((value) {
-      if (value != null) {
-        setState(() {
-          stockTransferModel = value as StockTransferFetchmodel;
-        });
-      }
+  get isValid {
+    if (stockTransferModel == null) {
+      return false;
+    }
+
+    if (!isConfirm && controller.text.isEmpty) {
+      return false;
+    }
+
+    return true;
+  }
+
+  _fetchStockTransfers(int selectedPage) {
+    setState(() {
+      isLoading = true;
+    });
+
+    StockTransferFetchmodel.fetchUnreceived(page).then((value) {
+      setState(() {
+        stockTransfers = value['data'];
+        dataCount = value['count'];
+      });
+    }).catchError((error) {
+      LoggerUtils().log(error.toString(), LogType.error);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.toString())));
+    }).whenComplete(() {
+      setState(() {
+        isLoading = false;
+      });
+    });
+  }
+
+  _fetchStockTransferByID(String id) {
+    setState(() {
+      isLoadingStockTransfer = true;
+    });
+
+    StockTransferFetchmodel.fetchByID(id).then((value) {
+      setState(() {
+        stockTransferModel = value;
+      });
     }).catchError((error) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error.toString())));
+    }).whenComplete(() {
+      setState(() {
+        isLoadingStockTransfer = false;
+      });
     });
   }
 
@@ -62,6 +107,8 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
           setState(() {
             stockTransferModel = null;
           });
+
+          _fetchStockTransfers(1);
         }).catchError((error) {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(error.toString())));
@@ -81,15 +128,11 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
           return const Dialog(
             child: SelectEmployee(),
           );
-        }).then((value) {
-      if (value != null) {
+        }).then((user) {
+      if (user != null) {
         showDialog(
           context: context,
           builder: (context) {
-            TextEditingController rejectNoteController =
-                TextEditingController(); // Move this outside the StatefulBuilder
-            bool isEnabled = false;
-
             return StatefulBuilder(builder: (context, setState) {
               return Dialog(
                 child: Container(
@@ -111,24 +154,6 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                       const SizedBox(
                         height: 25,
                       ),
-                      TextField(
-                        maxLines: 3,
-                        controller: rejectNoteController,
-                        // Reject note
-                        decoration: const InputDecoration(
-                          labelText: "Reject note",
-                          // outline
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            isEnabled = value.isNotEmpty;
-                          });
-                        },
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
                       Row(
                         children: [
                           const Spacer(),
@@ -136,11 +161,11 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                             onPressed: () {
                               Navigator.of(context).pop(false);
                             },
-                            child: const Text(
+                            child: Text(
                               "Cancel",
                               style: TextStyle(
                                 fontSize: 15,
-                                color: Color.fromARGB(255, 0, 32, 92),
+                                color: Theme.of(context).secondaryHeaderColor,
                                 fontWeight: FontWeight.normal,
                               ),
                             ),
@@ -150,17 +175,16 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                           ),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(255, 0, 32, 92),
+                              backgroundColor:
+                                  Theme.of(context).secondaryHeaderColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(25),
                                 // padding vertical 15, horizontal 35
                               ),
                             ),
-                            onPressed: isEnabled
-                                ? () {
-                                    Navigator.of(context).pop(true);
-                                  }
-                                : null,
+                            onPressed: () {
+                              Navigator.of(context).pop(true);
+                            },
                             child: const Text(
                               "Reject",
                               style: TextStyle(
@@ -179,7 +203,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
           },
         ).then((value) {
           if (value == true) {
-            _rejectStockTransfer();
+            _rejectStockTransfer(user.code);
           }
         });
       }
@@ -190,340 +214,468 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
     });
   }
 
-  _rejectStockTransfer() {}
+  _rejectStockTransfer(String userCode) {
+    setState(() {
+      isSubmitting = true;
+    });
 
-  List<Widget> buildStockTransferText() {
-    if (stockTransferModel == null) {
-      return [const Text("Stock transfer data not selected")];
-    } else {
-      return [
-        Text(
-          stockTransferModel!.name,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        Text(
-            "Requested to: ${stockTransferModel?.requestFrom == null ? 'Office' : stockTransferModel?.requestFrom!['name']}"),
-        Text("Requested by: ${stockTransferModel!.createdBy}"),
-        const SizedBox(
-          height: 15,
-        ),
-        Divider(
-          color: Colors.grey.shade300,
-        ),
-        const SizedBox(
-          height: 15,
-        ),
-        buildStockTransferTable()!,
-      ];
-    }
+    StockTransferModel.reject(
+      stockTransferModel!.id!,
+      userCode,
+      controller.text,
+    ).then((value) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Stock transfer rejected")));
+
+      setState(() {
+        stockTransferModel = null;
+      });
+
+      _fetchStockTransfers(1);
+    }).catchError((error) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.toString())));
+    }).whenComplete(() {
+      setState(() {
+        isSubmitting = false;
+      });
+    });
   }
 
-  Widget? buildStockTransferTable() {
-    if (stockTransferModel == null) {
-      return null;
-    } else {
-      return Table(
-        // border only horizontal
-        border: TableBorder.all(color: Colors.grey.shade300, width: 1.0),
-        children: [
-          TableRow(children: [
-            Container(
-              padding: const EdgeInsets.all(15),
-              child: const Text("Reference"),
-            ),
-            Container(
-              padding: const EdgeInsets.all(15),
-              child: const Text("Description"),
-            ),
-            Container(
-              padding: const EdgeInsets.all(15),
-              child: const Text("Quantity"),
-            ),
-          ]),
-          for (var item in stockTransferModel!.items)
-            TableRow(children: [
-              Container(
-                padding: const EdgeInsets.all(15),
-                child: Text(item.reference),
-              ),
-              Container(
-                padding: const EdgeInsets.all(15),
-                child: Text(item.description),
-              ),
-              Container(
-                padding: const EdgeInsets.all(15),
-                child: Text(
-                    "${NumberFormat.decimalPattern().format(item.quantity)} pcs"),
-              ),
-            ]),
-        ],
-      );
-    }
+  @override
+  initState() {
+    super.initState();
+    controller.addListener(() {
+      setState(() {});
+    });
+    _fetchStockTransfers(page);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(
-              left: 15,
-              right: 15,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              // Border bottom
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.shade300,
-                  width: 1,
-                ),
-              ),
-            ),
-            child: SizedBox(
-              height: 80,
-              child: Center(
-                child: Image.asset(
-                  "assets/images/icon.webp",
-                  width: 40,
-                  height: 40,
-                ),
-              ),
-            ),
-          ),
-          SingleChildScrollView(
-            child: Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                ClipPath(
-                  clipper: TrapezoidClipPath(),
-                  child: Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 211, 212, 253),
-                    height: 420,
-                  ),
-                ),
-                ClipPath(
-                  clipper: InversedTrapezoidClipPath(),
-                  child: Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(180, 124, 136, 248),
-                    height: 420,
-                  ),
-                ),
-                SizedBox(
-                  width: ResponsiveUtils.getContainerSize(context),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        height: 15,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(
+          height: 25,
+        ),
+        Text(
+          "Receive stock transfer request",
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
+        const SizedBox(
+          height: 35,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(0),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                              icon: const Icon(Icons.arrow_back),
-                              onPressed: () {
-                                router.pop();
-                              }),
-                          const Text(
-                            "Receive stock transfer",
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 4, 30, 73),
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
+                      color: Colors.transparent,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 20,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(0),
+                            color: Colors.black87,
+                          ),
+                          child: Text(
+                            "1. REQUEST OPTIONS",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                  color: Colors.white,
+                                ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(
+                            15,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Date",
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              Text(
+                                DateFormat("dd MMMM yyyy")
+                                    .format(DateTime.now()),
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Text(
+                                "Stock transfer",
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              SizedBox(
+                                height: 300,
+                                child: isLoading
+                                    ? const Center(
+                                        child: CircularProgressIndicator(),
+                                      )
+                                    : (!isLoading && stockTransfers.isEmpty)
+                                        ? const Center(
+                                            child: Text("Data not found."),
+                                          )
+                                        : ListView.builder(
+                                            itemBuilder: (context, index) {
+                                              return ListTile(
+                                                onTap: () {
+                                                  _fetchStockTransferByID(
+                                                      stockTransfers[index]
+                                                          .id!);
+                                                },
+                                                title: Text(
+                                                  stockTransfers[index].name,
+                                                ),
+                                                subtitle: Text(
+                                                  "Requsted from ${(stockTransfers[index].requestFrom == null ? 'Office' : stockTransfers[index].requestFrom!['name'])}",
+                                                ),
+                                              );
+                                            },
+                                            itemCount: stockTransfers.length,
+                                          ),
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              PaginationComponent(
+                                  pageIndex: page - 1,
+                                  dataCount: dataCount,
+                                  pageSize: 10,
+                                  onPageChange: (value) {
+                                    _fetchStockTransfers(value + 1);
+                                  })
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(0),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
+                      color: Colors.transparent,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 20,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(0),
+                            color: Colors.black87,
+                          ),
+                          child: Text(
+                            "2. CONFIRMATION OPTIONS",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                  color: Colors.white,
+                                ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(
+                            15,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(
+                              15,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // option between confirm and reject
+                                RadioListTile<bool>(
+                                    title: Text(
+                                      "Confirm",
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    groupValue: isConfirm,
+                                    value: true,
+                                    activeColor: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .color,
+                                    onChanged: isLoadingStockTransfer
+                                        ? null
+                                        : (value) {
+                                            setState(() {
+                                              isConfirm = true;
+                                            });
+                                          }),
+                                RadioListTile<bool>(
+                                    title: Text(
+                                      "Reject",
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    groupValue: isConfirm,
+                                    value: false,
+                                    activeColor: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .color,
+                                    onChanged: isLoadingStockTransfer
+                                        ? null
+                                        : (value) {
+                                            setState(() {
+                                              isConfirm = false;
+                                            });
+                                          }),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                TextFormField(
+                                  controller: controller,
+                                  enabled: !isConfirm,
+                                  decoration: InputDecoration(
+                                    labelText: "Rejection note",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  maxLines: 4,
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          // Radius 10
-                          borderRadius: BorderRadius.circular(10),
-                          // elevation
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  const Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor:
-                                      Color.fromARGB(255, 201, 170, 252),
-                                  child: Text("1"),
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                Text(
-                                  "Select stock transfer",
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            ElevatedButton(
-                              // dark blue background
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(255, 0, 32, 92),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(25),
-                                  // padding vertical 15, horizontal 35
-                                ),
-                              ),
-                              onPressed: _openStockTransferSelector,
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 35,
-                                  vertical: 10,
-                                ),
-                                child: Text(
-                                  "Select stock transfer",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 255, 255, 255),
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          // Radius 10
-                          borderRadius: BorderRadius.circular(10),
-                          // elevation
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  const Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor:
-                                      Color.fromARGB(255, 201, 170, 252),
-                                  child: Text("2"),
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                Text(
-                                  "Receive stock transfer",
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            ...buildStockTransferText(),
-                            const SizedBox(
-                              height: 25,
-                            ),
-                            Row(
-                              children: [
-                                const Spacer(),
-                                TextButton(
-                                  onPressed:
-                                      stockTransferModel == null || isSubmitting
-                                          ? null
-                                          : _preRejectStockTransfer,
-                                  child: const Text(
-                                    "Reject",
-                                    style: TextStyle(
-                                        color: Color.fromARGB(255, 0, 32, 92),
-                                        fontWeight: FontWeight.normal,
-                                        fontSize: 16),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 25,
-                                ),
-                                ElevatedButton(
-                                  // dark blue background
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        const Color.fromARGB(255, 0, 32, 92),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25),
-                                      // padding vertical 15, horizontal 35
-                                    ),
-                                  ),
-                                  onPressed:
-                                      stockTransferModel == null || isSubmitting
-                                          ? null
-                                          : _receiveStockTransfer,
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 35,
-                                      vertical: 10,
-                                    ),
-                                    child: Text(
-                                      "Confirm",
-                                      style: TextStyle(
-                                        color:
-                                            Color.fromARGB(255, 255, 255, 255),
-                                        fontWeight: FontWeight.normal,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(
+              width: 15,
+            ),
+            SizedBox(
+              width: 400,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(0),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(0),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 20,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(0),
+                            color: Theme.of(context)
+                                .secondaryHeaderColor
+                                .withOpacity(0.8),
+                          ),
+                          child: Text(
+                            "YOUR REQUEST",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                  color: Colors.white,
+                                ),
+                          ),
+                        ),
+                        stockTransferModel == null
+                            ? Container(
+                                padding: const EdgeInsets.all(
+                                  20,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "You have not selected any stock transfer",
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                padding: const EdgeInsets.all(
+                                  20,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Name",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall,
+                                    ),
+                                    Text(
+                                      stockTransferModel!.name,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                    Text(
+                                      "Requested from",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall,
+                                    ),
+                                    Text(
+                                      stockTransferModel!.requestFrom == null
+                                          ? "Office"
+                                          : stockTransferModel!
+                                              .requestFrom!['name'],
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                    Text(
+                                      "Requested by",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall,
+                                    ),
+                                    Text(
+                                      stockTransferModel!.createdBy,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      itemBuilder: (context, index) {
+                                        return ListTile(
+                                          title: Text(
+                                            stockTransferModel!
+                                                .items[index].reference,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                stockTransferModel!
+                                                    .items[index].description,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyLarge,
+                                              ),
+                                              Text(
+                                                "${NumberFormat("#,##0").format(stockTransferModel!.items[index].quantity)} pcs",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium,
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      itemCount:
+                                          stockTransferModel!.items.length,
+                                    )
+                                  ],
+                                ),
+                              )
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  InkWell(
+                    onTap: isValid && isConfirm
+                        ? _receiveStockTransfer
+                        : (isValid && !isConfirm)
+                            ? _preRejectStockTransfer
+                            : null,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: isValid
+                            ? Theme.of(context).secondaryHeaderColor
+                            : Theme.of(context).disabledColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Send",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(
+                                  color: isValid
+                                      ? Colors.white
+                                      : Theme.of(context).disabledColor),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

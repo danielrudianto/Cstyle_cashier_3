@@ -1,7 +1,6 @@
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class AppbarPageView extends StatelessWidget {
@@ -53,93 +52,96 @@ class AppbarPageView extends StatelessWidget {
             Expanded(
               flex: 24,
               child: Center(
-                child: SingleChildScrollView(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: page == 0
-                                  ? const Color.fromARGB(255, 109, 78, 137)
-                                  : Colors.transparent,
-                              width: 3,
-                            ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 125,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: page == 0
+                                ? Theme.of(context).secondaryHeaderColor
+                                : Colors.transparent,
+                            width: 3,
                           ),
                         ),
-                        height: 80,
-                        child: InkWell(
-                          onTap: () {
-                            changePage(0);
-                          },
-                          child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Text(
-                                "Dashboard",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .copyWith(
-                                      color: page == 0
-                                          ? const Color.fromARGB(
-                                              255, 109, 78, 137)
-                                          : Colors.grey.shade500,
-                                      fontWeight: page == 0
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                    ),
-                              ),
-                            ],
+                        color: Colors.transparent,
+                      ),
+                      height: 80,
+                      child: InkWell(
+                        onTap: page == 0
+                            ? null
+                            : () {
+                                changePage(0);
+                              },
+                        child: Column(
+                          children: [
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Text(
+                              "Dashboard",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(
+                                    color: page == 0
+                                        ? const Color.fromARGB(
+                                            255, 109, 78, 137)
+                                        : Colors.grey.shade500,
+                                    fontWeight: page == 0
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 100,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: page == 1
+                                ? Theme.of(context).secondaryHeaderColor
+                                : Colors.transparent,
+                            width: 3,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 25),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: page == 1
-                                  ? const Color.fromARGB(255, 109, 78, 137)
-                                  : Colors.transparent,
-                              width: 3,
+                      height: 80,
+                      child: InkWell(
+                        onTap: page == 1
+                            ? null
+                            : () {
+                                changePage(1);
+                              },
+                        child: Column(
+                          children: [
+                            const SizedBox(
+                              height: 20,
                             ),
-                          ),
-                        ),
-                        height: 80,
-                        child: InkWell(
-                          onTap: () {
-                            changePage(1);
-                          },
-                          child: Column(
-                            children: [
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Text(
-                                "Store",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .copyWith(
-                                      color: page == 1
-                                          ? const Color.fromARGB(
-                                              255, 109, 78, 137)
-                                          : Colors.grey.shade500,
-                                      fontWeight: page == 1
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                    ),
-                              ),
-                            ],
-                          ),
+                            Text(
+                              "Store",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(
+                                    color: page == 1
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : Colors.grey.shade500,
+                                    fontWeight: page == 1
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -148,7 +150,7 @@ class AppbarPageView extends StatelessWidget {
               fit: FlexFit.loose,
               flex: 1,
               child: Badge(
-                backgroundColor: const Color.fromARGB(255, 109, 78, 137),
+                backgroundColor: Theme.of(context).secondaryHeaderColor,
                 label: Text(
                   value.cartCount.toString(),
                   style: const TextStyle(
@@ -159,6 +161,9 @@ class AppbarPageView extends StatelessWidget {
                 child: IconButton(
                   icon: Icon(
                     Icons.inventory,
+                    color: value.cartCount == 0
+                        ? Theme.of(context).disabledColor
+                        : Theme.of(context).iconTheme.color,
                   ),
                   onPressed: value.cartCount == 0
                       ? null
@@ -173,7 +178,7 @@ class AppbarPageView extends StatelessWidget {
               fit: FlexFit.loose,
               flex: 1,
               child: IconButton(
-                  icon: Icon(Icons.settings),
+                  icon: const Icon(Icons.settings),
                   onPressed: () {
                     router.push("/settings");
                   }),

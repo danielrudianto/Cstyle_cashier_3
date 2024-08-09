@@ -1,4 +1,5 @@
 import 'package:cstyle_cashier_3/db/db.store.model.dart';
+import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/api.utils.dart';
 import 'package:cstyle_cashier_3/view/store/store.page.dart';
 import 'package:dio/dio.dart';
@@ -96,6 +97,25 @@ class MemberModel {
           Options(headers: {"store": store!.code}));
 
       return membership;
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  static fetch(int page, String keyword) async {
+    try {
+      var store = await StoreModel.getCurrentProfile();
+      var membership = await ApiUtils().getRequest(
+          "cashier/membership",
+          {"page": page, "keyword": keyword},
+          Options(headers: {"store": store!.code}));
+
+      // return list of members
+      var data = membership['data'].map((e) {
+        return MemberModel.fromMap(e);
+      }).toList();
+
+      return {"data": data, "count": membership['count']};
     } catch (error) {
       throw Exception(error);
     }

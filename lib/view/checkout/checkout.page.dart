@@ -1,18 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/components/thousand-separator/thousand-separator.dart';
-import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/printing.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
-import 'package:cstyle_cashier_3/utils/text-formatter.utils.dart';
 import 'package:cstyle_cashier_3/view/checkout/components/add-member-checkout.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
@@ -214,7 +211,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
           return const Dialog(
             child: AddMemberCheckout(),
           );
-        });
+        }).then((value) {
+      setState(() {
+        memberID = value;
+      });
+    });
   }
 
   @override
@@ -222,6 +223,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).canvasColor,
+          // back button color
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            onPressed: () {
+              router.pop();
+            },
+          ),
         ),
         body: SingleChildScrollView(
           child: Consumer<CartNotifier>(builder: (_, value, __) {
@@ -234,12 +245,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     Text(
                       "CHECKOUT",
                       // all caps
-
+                      // size it 1.5 times
+                      textScaleFactor: 1.5,
                       style: Theme.of(context)
                           .textTheme
                           .headlineLarge!
                           .copyWith(
-                              fontWeight: FontWeight.bold, letterSpacing: -1.2),
+                              fontWeight: FontWeight.bold, letterSpacing: -1),
                     ),
                     const SizedBox(
                       height: 25,
@@ -344,9 +356,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                         children: [
                                           TextField(
                                             // outlined
-                                            decoration: const InputDecoration(
-                                              labelText: "Amount",
-                                              border: OutlineInputBorder(),
+                                            decoration: InputDecoration(
+                                              label: Text(
+                                                "Amount",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelSmall,
+                                              ),
+                                              border: OutlineInputBorder(
+                                                // color same as divider color
+                                                borderSide: BorderSide(
+                                                  color: Theme.of(context)
+                                                      .dividerColor,
+                                                ),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Theme.of(context)
+                                                      .dividerColor,
+                                                ),
+                                              ),
                                             ),
                                             // only allow number
                                             inputFormatters: [
@@ -434,6 +463,40 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                           const SizedBox(
                                             height: 10,
                                           ),
+                                          // if memberID is not null
+                                          if (memberID != null)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: 15,
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    "Member ID: $memberID",
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium,
+                                                  ),
+                                                  IconButton(
+                                                    onPressed: () {
+                                                      setState(() {
+                                                        memberID = null;
+                                                      });
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.close,
+                                                      color: Theme.of(context)
+                                                          .iconTheme
+                                                          .color,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           // member selector button
                                           InkWell(
                                             onTap: () {
@@ -754,7 +817,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                             .bodyMedium,
                                       ),
                                       trailing: Text(
-                                        change <= 0
+                                        change >= 0
                                             ? "0.00"
                                             : NumberFormat("#,##0.00").format(
                                                 -change,

@@ -5,6 +5,7 @@ import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
+import 'package:cstyle_cashier_3/viewmodel/theme.viewmodel.dart';
 import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -32,6 +33,7 @@ Future<void> main() async {
     providers: [
       ChangeNotifierProvider<CartNotifier>(create: (_) => CartNotifier()),
       ChangeNotifierProvider<CompareNotifier>(create: (_) => CompareNotifier()),
+      ChangeNotifierProvider<ThemeNotifier>(create: (_) => ThemeNotifier()),
     ],
     child: const MyApp(),
   ));
@@ -43,17 +45,23 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      scrollBehavior: ScrollConfiguration.of(context).copyWith(
-        dragDevices: {
-          PointerDeviceKind.touch,
-          PointerDeviceKind.mouse,
-        },
-      ),
-      debugShowCheckedModeBanner: false,
-      title: 'Cstyle Cashier Application',
-      theme: darkThemeData,
-      routerConfig: router,
-    );
+    Provider.of<ThemeNotifier>(context, listen: false).loadThemeMode();
+
+    return Consumer<ThemeNotifier>(builder: (_, value, __) {
+      return MaterialApp.router(
+        scrollBehavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse,
+          },
+        ),
+        debugShowCheckedModeBanner: false,
+        title: 'Cstyle Cashier Application',
+        theme: themeData,
+        darkTheme: darkThemeData,
+        routerConfig: router,
+        themeMode: value.themeMode,
+      );
+    });
   }
 }

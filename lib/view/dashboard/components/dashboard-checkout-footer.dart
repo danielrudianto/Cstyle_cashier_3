@@ -99,12 +99,12 @@ class DashboardCheckoutFooter extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
+            SizedBox(
               width: 325,
               height: 1,
               child: CustomPaint(
                 painter: DashedLineHelper(),
-                size: Size(300, 1),
+                size: const Size(300, 1),
               ),
             ),
           ],
@@ -133,10 +133,7 @@ class DashboardCheckoutFooter extends StatelessWidget {
               Expanded(
                 child: Text(
                   "Total",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: Theme.of(context).textTheme.headline6!.fontSize,
-                  ),
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
               Expanded(
@@ -144,10 +141,7 @@ class DashboardCheckoutFooter extends StatelessWidget {
                   NumberFormat("#,##0.00").format(
                     value,
                   ),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: Theme.of(context).textTheme.headline6!.fontSize,
-                  ),
+                  style: Theme.of(context).textTheme.headlineSmall,
                   textAlign: TextAlign.right,
                 ),
               ),

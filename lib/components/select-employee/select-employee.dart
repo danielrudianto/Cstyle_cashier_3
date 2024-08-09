@@ -58,20 +58,25 @@ class _SelectEmployeeState extends State<SelectEmployee> {
       height: 220,
       width: 480,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(15),
-            height: 60,
+            height: 80,
             width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 11, 87, 208),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: Theme.of(context).secondaryHeaderColor,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(10),
                 topRight: Radius.circular(10),
+              ),
+              // border width 0
+              border: Border.all(
+                width: 0,
+                color: Colors.transparent,
               ),
             ),
             child: Row(
@@ -101,6 +106,7 @@ class _SelectEmployeeState extends State<SelectEmployee> {
           Padding(
             padding: const EdgeInsets.all(15),
             child: TextFormField(
+              autofocus: true,
               readOnly: isChecking,
               onChanged: (value) {
                 _checkEmployeeCode(value);
@@ -136,7 +142,7 @@ class _SelectEmployeeState extends State<SelectEmployee> {
                 const Spacer(),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 11, 87, 208),
+                    backgroundColor: Theme.of(context).secondaryHeaderColor,
                   ),
                   onPressed: isChecking || !isChecked || user == null
                       ? null

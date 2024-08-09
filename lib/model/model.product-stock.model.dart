@@ -133,6 +133,46 @@ class ProductStockFetchModel {
       throw Exception(e);
     }
   }
+
+  static Future<ProductStockFetchModel> downloadServerStock() async {
+    try {
+      var store = await StoreModel.getCurrentProfile();
+      var result = await ApiUtils().postRequest(
+        "/cashier/products/download",
+        {},
+        Options(headers: {
+          "store": store?.code,
+        }),
+      );
+
+      List<StoreModel> stores = [
+        StoreModel(
+          id: null,
+          name: "OFFICE",
+          address: "Jalan Kerobokan no. 87A, Denpasar",
+        )
+      ];
+      List<ProductStockFetchItemModel> data = [];
+
+      result['store'].forEach((x) {
+        stores.add(
+          StoreModel(
+            name: x['name'],
+            address: x['address'],
+            id: x['_id'],
+          ),
+        );
+      });
+
+      result['data'].forEach((x) {
+        data.add(ProductStockFetchItemModel.fromMap(x));
+      });
+
+      return ProductStockFetchModel(data: data, stores: stores, count: 0);
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 }
 
 class ProductStockFetchItemModel {
@@ -166,9 +206,14 @@ class ProductStockFetchItemModel {
   factory ProductStockFetchItemModel.fromMap(Map<String, dynamic> map) {
     List<ProductStockFetchStoreModel> stocks = [];
     map['stock'].forEach((x) {
-      stocks.add(ProductStockFetchStoreModel(
-          storeID: x['storeID'], quantity: x['quantity']));
+      stocks.add(
+        ProductStockFetchStoreModel(
+          storeID: x['storeID'],
+          quantity: x['quantity'],
+        ),
+      );
     });
+
     return ProductStockFetchItemModel(
       id: map['id'],
       reference: map['reference'],

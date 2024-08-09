@@ -1,21 +1,24 @@
-// ignore_for_file: constant_identifier_names, camel_case_types
-
-import 'dart:io';
-
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/model/model.countries.dart';
+import 'package:cstyle_cashier_3/model/model.daily-report.model.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
-import 'package:cstyle_cashier_3/utils/router.utils.dart';
-import 'package:cstyle_cashier_3/view/store/components/action-card.component.dart';
-import 'package:cstyle_cashier_3/view/store/components/stat-card.component.dart';
+import 'package:cstyle_cashier_3/view/check-stock/check-stock.page.dart';
+import 'package:cstyle_cashier_3/view/member-list/member-list.page.dart';
+import 'package:cstyle_cashier_3/view/stock-transfer/create-stock-transfer/create-stock-transfer.page.dart';
+import 'package:cstyle_cashier_3/view/stock-transfer/list-stock-transfer/list-stock-transfer.dart';
+import 'package:cstyle_cashier_3/view/stock-transfer/receive-stock-transfer/receive-stock-transfer.page.dart';
+import 'package:cstyle_cashier_3/view/stock-transfer/send-stock-transfer/send-stock.transfer.page.dart';
+import 'package:cstyle_cashier_3/view/store/components/store-dashboard.dart';
+import 'package:cstyle_cashier_3/viewmodel/theme.viewmodel.dart';
 import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorePage extends StatefulWidget {
@@ -25,20 +28,17 @@ class StorePage extends StatefulWidget {
   State<StorePage> createState() => _StorePageState();
 }
 
+// ignore: camel_case_types
 enum language {
+  // ignore: constant_identifier_names
   EN,
+  // ignore: constant_identifier_names
   ID,
 }
 
 class _StorePageState extends State<StorePage> {
-  TextEditingController codeEditingController = TextEditingController();
+  int selectedMenu = 0;
   bool isLoading = false;
-
-  int newMemberCount = 0;
-  int memberCount = 0;
-  int billCount = 0;
-  int billValue = 0;
-  DateTime? lastUpdated;
 
   Future<void> fetchByCode(String code) async {
     setState(() {
@@ -282,7 +282,12 @@ class _StorePageState extends State<StorePage> {
 
         await member.create();
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Successfully created member")));
+          const SnackBar(
+            content: Text("Successfully created member"),
+            duration: Duration(seconds: 1),
+            showCloseIcon: true,
+          ),
+        );
         Navigator.pop(context);
       } catch (error) {
         LoggerUtils().log(error.toString(), LogType.error);
@@ -301,9 +306,7 @@ class _StorePageState extends State<StorePage> {
         builder: (context) {
           return StatefulBuilder(builder: (context, setState) {
             return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
+              surfaceTintColor: Theme.of(context).cardColor,
               child: SizedBox(
                 width: 400,
                 child: SingleChildScrollView(
@@ -315,36 +318,40 @@ class _StorePageState extends State<StorePage> {
                       Container(
                         width: 400,
                         height: 100,
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 96, 99, 255),
-                          borderRadius: BorderRadius.only(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).secondaryHeaderColor,
+                          borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(25),
                             topRight: Radius.circular(25),
                           ),
+                          // border color
+                          border: Border.all(
+                            color: Colors.transparent,
+                            width: 0,
+                          ),
                         ),
-                        child: Column(
+                        child: Row(
                           children: [
-                            Row(
-                              children: [
-                                const Spacer(),
-                                IconButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Center(
-                              child: Text("Create new member",
+                            const Expanded(
+                              child: Center(
+                                child: Text(
+                                  "Create new member",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
-                                  )),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
@@ -356,17 +363,20 @@ class _StorePageState extends State<StorePage> {
                           children: [
                             TextFormField(
                               controller: codeEditingController,
-                              decoration: const InputDecoration(
-                                labelText: "Code",
-                                border: OutlineInputBorder(),
-                                focusColor: Colors.black54,
-                                hoverColor: Colors.black54,
-                                focusedBorder: OutlineInputBorder(),
-                                labelStyle: TextStyle(
-                                  color: Colors.black54,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Code",
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
-                                floatingLabelStyle: TextStyle(
-                                  color: Colors.black54,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
                                 ),
                               ),
                             ),
@@ -375,17 +385,20 @@ class _StorePageState extends State<StorePage> {
                             ),
                             TextFormField(
                               controller: nameEditingController,
-                              decoration: const InputDecoration(
-                                labelText: "Name",
-                                border: OutlineInputBorder(),
-                                focusColor: Colors.black54,
-                                hoverColor: Colors.black54,
-                                focusedBorder: OutlineInputBorder(),
-                                labelStyle: TextStyle(
-                                  color: Colors.black54,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Name",
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
-                                floatingLabelStyle: TextStyle(
-                                  color: Colors.black54,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
                                 ),
                               ),
                             ),
@@ -413,18 +426,21 @@ class _StorePageState extends State<StorePage> {
                                     fontWeight: FontWeight.normal,
                                   ),
                                   enabled: (nationality == null),
-                                  decoration: const InputDecoration(
-                                    hintText: "Ex. Indonesia (ID)",
-                                    labelText: "Nationality",
-                                    border: OutlineInputBorder(),
-                                    focusColor: Colors.black54,
-                                    hoverColor: Colors.black54,
-                                    focusedBorder: OutlineInputBorder(),
-                                    labelStyle: TextStyle(
-                                      color: Colors.black54,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      "Nationality",
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
                                     ),
-                                    floatingLabelStyle: TextStyle(
-                                      color: Colors.black54,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context).dividerColor,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context).dividerColor,
+                                      ),
                                     ),
                                   ),
                                 );
@@ -544,17 +560,20 @@ class _StorePageState extends State<StorePage> {
                             ),
                             TextFormField(
                               controller: memberPhoneNumberController,
-                              decoration: const InputDecoration(
-                                labelText: "Phone number",
-                                border: OutlineInputBorder(),
-                                focusColor: Colors.black54,
-                                hoverColor: Colors.black54,
-                                focusedBorder: OutlineInputBorder(),
-                                labelStyle: TextStyle(
-                                  color: Colors.black54,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Phone number",
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
-                                floatingLabelStyle: TextStyle(
-                                  color: Colors.black54,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
                                 ),
                               ),
                             ),
@@ -563,40 +582,48 @@ class _StorePageState extends State<StorePage> {
                             ),
                             TextFormField(
                               controller: memberEmailController,
-                              decoration: const InputDecoration(
-                                labelText: "Email",
-                                border: OutlineInputBorder(),
-                                focusColor: Colors.black54,
-                                hoverColor: Colors.black54,
-                                focusedBorder: OutlineInputBorder(),
-                                labelStyle: TextStyle(
-                                  color: Colors.black54,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Email",
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
-                                floatingLabelStyle: TextStyle(
-                                  color: Colors.black54,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(
                               height: 15,
                             ),
-                            const Text(
-                                "Please insert either phone number or email, or both."),
+                            Text(
+                              "Please insert either phone number or email, or both.",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
                             const SizedBox(
                               height: 15,
                             ),
                             TextFormField(
-                              decoration: const InputDecoration(
-                                labelText: "Birthday",
-                                border: OutlineInputBorder(),
-                                focusColor: Colors.black54,
-                                hoverColor: Colors.black54,
-                                focusedBorder: OutlineInputBorder(),
-                                labelStyle: TextStyle(
-                                  color: Colors.black54,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Birthday",
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
-                                floatingLabelStyle: TextStyle(
-                                  color: Colors.black54,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
                                 ),
                               ),
                               onTap: () {
@@ -649,7 +676,7 @@ class _StorePageState extends State<StorePage> {
                             const SizedBox(
                               height: 15,
                             ),
-                            GestureDetector(
+                            InkWell(
                               onTap: isSubmitting
                                   ? null
                                   : () {
@@ -662,14 +689,15 @@ class _StorePageState extends State<StorePage> {
                                 ),
                                 width: double.infinity,
                                 decoration: BoxDecoration(
-                                  color:
-                                      const Color.fromARGB(255, 151, 158, 249),
+                                  color: isSubmitting
+                                      ? Theme.of(context).disabledColor
+                                      : Theme.of(context).secondaryHeaderColor,
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 child: const Text(
                                   "Submit",
                                   style: TextStyle(
-                                    color: Color.fromARGB(255, 0, 32, 92),
+                                    color: Colors.white,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -687,60 +715,185 @@ class _StorePageState extends State<StorePage> {
         });
   }
 
-  _preUpdateStats(int period) async {
-    // Check for storage
-    setState(() {
-      isLoading = true;
+  openDailyReport() {
+    DailyReportModel.downloadDailyReport().then((value) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              child: Container(
+                height: 620,
+                width: 480,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      height: 80,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).secondaryHeaderColor,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
+                        ),
+                        // border width 0
+                        border: Border.all(
+                          width: 0,
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              "Daily Report",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 15,
+                          right: 15,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Date",
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              Text(
+                                DateFormat("dd/MM/yyyy").format(DateTime.now()),
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: value['payments'].length,
+                                itemBuilder: (context, index) {
+                                  return ListTile(
+                                    title: Text(
+                                      value['payments'][index]['type']
+                                          .toString()
+                                          .toUpperCase(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall,
+                                    ),
+                                    subtitle: Text(
+                                      NumberFormat("#,##0.00").format(
+                                          value['payments'][index]['value']),
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(
+                        15,
+                      ),
+                      child: Row(children: [
+                        const Spacer(),
+                        InkWell(
+                          onTap: () {
+                            String text = "";
+                            num total = 0.0;
+                            for (var item in value['payments']) {
+                              text +=
+                                  "${item['type'].toString().toUpperCase()}: ${NumberFormat("#,##0.00").format(item['value'])}\n";
+                              total += item['value'];
+                            }
+                            text +=
+                                "Total: ${NumberFormat("#,##0.00").format(total)}";
+                            Clipboard.setData(ClipboardData(text: text));
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Copied to clipboard"),
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Copy to clipboard",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge!
+                                .copyWith(
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+    }).catchError((error) {
+      LoggerUtils().log(error.toString(), LogType.error);
     });
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    var lastSynced = prefs.getString("last_synced:$period") == null
-        ? null
-        : DateTime.parse(prefs.getString("last_synced:$period")!);
-    // check if online
-    final result = await InternetAddress.lookup('google.com');
-    var isOnline = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    if ((lastSynced == null ||
-            lastSynced
-                .isBefore(DateTime.now().subtract(const Duration(hours: 1)))) &&
-        isOnline) {
-      _fetchUpdateStats(period).then((value) {
-        prefs.setString("last_synced:$period", DateTime.now().toString());
-        prefs.setInt("new_member_count:$period", value[0]);
-        prefs.setInt("member_count:$period", value[1]);
-        prefs.setInt("bill_count:$period", value[2]);
-        prefs.setInt("bill_value:$period", value[3]);
-
-        setState(() {
-          lastUpdated = DateTime.parse(prefs.getString("last_synced:$period")!);
-          newMemberCount = prefs.getInt("new_member_count:$period") ?? 0;
-          memberCount = prefs.getInt("member_count:$period") ?? 0;
-          billCount = prefs.getInt("bill_count:$period") ?? 0;
-          billValue = prefs.getInt("bill_value:$period") ?? 0;
-          isLoading = false;
-        });
-      });
-    } else {
-      setState(() {
-        lastUpdated = DateTime.parse(prefs.getString("last_synced:$period")!);
-        newMemberCount = prefs.getInt("new_member_count:$period") ?? 0;
-        memberCount = prefs.getInt("member_count:$period") ?? 0;
-        billCount = prefs.getInt("bill_count:$period") ?? 0;
-        billValue = prefs.getInt("bill_value:$period") ?? 0;
-        isLoading = false;
-      });
-    }
-  }
-
-  _fetchUpdateStats(int period) {
-    return StoreModel.fetchStats(period);
   }
 
   @override
   void initState() {
-    _preUpdateStats(1);
     super.initState();
+  }
+
+  Widget get currentPage {
+    switch (selectedMenu) {
+      case 0:
+        return const StoreDashboard();
+      case 1:
+        return const MemberListPage();
+      case 2:
+        return const CreateStockTransferPage();
+      case 3:
+        return const SendStockTransferPage();
+      case 4:
+        return const ReceiveStockTransferPage();
+      case 5:
+        return const ListStockTransfer();
+      case 6:
+        return const CheckStockPage();
+      default:
+        return const SizedBox();
+    }
   }
 
   @override
@@ -748,342 +901,289 @@ class _StorePageState extends State<StorePage> {
     ScrollController scrollController = ScrollController();
 
     return Scaffold(
-      body: RawScrollbar(
-        controller: scrollController,
-        thumbColor: const Color.fromARGB(255, 161, 121, 220),
-        radius: const Radius.circular(8.0),
-        thickness: 8.0,
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.only(
-                  top: 50,
-                  bottom: 50,
-                ),
-                color: const Color.fromARGB(0, 151, 157, 249),
-                child: Center(
-                  child: SizedBox(
-                    width: 1 * ResponsiveUtils.getContainerSize(context),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          // Width only 0.7
-                          width:
-                              0.5 * ResponsiveUtils.getContainerSize(context),
-                          child: const Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Check Your Store Performance",
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 109, 41, 187),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 35,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                "Here you can check out your sales performance, track registered members, and monitor overall store activity.",
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 0, 32, 92),
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(
+              10,
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                right: BorderSide(
+                  color: Colors.grey.shade300,
+                  width: 1.0,
                 ),
               ),
-              Center(
-                child: SizedBox(
-                  width: 1 * ResponsiveUtils.getContainerSize(context),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              color: Theme.of(context).cardColor,
+            ),
+            width: 250,
+            height: double.infinity,
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    shrinkWrap: true,
                     children: [
-                      const Text(
-                        "Quick picks",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 109, 41, 187),
-                          fontSize: 25,
+                      ListTile(
+                        onTap: selectedMenu == 0
+                            ? null
+                            : () {
+                                setState(() {
+                                  selectedMenu = 0;
+                                });
+                              },
+                        title: Text(
+                          "Dashboard",
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: selectedMenu == 0
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : null,
+                                  ),
+                        ),
+                        leading: Icon(
+                          Icons.dashboard_outlined,
+                          color: selectedMenu == 0
+                              ? Theme.of(context).secondaryHeaderColor
+                              : Theme.of(context).iconTheme.color,
                         ),
                       ),
-                      const SizedBox(
-                        height: 35,
+                      Divider(color: Theme.of(context).dividerColor),
+                      ListTile(
+                        title: Text(
+                          "Memberships",
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
                       ),
-                      StaggeredGrid.count(
-                        mainAxisSpacing: 25,
-                        crossAxisSpacing: 25,
-                        crossAxisCount: 3,
-                        children: [
-                          ActionCard(
-                            imageString: "assets/images/create.png",
-                            title: "Add new member",
-                            description:
-                                "Add new member. Please prepare the required data such as name and email.",
-                            onPressed: preOpenAddMember,
-                            buttonLabel: "Register",
-                          ),
-                          ActionCard(
-                            imageString: "assets/images/check-stock.png",
-                            title: "Check stock",
-                            description: "Check stocks from other stores.",
-                            onPressed: () {
-                              router.push('/inventory/check-stock');
-                            },
-                            buttonLabel: "Check",
-                          ),
-                          ActionCard(
-                            imageString: "assets/images/history.png",
-                            title: "Sales history",
-                            description: "Get past bills",
-                            onPressed: () {
-                              router.push('/history');
-                            },
-                            buttonLabel: "View",
-                          ),
-                        ],
+                      ListTile(
+                        onTap: () {
+                          preOpenAddMember();
+                        },
+                        title: Text(
+                          "Add member",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        leading: Icon(
+                          Icons.add,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
                       ),
-                      const SizedBox(
-                        height: 25,
+                      ListTile(
+                        onTap: selectedMenu == 1
+                            ? null
+                            : () {
+                                setState(() {
+                                  selectedMenu = 1;
+                                });
+                              },
+                        // add new member
+                        title: Text(
+                          "View members",
+                          style:
+                              Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                    color: selectedMenu == 1
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : null,
+                                  ),
+                        ),
+                        leading: Icon(
+                          Icons.list,
+                          color: selectedMenu == 1
+                              ? Theme.of(context).secondaryHeaderColor
+                              : Theme.of(context).iconTheme.color,
+                        ),
                       ),
-                      const Divider(
-                        color: Color.fromARGB(255, 184, 184, 184),
+                      Divider(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                      ListTile(
+                        title: Text(
+                          "Inventory",
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ),
+                      ListTile(
+                        onTap: selectedMenu == 2
+                            ? null
+                            : () {
+                                setState(() {
+                                  selectedMenu = 2;
+                                });
+                              },
+                        title: Text(
+                          "Create transfer",
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: selectedMenu == 2
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : null,
+                                  ),
+                        ),
+                        leading: Icon(
+                          Icons.add,
+                          color: selectedMenu == 2
+                              ? Theme.of(context).secondaryHeaderColor
+                              : Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                      ListTile(
+                        onTap: selectedMenu == 3
+                            ? null
+                            : () {
+                                setState(() {
+                                  selectedMenu = 3;
+                                });
+                              },
+                        title: Text(
+                          "Send transfer",
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: selectedMenu == 3
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : null,
+                                  ),
+                        ),
+                        leading: Icon(
+                          Icons.call_made,
+                          color: selectedMenu == 3
+                              ? Theme.of(context).secondaryHeaderColor
+                              : Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                      ListTile(
+                        onTap: selectedMenu == 4
+                            ? null
+                            : () {
+                                setState(() {
+                                  selectedMenu = 4;
+                                });
+                              },
+                        title: Text(
+                          "Receive transfer",
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: selectedMenu == 4
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : null,
+                                  ),
+                        ),
+                        leading: Icon(
+                          Icons.call_received,
+                          color: selectedMenu == 4
+                              ? Theme.of(context).secondaryHeaderColor
+                              : Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                      ListTile(
+                        onTap: selectedMenu == 5
+                            ? null
+                            : () {
+                                setState(() {
+                                  selectedMenu = 5;
+                                });
+                              },
+                        title: Text(
+                          "List",
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: selectedMenu == 5
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : null,
+                                  ),
+                        ),
+                        leading: Icon(
+                          Icons.list,
+                          color: selectedMenu == 5
+                              ? Theme.of(context).secondaryHeaderColor
+                              : Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                      Divider(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                      ListTile(
+                        title: Text(
+                          "Utilities",
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ),
+                      ListTile(
+                        onTap: openDailyReport,
+                        title: Text(
+                          "Daily Report",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        leading: Icon(
+                          Icons.report,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                      ListTile(
+                        onTap: selectedMenu == 6
+                            ? null
+                            : () {
+                                setState(() {
+                                  selectedMenu = 6;
+                                });
+                              },
+                        title: Text(
+                          "Stock list",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        leading: Icon(
+                          Icons.list,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                      ListTile(
+                        onTap: () {},
+                        title: Text(
+                          "History",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        leading: Icon(
+                          Icons.history,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-              Center(
-                child: SizedBox(
-                  width: 1 * ResponsiveUtils.getContainerSize(context),
-                  child: Card(
-                    color: const Color.fromARGB(59, 240, 237, 245),
-                    elevation: 0,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 35,
-                        horizontal: 15,
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              "Your store stats",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 66, 66, 66),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 25,
-                            ),
-                            // select
-                            Row(
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    DropdownMenu<int>(
-                                      initialSelection: 1,
-                                      onSelected: (value) {
-                                        if (value != null) {
-                                          _preUpdateStats(value);
-                                        }
-                                      },
-                                      // white background
-                                      inputDecorationTheme:
-                                          const InputDecorationTheme(
-                                        filled: true,
-                                        contentPadding: EdgeInsets.all(10.0),
-                                        // borer
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      width: 0.4 *
-                                          ResponsiveUtils.getContainerSize(
-                                              context),
-                                      label: const Text("Assessment period"),
-                                      dropdownMenuEntries: const [
-                                        DropdownMenuEntry(
-                                          label: "Today",
-                                          value: 1,
-                                        ),
-                                        DropdownMenuEntry(
-                                          label: "Last 7 days",
-                                          value: 7,
-                                        ),
-                                        DropdownMenuEntry(
-                                          label: "Last 30 days",
-                                          value: 30,
-                                        ),
-                                        DropdownMenuEntry(
-                                          label: "Overall",
-                                          value: -1,
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                        "Last synced at ${lastUpdated == null ? "Never" : DateFormat("dd/MM/yyyy HH:mm").format(lastUpdated!)}"),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                const Expanded(
-                                  child: Text(
-                                      "You can change the periode of your assessment here. By default it will be the today's assessment.",
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 66, 66, 66),
-                                      )),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 50,
-                            ),
-                            Row(
-                              children: [
-                                StatCard(
-                                  number: NumberFormat.compact()
-                                      .format(newMemberCount),
-                                  title: "New member count",
-                                  description:
-                                      "New members registered in your store",
-                                  onPressed: () {},
-                                ),
-                                StatCard(
-                                  number: NumberFormat.compact()
-                                      .format(memberCount),
-                                  title: "Member count",
-                                  description:
-                                      "Members registered in your store",
-                                  onPressed: () {},
-                                ),
-                                StatCard(
-                                  number:
-                                      NumberFormat.compact().format(billCount),
-                                  title: "Bills count",
-                                  description:
-                                      "Bills created and uploaded to the server",
-                                  onPressed: () {},
-                                ),
-                                StatCard(
-                                  number:
-                                      NumberFormat.compact().format(billValue),
-                                  title: "Bills value",
-                                  description:
-                                      "Bills created and uploaded to the server",
-                                  onPressed: () {},
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-              Center(
-                child: SizedBox(
-                  width: 1 * ResponsiveUtils.getContainerSize(context),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "More to your store",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 109, 41, 187),
-                          fontSize: 25,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 35,
-                      ),
-                      StaggeredGrid.count(
-                        mainAxisSpacing: 25,
-                        crossAxisSpacing: 25,
-                        crossAxisCount: 3,
-                        children: [
-                          ActionCard(
-                            imageString: "assets/images/report.png",
-                            title: "Daily report",
-                            description:
-                                "Get your daily report here, it contains payments and sales data.",
-                            onPressed: () {},
-                            buttonLabel: "Download",
-                          ),
-                          ActionCard(
-                            imageString: "assets/images/send.png",
-                            title: "Send stock transfer",
-                            description: "Send stock to other stores.",
-                            onPressed: () {
-                              router.push('/inventory/stock-transfer/send');
-                            },
-                            buttonLabel: "Create",
-                          ),
-                          ActionCard(
-                            imageString: "assets/images/receive.png",
-                            title: "Receive stock transfer",
-                            description:
-                                "Receive stock transfer from other stores / office.",
-                            onPressed: () {
-                              router.push('/inventory/stock-transfer/receive');
-                            },
-                            buttonLabel: "Create",
-                          ),
-                          ActionCard(
-                            imageString:
-                                "assets/images/create-stock-transfer.png",
-                            title: "Create stock transfer",
-                            description:
-                                "Create stock transfer request to other stores / office.",
-                            onPressed: () {
-                              router.push('/inventory/stock-transfer/create');
-                            },
-                            buttonLabel: "Create",
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      const Divider(
-                        color: Color.fromARGB(255, 184, 184, 184),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          Expanded(
+            child: RawScrollbar(
+              controller: scrollController,
+              thumbColor: const Color.fromARGB(255, 161, 121, 220),
+              radius: const Radius.circular(8.0),
+              thickness: 8.0,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: ResponsiveUtils.getContainerSize(context),
+                      maxWidth: ResponsiveUtils.getContainerSize(context),
+                      minHeight: MediaQuery.of(context).size.height - 100,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: AnimatedContainer(
+                        duration: Duration(
+                          milliseconds: 200,
+                        ),
+                        child: currentPage,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

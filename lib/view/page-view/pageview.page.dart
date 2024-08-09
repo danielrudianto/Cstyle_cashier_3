@@ -3,7 +3,6 @@ import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/view/dashboard/dashboard.page.dart';
 import 'package:cstyle_cashier_3/view/store/store.page.dart';
 import 'package:cstyle_cashier_3/view/page-view/components/appbar-pageview.dart';
-import 'package:cstyle_cashier_3/view/setting/setting.page.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -603,13 +602,26 @@ class _PageViewPageState extends State<PageViewPage> {
 
                                           Navigator.of(context).pop();
                                         },
-                                  title: Text(carts[index].name),
-                                  subtitle: Text(DateFormat("dd/MM/yyyy")
-                                      .format(carts[index].date)),
+                                  title: Text(
+                                    carts[index].name,
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                  subtitle: Text(
+                                    DateFormat(
+                                      "dd/MM/yyyy",
+                                    ).format(carts[index].date),
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
                                   trailing: cartNotifier.selectedCart != null &&
                                           cartNotifier.selectedCart!.id ==
                                               carts[index].id
-                                      ? const Icon(Icons.check)
+                                      ? Icon(
+                                          Icons.check,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
+                                        )
                                       : null,
                                 );
                               },

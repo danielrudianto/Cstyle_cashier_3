@@ -69,6 +69,18 @@ class SQLStoreModel {
     }
   }
 
+  static Future<void> removeCurrentProfile() async {
+    try {
+      final db = await DatabaseUtils().database;
+      var result = await db.delete("store");
+      if (result == 0) {
+        throw Exception("Failed to remove store");
+      }
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
   static Future<SQLStoreModel?> checkStoreUID(String uid) async {
     if (RegExp(r"^[0-9a-fA-F]{32}$").hasMatch(uid)) {
       var response =

@@ -25,7 +25,7 @@ class CheckoutCard extends CustomPainter {
     path.arcToPoint(Offset(12.5, size.height / 2),
         radius: Radius.circular(size.height / 2), clockwise: false);
 
-    path.arcToPoint(Offset(0, 0),
+    path.arcToPoint(const Offset(0, 0),
         radius: Radius.circular(size.height / 2), clockwise: false);
 
     path.close();

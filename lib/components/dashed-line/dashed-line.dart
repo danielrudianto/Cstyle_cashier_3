@@ -6,7 +6,7 @@ class DashedLineHelper extends CustomPainter {
     double dashHeight = 5, dashSpace = 5;
     double startX = 0;
     final paint = Paint()
-      ..color = Color.fromARGB(255, 170, 170, 170)
+      ..color = const Color.fromARGB(255, 170, 170, 170)
       ..strokeWidth = 1;
     while (startX < size.width) {
       canvas.drawLine(Offset(startX, 0), Offset(startX + dashHeight, 0), paint);

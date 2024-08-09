@@ -22,6 +22,12 @@ class _HeroPageState extends State<HeroPage> {
   String loadingStatus = "Initializing";
 
   @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+  }
+
+  @override
   void initState() {
     checkDateTime().then((_) async {
       await connectAndSync();
@@ -174,7 +180,7 @@ class _HeroPageState extends State<HeroPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 161, 121, 220),
+      backgroundColor: const Color.fromARGB(255, 161, 121, 220),
       body: Center(
         child: Column(
           children: [
