@@ -74,6 +74,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
       width: 400,
       height: 400,
       padding: const EdgeInsets.all(20),
+      color: Theme.of(context).cardColor,
       child: Material(
         color: Colors.transparent,
         child: Column(
@@ -111,13 +112,13 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                       itemCount: products.length,
                       itemBuilder: (context, index) {
                         return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 25,
+                          ),
                           title: Text(
                             products[index].reference,
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall,
                           ),
                           subtitle: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -127,19 +128,13 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                                 products[index].description,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.grey.shade800,
-                                  fontSize: 13,
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               Text(
                                 "Current stock: ${NumberFormat.decimalPattern().format(products[index].stock)}",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.grey.shade800,
-                                  fontSize: 13,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
                           ),

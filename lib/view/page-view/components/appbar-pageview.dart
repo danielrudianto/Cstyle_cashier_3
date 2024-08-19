@@ -173,16 +173,6 @@ class AppbarPageView extends StatelessWidget {
                 ),
               ),
             ),
-            Flexible(
-              // Fit to right
-              fit: FlexFit.loose,
-              flex: 1,
-              child: IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () {
-                    router.push("/settings");
-                  }),
-            )
           ],
         );
       }),
