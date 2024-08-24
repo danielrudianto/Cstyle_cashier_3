@@ -56,20 +56,28 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
         }).then((value) {
       if (value != null) {
         var product = value as ProductModel;
-        setState(() {
-          products.add(
-            ProductModelStockTransfer(
-              id: product.id,
-              reference: product.reference,
-              description: product.description,
-              brand: product.brand,
-              type: product.type,
-              price: product.price,
-              stock: product.stock ?? 0,
-              quantity: 1,
-            ),
-          );
-        });
+        var index = products.indexWhere((element) => element.id == product.id);
+        if (index == -1) {
+          setState(() {
+            products.add(
+              ProductModelStockTransfer(
+                id: product.id,
+                reference: product.reference,
+                description: product.description,
+                brand: product.brand,
+                type: product.type,
+                price: product.price,
+                stock: product.stock ?? 0,
+                quantity: 1,
+              ),
+            );
+          });
+        } else {
+          // add the quantity to existing
+          setState(() {
+            products[index].quantity++;
+          });
+        }
       }
     });
   }
@@ -499,6 +507,10 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                                                     .textTheme
                                                                     .bodyMedium!
                                                                     .fontSize,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .iconTheme
+                                                                    .color,
                                                               ),
                                                               onPressed: () {
                                                                 setState(() {
@@ -517,6 +529,10 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                                                     .textTheme
                                                                     .bodyMedium!
                                                                     .fontSize,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .iconTheme
+                                                                    .color,
                                                               ),
                                                               onPressed:
                                                                   products[index]
@@ -537,6 +553,9 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                                           .textTheme
                                                           .bodyMedium!
                                                           .fontSize,
+                                                      color: Theme.of(context)
+                                                          .iconTheme
+                                                          .color,
                                                     ),
                                                     onPressed: () {
                                                       setState(() {

@@ -94,14 +94,17 @@ class _StoreSelectorState extends State<StoreSelector> {
             child: Container(
               padding: const EdgeInsets.all(20),
               child: isLoading
-                  ? Center(
+                  ? const Center(
                       child: CircularProgressIndicator(),
                     )
                   : ListView.builder(
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text(stores[index].name),
+                          title: Text(
+                            stores[index].name,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
                           onTap: () {
                             Navigator.pop(context, stores[index]);
                           },

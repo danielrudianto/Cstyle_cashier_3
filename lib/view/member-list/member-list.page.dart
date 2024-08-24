@@ -87,7 +87,7 @@ class _MemberListPageState extends State<MemberListPage> {
               width: double.infinity,
               child: DataTable(
                 showCheckboxColumn: false,
-                dividerThickness: 1,
+                dividerThickness: 0.25,
                 // border color only horizontal
                 border: TableBorder(
                   horizontalInside: BorderSide(

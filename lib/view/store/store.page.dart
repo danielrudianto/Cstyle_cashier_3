@@ -12,6 +12,7 @@ import 'package:cstyle_cashier_3/view/stock-transfer/create-stock-transfer/creat
 import 'package:cstyle_cashier_3/view/stock-transfer/list-stock-transfer/list-stock-transfer.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/receive-stock-transfer/receive-stock-transfer.page.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/send-stock-transfer/send-stock.transfer.page.dart';
+import 'package:cstyle_cashier_3/view/store/components/bill-history.dart';
 import 'package:cstyle_cashier_3/view/store/components/store-dashboard.dart';
 import 'package:cstyle_cashier_3/viewmodel/theme.viewmodel.dart';
 import 'package:flag/flag.dart';
@@ -891,6 +892,8 @@ class _StorePageState extends State<StorePage> {
         return const ListStockTransfer();
       case 6:
         return const CheckStockPage();
+      case 7:
+        return const BillHistory();
       default:
         return const SizedBox();
     }
@@ -936,7 +939,7 @@ class _StorePageState extends State<StorePage> {
                         title: Text(
                           "Dashboard",
                           style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: selectedMenu == 0
                                         ? Theme.of(context).secondaryHeaderColor
                                         : null,
@@ -962,7 +965,7 @@ class _StorePageState extends State<StorePage> {
                         },
                         title: Text(
                           "Add member",
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         leading: Icon(
                           Icons.add,
@@ -981,7 +984,7 @@ class _StorePageState extends State<StorePage> {
                         title: Text(
                           "View members",
                           style:
-                              Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              Theme.of(context).textTheme.bodyMedium!.copyWith(
                                     color: selectedMenu == 1
                                         ? Theme.of(context).secondaryHeaderColor
                                         : null,
@@ -1014,7 +1017,7 @@ class _StorePageState extends State<StorePage> {
                         title: Text(
                           "Create transfer",
                           style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: selectedMenu == 2
                                         ? Theme.of(context).secondaryHeaderColor
                                         : null,
@@ -1038,7 +1041,7 @@ class _StorePageState extends State<StorePage> {
                         title: Text(
                           "Send transfer",
                           style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: selectedMenu == 3
                                         ? Theme.of(context).secondaryHeaderColor
                                         : null,
@@ -1062,7 +1065,7 @@ class _StorePageState extends State<StorePage> {
                         title: Text(
                           "Receive transfer",
                           style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: selectedMenu == 4
                                         ? Theme.of(context).secondaryHeaderColor
                                         : null,
@@ -1086,7 +1089,7 @@ class _StorePageState extends State<StorePage> {
                         title: Text(
                           "List",
                           style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: selectedMenu == 5
                                         ? Theme.of(context).secondaryHeaderColor
                                         : null,
@@ -1112,7 +1115,7 @@ class _StorePageState extends State<StorePage> {
                         onTap: openDailyReport,
                         title: Text(
                           "Daily Report",
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         leading: Icon(
                           Icons.report,
@@ -1129,22 +1132,42 @@ class _StorePageState extends State<StorePage> {
                               },
                         title: Text(
                           "Stock list",
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: selectedMenu == 6
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : null,
+                                  ),
                         ),
                         leading: Icon(
                           Icons.list,
-                          color: Theme.of(context).iconTheme.color,
+                          color: selectedMenu == 6
+                              ? Theme.of(context).secondaryHeaderColor
+                              : Theme.of(context).iconTheme.color,
                         ),
                       ),
                       ListTile(
-                        onTap: () {},
+                        onTap: selectedMenu == 7
+                            ? null
+                            : () {
+                                setState(() {
+                                  selectedMenu = 7;
+                                });
+                              },
                         title: Text(
                           "History",
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: selectedMenu == 7
+                                        ? Theme.of(context).secondaryHeaderColor
+                                        : null,
+                                  ),
                         ),
                         leading: Icon(
                           Icons.history,
-                          color: Theme.of(context).iconTheme.color,
+                          color: selectedMenu == 7
+                              ? Theme.of(context).secondaryHeaderColor
+                              : Theme.of(context).iconTheme.color,
                         ),
                       ),
                     ],

@@ -25,6 +25,7 @@ class StatCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: Theme.of(context).secondaryHeaderColor,
+            width: 3,
           ),
         ),
         child: Padding(

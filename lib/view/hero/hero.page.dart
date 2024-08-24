@@ -23,7 +23,11 @@ class _HeroPageState extends State<HeroPage> {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
+    checkDateTime().then((_) async {
+      await connectAndSync();
+    }).catchError((error) {
+      LoggerUtils().log("Error on checking date and time", LogType.error);
+    });
     super.didChangeDependencies();
   }
 

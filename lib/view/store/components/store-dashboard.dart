@@ -386,7 +386,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(15),
             ),
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.all(30),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,6 +595,28 @@ class _StoreDashboardState extends State<StoreDashboard> {
                     "Printer: ${printer!.name}",
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  InkWell(
+                    onTap: () {},
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 25),
+                      // border 1 px solid #ccc
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).dividerColor,
+                        ),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        "Change printer",
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -604,8 +626,8 @@ class _StoreDashboardState extends State<StoreDashboard> {
           height: 15,
         ),
         // button to logout from application
-        ElevatedButton(
-          onPressed: () async {
+        InkWell(
+          onTap: () async {
             StoreModel.removeCurrentProfile().then((_) {
               // Go to main page
               router.go("/");
@@ -617,9 +639,16 @@ class _StoreDashboardState extends State<StoreDashboard> {
               );
             });
           },
-          child: Text(
-            "Logout",
-            style: Theme.of(context).textTheme.bodyLarge,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 10,
+              horizontal: 35,
+            ),
+            color: Theme.of(context).canvasColor,
+            child: Text(
+              "Logout",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           ),
         ),
       ],

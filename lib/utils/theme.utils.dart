@@ -60,7 +60,7 @@ ThemeData themeData = ThemeData(
     headlineLarge: const TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.black,
-      fontSize: 18,
+      fontSize: 24,
       fontFamily: "Montserrat",
     ),
   ),
@@ -150,7 +150,7 @@ ThemeData darkThemeData = ThemeData(
     headlineLarge: const TextStyle(
       fontWeight: FontWeight.bold,
       color: Colors.white,
-      fontSize: 18,
+      fontSize: 24,
       fontFamily: "Montserrat",
     ),
   ),
