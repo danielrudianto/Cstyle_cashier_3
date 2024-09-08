@@ -608,13 +608,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                               Row(
                                                 children: [
                                                   Text(
-                                                    "${NumberFormat().format(value.selectedCart!.products[index].quantity)} x ${value.selectedCart!.products[index].discount == 0 ? NumberFormat("#,##0.00").format(value.selectedCart!.products[index].price / 1.11) : NumberFormat("#,##0.00").format(
+                                                    "${NumberFormat().format(value.selectedCart!.products[index].quantity)} x ${value.selectedCart!.products[index].discount == 0 ? NumberFormat("#,##0.00").format(value.selectedCart!.products[index].price) : NumberFormat("#,##0.00").format(
                                                         (value
-                                                                    .selectedCart!
-                                                                    .products[
-                                                                        index]
-                                                                    .price /
-                                                                1.11) -
+                                                                .selectedCart!
+                                                                .products[index]
+                                                                .price) -
                                                             ((value
                                                                         .selectedCart!
                                                                         .products[
@@ -654,8 +652,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                                     .selectedCart!
                                                                     .products[
                                                                         index]
-                                                                    .price /
-                                                                1.11)
+                                                                    .price)
                                                         : NumberFormat(
                                                                 "#,##0.00")
                                                             .format(
@@ -665,22 +662,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                                             index]
                                                                         .quantity *
                                                                     (value
-                                                                            .selectedCart!
-                                                                            .products[
-                                                                                index]
-                                                                            .price /
-                                                                        1.11) -
+                                                                        .selectedCart!
+                                                                        .products[
+                                                                            index]
+                                                                        .price) -
                                                                 ((value
-                                                                            .selectedCart!
-                                                                            .products[
-                                                                                index]
-                                                                            .price *
-                                                                        value
-                                                                            .selectedCart!
-                                                                            .products[index]
-                                                                            .discount /
-                                                                        100) /
-                                                                    1.11),
+                                                                        .selectedCart!
+                                                                        .products[
+                                                                            index]
+                                                                        .price *
+                                                                    value
+                                                                        .selectedCart!
+                                                                        .products[
+                                                                            index]
+                                                                        .discount /
+                                                                    100)),
                                                           ),
                                                     style: Theme.of(context)
                                                         .textTheme
@@ -696,8 +692,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                           ),
                                         );
                                       },
-                                      itemCount:
-                                          value.selectedCart!.products.length,
+                                      itemCount: value.selectedCart == null
+                                          ? 0
+                                          : value.selectedCart!.products.length,
                                     ),
                                     const SizedBox(
                                       height: 5,
@@ -705,64 +702,64 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     Divider(
                                       color: Colors.grey.shade300,
                                     ),
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 5,
-                                        horizontal: 15,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            "Subtotal",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelLarge,
-                                          ),
-                                          const Spacer(),
-                                          Text(
-                                            NumberFormat("#,##0.00").format(
-                                                value.totalPrice / 1.11),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelLarge!
-                                                .copyWith(
-                                                  fontWeight: FontWeight.normal,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 5,
-                                        horizontal: 15,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            "Tax",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelLarge,
-                                          ),
-                                          const Spacer(),
-                                          Text(
-                                            NumberFormat("#,##0.00").format(
-                                                value.totalPrice -
-                                                    value.totalPrice / 1.11),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelLarge!
-                                                .copyWith(
-                                                  fontWeight: FontWeight.normal,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    // const SizedBox(
+                                    //   height: 15,
+                                    // ),
+                                    // Container(
+                                    //   padding: const EdgeInsets.symmetric(
+                                    //     vertical: 5,
+                                    //     horizontal: 15,
+                                    //   ),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Text(
+                                    //         "Subtotal",
+                                    //         style: Theme.of(context)
+                                    //             .textTheme
+                                    //             .labelLarge,
+                                    //       ),
+                                    //       const Spacer(),
+                                    //       Text(
+                                    //         NumberFormat("#,##0.00").format(
+                                    //             value.totalPrice / 1.11),
+                                    //         style: Theme.of(context)
+                                    //             .textTheme
+                                    //             .labelLarge!
+                                    //             .copyWith(
+                                    //               fontWeight: FontWeight.normal,
+                                    //             ),
+                                    //       ),
+                                    //     ],
+                                    //   ),
+                                    // ),
+                                    // Container(
+                                    //   padding: const EdgeInsets.symmetric(
+                                    //     vertical: 5,
+                                    //     horizontal: 15,
+                                    //   ),
+                                    //   child: Row(
+                                    //     children: [
+                                    //       Text(
+                                    //         "Tax",
+                                    //         style: Theme.of(context)
+                                    //             .textTheme
+                                    //             .labelLarge,
+                                    //       ),
+                                    //       const Spacer(),
+                                    //       Text(
+                                    //         NumberFormat("#,##0.00").format(
+                                    //             value.totalPrice -
+                                    //                 value.totalPrice / 1.11),
+                                    //         style: Theme.of(context)
+                                    //             .textTheme
+                                    //             .labelLarge!
+                                    //             .copyWith(
+                                    //               fontWeight: FontWeight.normal,
+                                    //             ),
+                                    //       ),
+                                    //     ],
+                                    //   ),
+                                    // ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 5,

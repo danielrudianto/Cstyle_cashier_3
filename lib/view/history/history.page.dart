@@ -1,11 +1,9 @@
+import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
-import 'package:cstyle_cashier_3/utils/printing.utils.dart';
-import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
-import 'package:cstyle_cashier_3/utils/router.utils.dart';
+import 'package:cstyle_cashier_3/utils/logger.utils.dart';
+import 'package:cstyle_cashier_3/view/history/components/bill-view.page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -15,81 +13,225 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  List<BillCodeModelFetch> bills = [];
+  int count = 0;
   int page = 1;
-  List<BillCodeModel> bills = [];
-  int billCount = 0;
 
-  Future<void> _loadData() async {
-    BillCodeModel.fetchHistory(page).then((value) {
+  _fetchBill() async {
+    try {
+      var fetchedBills = await BillCodeModelFetch.fetchHistory(
+        page,
+      );
+
       setState(() {
-        bills = value;
+        bills = fetchedBills['data'] as List<BillCodeModelFetch>;
+        count = fetchedBills['count'];
       });
-    }).catchError((error) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error.toString())));
-    });
-  }
-
-  Future<Printer?> prePrint(String name) async {
-    var prefs = await SharedPreferences.getInstance();
-    if (prefs.getString("printer:name") == null ||
-        prefs.getString("printer:url") == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Default printer is not found. Please select a printer"),
-      ));
-
-      var printer = await Printing.pickPrinter(context: context);
-      if (printer != null) {
-        print(name, printer);
-      }
-    } else {
-      var printer = Printer(url: prefs.getString("printer:url")!);
-      if (!printer.isAvailable) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Printer is not available"),
-        ));
-
-        var printer = await Printing.pickPrinter(context: context);
-        if (printer != null) {
-          print(name, printer);
-        }
-      } else {
-        print(name, printer);
-      }
+    } catch (e) {
+      LoggerUtils().log(e.toString(), LogType.error);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to fetch data"),
+        ),
+      );
     }
-    return null;
-  }
-
-  Future<void> print(String name, Printer printer) async {
-    await Printing.directPrintPdf(
-      printer: printer,
-      onLayout: (format) => PrintingUtils.generatePDF(name),
-    );
   }
 
   @override
   void initState() {
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _loadData();
-    });
+    _fetchBill();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(
-          height: 10,
+          height: 25,
         ),
-        Text(
-          "History",
-          style: Theme.of(context).textTheme.bodyLarge,
+        SizedBox(
+          height: MediaQuery.of(context).size.height - 221,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SizedBox(
+              width: double.infinity,
+              child: DataTable(
+                showCheckboxColumn: false,
+                dividerThickness: 0.25,
+                // border color only horizontal
+                border: TableBorder(
+                  horizontalInside: BorderSide(
+                    color: Theme.of(context).dividerColor.withOpacity(0.1),
+                  ),
+                  verticalInside: BorderSide.none,
+                ),
+                columns: [
+                  DataColumn(
+                    label: Text(
+                      "Date",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "Name",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "Member ID",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "Created by",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "Created at",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                ],
+                rows: bills.isEmpty == true
+                    ? [
+                        DataRow(
+                          cells: [
+                            DataCell(
+                              Text(
+                                "No data",
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                            const DataCell(
+                              Text(""),
+                            ),
+                            const DataCell(
+                              Text(""),
+                            ),
+                            const DataCell(
+                              Text(""),
+                            ),
+                            const DataCell(
+                              Text(""),
+                            ),
+                          ],
+                        ),
+                      ]
+                    : bills
+                        .map(
+                          (bill) => DataRow(
+                            onSelectChanged: (value) {
+                              if (value == true) {
+                                // open bottom sheet
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) {
+                                      return Container(
+                                        width: 400,
+                                        padding: const EdgeInsets.all(20),
+                                        child: ListView(
+                                          shrinkWrap: true,
+                                          children: [
+                                            ListTile(
+                                              onTap: () {
+                                                Navigator.of(context)
+                                                    .pop("view");
+                                              },
+                                              leading: Icon(
+                                                Icons.view_array,
+                                                color: Theme.of(context)
+                                                    .iconTheme
+                                                    .color,
+                                              ),
+                                              title: Text(
+                                                "View bill",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyLarge,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).then((value) {
+                                  if (value == 'view') {
+                                    // open view bill page
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          // minimum width
+                                          content: SizedBox(
+                                            width: 800,
+                                            child: BillViewPage(id: bill.id),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }
+                                });
+                              }
+                            },
+                            cells: [
+                              DataCell(
+                                Text(
+                                  DateFormat("dd MMM yyyy").format(bill.date),
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  bill.name,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  bill.memberID == null
+                                      ? "NO"
+                                      : bill.memberID!.name,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  bill.createdBy.name,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  DateFormat("dd MMM yyyy HH:mm")
+                                      .format(bill.createdAt),
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                        .toList(),
+              ),
+            ),
+          ),
         ),
-        const SizedBox(
-          height: 10,
+        PaginationComponent(
+          pageIndex: page - 1,
+          pageSize: 20,
+          dataCount: count,
+          onPageChange: (newPage) {
+            setState(() {
+              page = newPage + 1;
+            });
+            _fetchBill();
+          },
         ),
       ],
     );

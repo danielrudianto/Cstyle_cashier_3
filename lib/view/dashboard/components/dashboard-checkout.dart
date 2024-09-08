@@ -1,6 +1,8 @@
+import 'package:cstyle_cashier_3/model/model.cart-item.model.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-checkout-footer.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -12,60 +14,269 @@ class DashboardCheckout extends StatefulWidget {
 }
 
 class _DashboardCheckoutState extends State<DashboardCheckout> {
-  _updatePriceDiscount(int index) {
+  _updatePriceDiscount(CartItemModel item, int index) {
+    GlobalKey<FormState> _formKey = GlobalKey<FormState>();
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        TextEditingController discountController = TextEditingController(
+          text: NumberFormat.decimalPattern().format(item.discount),
+        );
+        TextEditingController quantityController = TextEditingController(
+          text: NumberFormat.decimalPattern().format(item.quantity),
+        );
+
         return Material(
           type: MaterialType.transparency,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Container(
-                width: 400,
-                padding: const EdgeInsets.all(0),
-                child: Container(
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    // border radius only top
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Container(
+                  width: 400,
+                  padding: const EdgeInsets.all(0),
+                  child: Container(
+                    height: 380,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      // border radius only top
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.reference,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    Text(
+                                      item.description,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Tooltip(
+                                message: "Delete this item instead",
+                                child: IconButton(
+                                  splashColor:
+                                      Theme.of(context).secondaryHeaderColor,
+                                  onPressed: () {
+                                    Provider.of<CartNotifier>(context,
+                                            listen: false)
+                                        .deleteProductFromCart(index);
+                                    Navigator.pop(context);
+                                  },
+                                  icon: const Icon(
+                                    Icons.delete,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Divider(
+                            color: Theme.of(context).dividerColor,
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          //form field
+                          Flexible(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                labelText: "Price",
+                                labelStyle:
+                                    Theme.of(context).textTheme.bodySmall,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                ),
+                              ),
+                              controller: TextEditingController(
+                                text: NumberFormat.decimalPattern()
+                                    .format(item.price),
+                              ),
+                              readOnly: true,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          TextFormField(
+                            // label Price
+                            // decoration outlineInputBorder
+                            decoration: InputDecoration(
+                              labelText: "Discount",
+                              labelStyle: Theme.of(context).textTheme.bodySmall,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              _formKey.currentState!.validate();
+                              setState(() {});
+                            },
+                            controller: discountController,
+                            // input filter
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d+\.?\d{0,2}'),
+                              ),
+                            ],
+                            // keyboard type number
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              double? discount = double.tryParse(value!);
+                              if (discount != null) {
+                                if (discount < 0 || discount > 100) {
+                                  return 'Discount must be between 0 and 100';
+                                }
+                              } else {
+                                return 'Invalid input';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          TextFormField(
+                            // label Price
+                            // decoration outlineInputBorder
+                            decoration: InputDecoration(
+                              labelText: "Quantity",
+                              labelStyle: Theme.of(context).textTheme.bodySmall,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              _formKey.currentState!.validate();
+                              setState(() {});
+                            },
+                            controller: quantityController,
+                            // input filter
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d+\.?\d{0,2}'),
+                              ),
+                            ],
+                            // keyboard type number
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              double? quantity = double.tryParse(value!);
+                              if (quantity != null) {
+                                if (quantity < 0) {
+                                  return 'Quantity must be greater than 0';
+                                }
+                              } else {
+                                return 'Invalid input';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Text(
+                            "Price after discount: ${NumberFormat.decimalPattern().format(item.price - (item.price * double.parse(discountController.text) / 100))}",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("Cancel"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    item.discount =
+                                        double.parse(discountController.text);
+                                    item.quantity =
+                                        int.parse(quantityController.text);
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                child: const Text("Save"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: const Column(
-                    children: <Widget>[
-                      //form field
-                      Flexible(
-                        child: TextField(
-                          // label Price
-                          // decoration outlineInputBorder
-                          decoration: InputDecoration(
-                            labelText: "Price",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: TextField(
-                          // label Price
-                          // decoration outlineInputBorder
-                          decoration: InputDecoration(
-                            labelText: "Price",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         );
       },
-    );
+    ).then((value) {
+      setState(() {});
+    });
   }
 
   @override
@@ -121,7 +332,8 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                       itemBuilder: (context, index) {
                         return ListTile(
                             onTap: () {
-                              _updatePriceDiscount(index);
+                              _updatePriceDiscount(
+                                  value.selectedCart!.products[index], index);
                             },
                             title: Text(
                               value.selectedCart!.products[index].reference,

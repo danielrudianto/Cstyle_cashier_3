@@ -174,15 +174,15 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                           : Theme.of(context).disabledColor),
                 );
               }),
-              IconButton(
-                onPressed: () {
-                  router.push("/upload");
-                },
-                icon: Icon(
-                  Icons.cloud_upload,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-              ),
+              // IconButton(
+              //   onPressed: () {
+              //     router.push("/upload");
+              //   },
+              //   icon: Icon(
+              //     Icons.cloud_upload,
+              //     color: Theme.of(context).iconTheme.color,
+              //   ),
+              // ),
             ],
           )
         ],

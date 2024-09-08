@@ -1,18 +1,23 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
+import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/components/clip-path/trapezoid.clip-path.dart';
 import 'package:cstyle_cashier_3/components/product-image.component.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 class ComparePage extends StatefulWidget {
   const ComparePage({super.key});
@@ -26,57 +31,130 @@ class _ComparePageState extends State<ComparePage> {
   TextEditingController noteController2 = TextEditingController();
   TextEditingController noteController3 = TextEditingController();
 
+  ScreenshotController screenshotController = ScreenshotController();
+  bool isGenerating = false;
+
   int? prefered;
 
-  _shareProductsComparison() {
-    Uint8List? images;
-    _generatePDF().then((value) async {
-      await for (var page in Printing.raster(value)) {
-        images = page.asImage().toUint8List();
+  _shareProductsComparison() async {
+    setState(() {
+      isGenerating = true;
+    });
+
+    var image = await _generateImage();
+    screenshotController
+        .captureFromWidget(image)
+        .then((Uint8List? image) async {
+      // copy image to clipboard
+      final clipboard = SystemClipboard.instance;
+      if (clipboard == null) {
+        return; // Clipboard API is not supported on this platform.
       }
 
-      if (images != null) {
-        // await Share.shareXFiles([
-        //   XFile.fromData(
-        //     images!,
-        //     mimeType: 'image/png',
-        //   ),
-        // ],
-        //     text:
-        //         "Hi, I just asked CStyle to compare these products and here are the results.");
-      }
+      final item = DataWriterItem();
+      item.add(Formats.png(image!));
+      await clipboard.write([item]);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Image copied to clipboard"),
+        ),
+      );
+    }).catchError((error) {
+      LoggerUtils().log(
+        "Error capturing image: $error",
+        LogType.error,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Error capturing image"),
+        ),
+      );
+    }).whenComplete(() {
+      setState(() {
+        isGenerating = false;
+      });
     });
   }
 
-  _generatePDF() async {
-    var items = Provider.of<CompareNotifier>(context, listen: false)
-        .selectedComparisson;
-    final doc = pw.Document();
-    var rows = await _buildPwRows(items);
-    doc.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        build: (pw.Context context) {
-          return pw.Column(children: [
-            pw.Text("Product comparisson"),
-            pw.Text(DateFormat("dd/MM/yyyy").format(DateTime.now())),
-            pw.Divider(),
-            pw.Table(
-              columnWidths: const {
-                0: pw.FlexColumnWidth(1),
-                1: pw.FlexColumnWidth(1),
-                2: pw.FlexColumnWidth(1),
-                3: pw.FlexColumnWidth(1),
-              },
-              children: rows,
-            ),
-            // Same as the table below, but only the first image
-          ]);
-        },
-      ),
+  Future<Widget> _generateImage() async {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(
+          height: 25,
+        ),
+        Container(
+          padding: const EdgeInsets.all(20.0),
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Product Comparisson",
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              Text(
+                DateFormat("dd MMMM yyyy hh:mm:ss").format(DateTime.now()),
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(
+                height: 25,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: ResponsiveUtils.getContainerSize(context) - 40,
+                    child: Table(
+                      // Border horizontal only black12
+                      border: const TableBorder(
+                        horizontalInside: BorderSide(
+                          color: Colors.black12,
+                          width: 1,
+                        ),
+                        verticalInside: BorderSide(
+                          color: Colors.transparent,
+                          width: 1,
+                        ),
+                        top: BorderSide(
+                          color: Colors.transparent,
+                          width: 1,
+                        ),
+                        bottom: BorderSide(
+                          color: Colors.transparent,
+                          width: 1,
+                        ),
+                      ),
+                      columnWidths: const <int, TableColumnWidth>{
+                        0: FlexColumnWidth(1),
+                        1: FlexColumnWidth(1),
+                        2: FlexColumnWidth(1),
+                        3: FlexColumnWidth(1),
+                      },
+                      defaultVerticalAlignment:
+                          TableCellVerticalAlignment.middle,
+                      children: _buildPrintedRows(Provider.of<CompareNotifier>(
+                        context,
+                        listen: false,
+                      ).selectedComparisson),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Text(
+                "Status mentioned above is only an opinion from our personel. The actual status may vary based on the actual product. We are not responsible for any loss or damage caused by this comparison.",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
-
-    return doc.save();
   }
 
   List<TableRow> _buildRows(List<ProductModel> products) {
@@ -129,6 +207,7 @@ class _ComparePageState extends State<ComparePage> {
                   autoPlay: false,
                   id: e.id,
                   bordered: true,
+                  static: false,
                 ),
               ),
             );
@@ -250,20 +329,8 @@ class _ComparePageState extends State<ComparePage> {
                           prefered = null;
                         });
                       },
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            "assets/images/recommended.png",
-                            width: 50,
-                            height: 50,
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          const Text("Recommended by CSTYLE INDONESIA",
-                              textAlign: TextAlign.center),
-                        ],
-                      ),
+                      child: const Text("Recommended by CSTYLE INDONESIA",
+                          textAlign: TextAlign.center),
                     )
                   : GestureDetector(
                       onTap: () {
@@ -289,189 +356,171 @@ class _ComparePageState extends State<ComparePage> {
     ];
   }
 
-  Future<List<pw.TableRow>> _buildPwRows(List<ProductModel> products) async {
-    final image = await imageFromAssetBundle('assets/images/logo-bill.png');
-    return <pw.TableRow>[
-      pw.TableRow(children: [
-        pw.Container(
-          padding: const pw.EdgeInsets.all(8.0),
-          child: pw.Text(
+  List<TableRow> _buildPrintedRows(List<ProductModel> products) {
+    return <TableRow>[
+      TableRow(children: [
+        Container(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
             "Product name",
-            style: const pw.TextStyle(
-              color: PdfColors.black,
-            ),
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
         ),
         ...products.map((e) {
-          return pw.Container(
-            padding: const pw.EdgeInsets.all(8.0),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+          return Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                pw.Text(
+                Text(
                   e.reference,
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-                pw.Text(
+                Text(
                   e.description,
-                  style: const pw.TextStyle(
-                    color: PdfColors.black,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.normal,
+                      ),
                 ),
               ],
             ),
           );
         })
       ]),
-      pw.TableRow(
+      TableRow(
         children: [
-          pw.Container(
-            padding: const pw.EdgeInsets.all(8.0),
-            child: pw.Text(
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
               "Images",
-              style: const pw.TextStyle(
-                color: PdfColors.black,
-              ),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
           ...products.map((e) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text("Daniel"),
+            return Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: ProductImageComponent(
+                  autoPlay: false,
+                  id: e.id,
+                  bordered: false,
+                  static: true,
+                ),
+              ),
             );
           })
         ],
       ),
-      pw.TableRow(
+      TableRow(
         children: [
-          pw.Container(
-            padding: const pw.EdgeInsets.all(8.0),
-            child: pw.Text(
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
               "Brand",
-              style: const pw.TextStyle(
-                color: PdfColors.black,
-              ),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
           ...products.map((e) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text(
+            return Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
                 e.brand,
-                style: const pw.TextStyle(
-                  color: PdfColors.black,
-                ),
-              ),
-            );
-          })
-        ],
-      ),
-      pw.TableRow(
-        children: [
-          pw.Container(
-            padding: const pw.EdgeInsets.all(8.0),
-            child: pw.Text(
-              "Type",
-              style: const pw.TextStyle(
-                color: PdfColors.black,
-              ),
-            ),
-          ),
-          ...products.map((e) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text(
-                e.type,
-                style: const pw.TextStyle(
-                  color: PdfColors.black,
-                ),
-              ),
-            );
-          })
-        ],
-      ),
-      pw.TableRow(
-        children: [
-          pw.Container(
-            padding: const pw.EdgeInsets.all(8.0),
-            child: pw.Text(
-              "Price",
-              style: const pw.TextStyle(
-                color: PdfColors.black,
-              ),
-            ),
-          ),
-          ...products.map((e) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text(NumberFormat.decimalPattern().format(e.price),
-                  style: const pw.TextStyle(
-                    color: PdfColors.grey800,
-                  )),
-            );
-          })
-        ],
-      ),
-      pw.TableRow(
-        children: [
-          pw.Container(
-            padding: const pw.EdgeInsets.all(8.0),
-            child: pw.Text(
-              "Notes",
-              style: const pw.TextStyle(
-                color: PdfColors.black,
-              ),
-            ),
-          ),
-          ...products.mapIndexed((index, e) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text(index == 0
-                  ? (noteController1.text.isEmpty ? "-" : noteController1.text)
-                  : index == 1
-                      ? (noteController2.text.isEmpty
-                          ? "-"
-                          : noteController3.text)
-                      : (noteController3.text.isEmpty
-                          ? "-"
-                          : noteController3.text)),
-            );
-          })
-        ],
-      ),
-      pw.TableRow(
-        children: [
-          pw.Container(
-            padding: const pw.EdgeInsets.all(8.0),
-            child: pw.Text(
-              "Status",
-              style: const pw.TextStyle(
-                color: PdfColors.black,
-              ),
-            ),
-          ),
-          ...products.mapIndexed((index, e) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.all(8.0),
-              child: prefered == index
-                  ? pw.Text(
-                      "Recommended",
-                      style: const pw.TextStyle(
-                        color: PdfColors.green,
-                      ),
-                    )
-                  : pw.Container(
-                      padding: const pw.EdgeInsets.all(8.0),
-                      child: pw.Text(
-                        "-",
-                        style: const pw.TextStyle(
-                          color: PdfColors.grey800,
-                        ),
-                      ),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.normal,
                     ),
+              ),
+            );
+          })
+        ],
+      ),
+      TableRow(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Type",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+          ...products.map((e) {
+            return Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                e.type,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.normal,
+                    ),
+              ),
+            );
+          })
+        ],
+      ),
+      TableRow(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Price",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+          ...products.map((e) {
+            return Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                NumberFormat.decimalPattern().format(e.price),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.normal,
+                    ),
+              ),
+            );
+          })
+        ],
+      ),
+      TableRow(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Notes",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+          ...products.mapIndexed((index, e) {
+            return Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                index == 0
+                    ? noteController1.text
+                    : index == 1
+                        ? noteController2.text
+                        : noteController3.text,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.normal,
+                    ),
+              ),
+            );
+          })
+        ],
+      ),
+      TableRow(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Status",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+          ...products.mapIndexed((index, e) {
+            return Container(
+              padding: const EdgeInsets.all(8.0),
+              child: prefered == index
+                  ? const Text("Recommended by CSTYLE INDONESIA",
+                      textAlign: TextAlign.center)
+                  : const Text("-"),
             );
           })
         ],
@@ -483,142 +532,113 @@ class _ComparePageState extends State<ComparePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: _shareProductsComparison,
-        child: const Icon(Icons.share),
+        onPressed: isGenerating ? null : _shareProductsComparison,
+        child: Icon(isGenerating ? Icons.bubble_chart : Icons.share),
+      ),
+      appBar: AppBar(
+        title: Text(
+          "Compare products",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).iconTheme.color,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        backgroundColor: Theme.of(context).canvasColor,
+        // border bottom 1px divider color
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4.0),
+          child: Container(
+            color: Theme.of(context).dividerColor,
+            height: 1.0,
+          ),
+        ),
       ),
       body: Consumer<CompareNotifier>(builder: (_, value, __) {
         return SingleChildScrollView(
-          child: Stack(
-            alignment: Alignment.topCenter,
-            children: [
-              ClipPath(
-                clipper: TrapezoidClipPath(),
-                child: Container(
-                  width: double.infinity,
-                  color: const Color.fromARGB(255, 211, 212, 253),
-                  height: 500,
-                ),
-              ),
-              ClipPath(
-                clipper: InversedTrapezoidClipPath(),
-                child: Container(
-                  width: double.infinity,
-                  color: const Color.fromARGB(180, 124, 136, 248),
-                  height: 500,
-                ),
-              ),
-              SizedBox(
-                width: ResponsiveUtils.getContainerSize(context),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+          child: Center(
+            child: SizedBox(
+              width: ResponsiveUtils.getContainerSize(context),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(20.0),
+                    color: Colors.transparent,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () {
-                              router.pop();
-                            }),
                         const Text(
-                          "Compare products",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 4, 30, 73),
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          "Hi! Here are your products to compare. Please note that this feature is only available for 2 - 3 products at a time. You can also share this table via Whatsapp application using the share button on the top right corner.",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(
+                          height: 25,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: ResponsiveUtils.getContainerSize(context) -
+                                  40,
+                              child: Table(
+                                // Border horizontal only black12
+                                border: const TableBorder(
+                                  horizontalInside: BorderSide(
+                                    color: Colors.black12,
+                                    width: 1,
+                                  ),
+                                  verticalInside: BorderSide(
+                                    color: Colors.transparent,
+                                    width: 1,
+                                  ),
+                                  top: BorderSide(
+                                    color: Colors.transparent,
+                                    width: 1,
+                                  ),
+                                  bottom: BorderSide(
+                                    color: Colors.transparent,
+                                    width: 1,
+                                  ),
+                                ),
+                                columnWidths: const <int, TableColumnWidth>{
+                                  0: FlexColumnWidth(1),
+                                  1: FlexColumnWidth(1),
+                                  2: FlexColumnWidth(1),
+                                  3: FlexColumnWidth(1),
+                                },
+                                defaultVerticalAlignment:
+                                    TableCellVerticalAlignment.middle,
+                                children: _buildRows(value.selectedComparisson),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        Text(
+                          "Status mentioned above is only an opinion from our personel. The actual status may vary based on the actual product. We are not responsible for any loss or damage caused by this comparison.",
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
-                    const SizedBox(
-                      height: 25,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(20.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        // Radius 10
-                        borderRadius: BorderRadius.circular(10),
-                        // elevation
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 5,
-                            blurRadius: 7,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Hi! Here are your products to compare. Please note that this feature is only available for 2 - 3 products at a time. You can also share this table via Whatsapp application using the share button on the top right corner.",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width:
-                                    ResponsiveUtils.getContainerSize(context) -
-                                        40,
-                                child: Table(
-                                  // Border horizontal only black12
-                                  border: const TableBorder(
-                                    horizontalInside: BorderSide(
-                                      color: Colors.black12,
-                                      width: 1,
-                                    ),
-                                    verticalInside: BorderSide(
-                                      color: Colors.transparent,
-                                      width: 1,
-                                    ),
-                                    top: BorderSide(
-                                      color: Colors.transparent,
-                                      width: 1,
-                                    ),
-                                    bottom: BorderSide(
-                                      color: Colors.transparent,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  columnWidths: const <int, TableColumnWidth>{
-                                    0: FlexColumnWidth(1),
-                                    1: FlexColumnWidth(1),
-                                    2: FlexColumnWidth(1),
-                                    3: FlexColumnWidth(1),
-                                  },
-                                  defaultVerticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  children:
-                                      _buildRows(value.selectedComparisson),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Text(
-                            "Status mentioned above is only an opinion from our personel. The actual status may vary based on the actual product. We are not responsible for any loss or damage caused by this comparison.",
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       }),

@@ -177,7 +177,7 @@ class PrintingUtils {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(
-                      "Subtotal",
+                      "Total",
                       style: pw.TextStyle(
                         font: regularFont,
                         fontSize: 8,

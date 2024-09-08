@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
+import 'package:cstyle_cashier_3/view/member-list/components/member-detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -87,7 +88,7 @@ class _MemberListPageState extends State<MemberListPage> {
               width: double.infinity,
               child: DataTable(
                 showCheckboxColumn: false,
-                dividerThickness: 0.25,
+                dividerThickness: 0.75,
                 // border color only horizontal
                 border: TableBorder(
                   horizontalInside: BorderSide(
@@ -99,6 +100,12 @@ class _MemberListPageState extends State<MemberListPage> {
                   DataColumn(
                     label: Text(
                       "Name",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "Code",
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
@@ -126,6 +133,7 @@ class _MemberListPageState extends State<MemberListPage> {
                           ),
                           const DataCell(Text("")),
                           const DataCell(Text("")),
+                          const DataCell(Text("")),
                         ])
                       ]
                     : [
@@ -137,7 +145,6 @@ class _MemberListPageState extends State<MemberListPage> {
                                 if (value == true) {
                                   // open bottom sheet
                                   showModalBottomSheet(
-                                      showDragHandle: true,
                                       context: context,
                                       builder: (context) {
                                         return Container(
@@ -266,7 +273,39 @@ class _MemberListPageState extends State<MemberListPage> {
                                             ],
                                           ),
                                         );
-                                      });
+                                      }).then((value) {
+                                    if (value == 'detail') {
+                                      // show dialog detail
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Text(
+                                              "Member Detail",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineMedium,
+                                            ),
+                                            // content table
+                                            content: MemberDetailPage(e.code),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text(
+                                                  "Close",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge,
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
+                                  });
                                 }
                               },
                               cells: [
@@ -278,6 +317,22 @@ class _MemberListPageState extends State<MemberListPage> {
                                     ),
                                     child: Text(
                                       e.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.start,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                      vertical: 10,
+                                    ),
+                                    child: Text(
+                                      e.code,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.start,

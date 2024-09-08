@@ -106,6 +106,7 @@ class StockTransferFetchmodel {
   String? id;
   final String name;
   final Map<String, dynamic>? requestFrom;
+  final Map<String, dynamic>? requestTo;
   final List<StockTransferFetchItemModel> items;
   final String createdBy;
   DateTime createdAt;
@@ -114,6 +115,7 @@ class StockTransferFetchmodel {
     this.id,
     required this.name,
     required this.requestFrom,
+    required this.requestTo,
     required this.items,
     required this.createdBy,
     required this.createdAt,
@@ -135,6 +137,7 @@ class StockTransferFetchmodel {
       id: map['_id'],
       name: map['name'],
       requestFrom: map['requestFrom'],
+      requestTo: map['requestTo'],
       items: [],
       createdBy: map['createdBy']['name'],
       createdAt: DateTime.parse(map['createdAt']),
@@ -146,6 +149,7 @@ class StockTransferFetchmodel {
       id: map['_id'],
       name: map['name'],
       requestFrom: map['requestFrom'],
+      requestTo: map['requestTo'],
       items: List<StockTransferFetchItemModel>.from(
           map['items'].map((x) => StockTransferFetchItemModel.fromMap(x))),
       createdBy: map['createdBy']['name'],
@@ -175,6 +179,24 @@ class StockTransferFetchmodel {
     var store = await StoreModel.getCurrentProfile();
     var response = await ApiUtils().getRequest(
         "cashier/stock-transfer/unreceived",
+        {"page": page},
+        Options(
+          headers: {"store": store?.code},
+        ));
+
+    var data = response['data'];
+
+    return {
+      "data": List<StockTransferFetchmodel>.from(
+          data.map((x) => StockTransferFetchmodel.fromMap(x))),
+      "count": response['count']
+    };
+  }
+
+  static Future<Map<String, dynamic>> fetchCreated(int page) async {
+    var store = await StoreModel.getCurrentProfile();
+    var response = await ApiUtils().getRequest(
+        "cashier/stock-transfer/created",
         {"page": page},
         Options(
           headers: {"store": store?.code},

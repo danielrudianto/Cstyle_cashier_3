@@ -46,6 +46,7 @@ class DashboardGridList extends StatelessWidget {
                               id: e.id,
                               autoPlay: true,
                               bordered: false,
+                              static: false,
                             ),
                           ),
                     SizedBox(
@@ -77,7 +78,7 @@ class DashboardGridList extends StatelessWidget {
                             ),
                             Text(
                               "Rp. ${NumberFormat("#,##0.00").format(e.price)}",
-                              style: Theme.of(context).textTheme.titleMedium,
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(
                               height: 15,
@@ -100,7 +101,10 @@ class DashboardGridList extends StatelessWidget {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.add_shopping_cart_rounded),
+                                    const Icon(
+                                      Icons.add_shopping_cart_rounded,
+                                      color: Colors.white,
+                                    ),
                                     const SizedBox(
                                       height: 15,
                                     ),
@@ -120,8 +124,9 @@ class DashboardGridList extends StatelessWidget {
                             ),
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.verified,
+                                  color: Theme.of(context).iconTheme.color,
                                 ),
                                 const SizedBox(
                                   width: 10,
@@ -137,8 +142,9 @@ class DashboardGridList extends StatelessWidget {
                             ),
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.credit_card,
+                                  color: Theme.of(context).iconTheme.color,
                                 ),
                                 const SizedBox(
                                   width: 10,

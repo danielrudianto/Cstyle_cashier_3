@@ -63,9 +63,9 @@ class _AddMemberCheckoutState extends State<AddMemberCheckout> {
             padding: const EdgeInsets.all(15),
             height: 60,
             width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 11, 87, 208),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: Theme.of(context).secondaryHeaderColor,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(10),
                 topRight: Radius.circular(10),
               ),
@@ -137,7 +137,7 @@ class _AddMemberCheckoutState extends State<AddMemberCheckout> {
                 const Spacer(),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 11, 87, 208),
+                    backgroundColor: Theme.of(context).secondaryHeaderColor,
                   ),
                   onPressed: isChecking
                       ? null

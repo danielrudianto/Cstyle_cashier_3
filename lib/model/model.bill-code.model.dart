@@ -4,6 +4,9 @@ import 'package:cstyle_cashier_3/db/db.bill_payment.model.dart';
 import 'package:cstyle_cashier_3/db/db.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.bill-payment.model.dart';
 import 'package:cstyle_cashier_3/model/model.bill.model.dart';
+import 'package:cstyle_cashier_3/model/model.store.model.dart';
+import 'package:cstyle_cashier_3/utils/api.utils.dart';
+import 'package:dio/dio.dart';
 
 class BillCodeModel {
   int? id;
@@ -89,24 +92,6 @@ class BillCodeModel {
         mongoID: billCode.mongoID,
         createdBy: billCode.createdBy,
       );
-    } catch (error) {
-      throw Exception(error);
-    }
-  }
-
-  static Future<List<BillCodeModel>> fetchHistory(int page) async {
-    try {
-      var bills = await SQLBillCodeModel.fetch(page);
-      return bills.map((x) {
-        return BillCodeModel(
-          id: x.id!,
-          date: x.date,
-          name: x.name,
-          memberID: x.memberID,
-          createdBy: x.createdBy,
-          mongoID: x.mongoID,
-        );
-      }).toList();
     } catch (error) {
       throw Exception(error);
     }
@@ -310,5 +295,193 @@ class BillCodeModelSync {
     } catch (error) {
       throw Exception(error);
     }
+  }
+}
+
+class BillCodeModelFetch {
+  DateTime date;
+  DateTime createdAt;
+  String name;
+  String id;
+  BillCodeCreatedByModel createdBy;
+  BillCodeMembershipModel? memberID;
+  List<BillCodeItemModelFetch>? items;
+  List<BillCodePaymentModelFetch>? payment;
+
+  BillCodeModelFetch({
+    required this.date,
+    required this.createdAt,
+    required this.name,
+    required this.id,
+    required this.createdBy,
+    required this.memberID,
+    this.items,
+    this.payment,
+  });
+
+  factory BillCodeModelFetch.fromMap(Map<String, dynamic> map) {
+    return BillCodeModelFetch(
+      date: DateTime.parse(map['date']),
+      name: map['name'],
+      id: map['_id'],
+      createdBy: BillCodeCreatedByModel.fromMap(map['createdBy']),
+      createdAt: DateTime.parse(map['createdAt']),
+      memberID: map['memberID'] == null
+          ? null
+          : BillCodeMembershipModel(
+              name: map['memberID']['name'],
+              code: map['memberID']['code'],
+            ),
+      items: map['items'] == null
+          ? null
+          : (map['items'] as List).map((x) {
+              return BillCodeItemModelFetch.fromMap(x);
+            }).toList(),
+      payment: map['payment'] == null
+          ? null
+          : (map['payment'] as List).map((x) {
+              return BillCodePaymentModelFetch.fromMap(x);
+            }).toList(),
+    );
+  }
+
+  static Future<Map<String, dynamic>> fetchHistory(int page) async {
+    try {
+      var store = await StoreModel.getCurrentProfile();
+      var bills = await ApiUtils().getRequest(
+          "cashier/bills",
+          {
+            "page": page,
+          },
+          Options(headers: {
+            "store": store!.code,
+          }));
+
+      return {
+        "data": (bills['data'] as List).map((x) {
+          return BillCodeModelFetch(
+            date: DateTime.parse(x['date']),
+            name: x['name'],
+            id: x['_id'],
+            createdBy: BillCodeCreatedByModel.fromMap(x['createdBy']),
+            createdAt: DateTime.parse(x['createdAt']),
+            memberID: x['memberID'] == null
+                ? null
+                : BillCodeMembershipModel(
+                    name: x['memberID']['name'],
+                    code: x['memberID']['code'],
+                  ),
+          );
+        }).toList(),
+        "count": bills['count'],
+      };
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  static Future<BillCodeModelFetch> fetchByID(String id) async {
+    try {
+      var store = await StoreModel.getCurrentProfile();
+      var bill = await ApiUtils().getRequest(
+          "cashier/bills/$id",
+          {},
+          Options(headers: {
+            "store": store!.code,
+          }));
+
+      return BillCodeModelFetch.fromMap(bill);
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+}
+
+class BillCodeMembershipModel {
+  String name;
+  String code;
+
+  BillCodeMembershipModel({
+    required this.name,
+    required this.code,
+  });
+}
+
+class BillCodeCreatedByModel {
+  String name;
+
+  BillCodeCreatedByModel({
+    required this.name,
+  });
+
+  factory BillCodeCreatedByModel.fromMap(Map<String, dynamic> map) {
+    return BillCodeCreatedByModel(
+      name: map['name'],
+    );
+  }
+
+  // To map
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+    };
+  }
+}
+
+class BillCodeItemModelFetch {
+  BillCodItemModelItemIDFetch itemID;
+  double price;
+  double discount;
+  int quantity;
+
+  BillCodeItemModelFetch({
+    required this.itemID,
+    required this.price,
+    required this.discount,
+    required this.quantity,
+  });
+
+  factory BillCodeItemModelFetch.fromMap(Map<String, dynamic> map) {
+    return BillCodeItemModelFetch(
+      itemID: BillCodItemModelItemIDFetch.fromMap(map['itemID']),
+      // price was in integer, how to make it double?
+      price: double.parse(map['price'].toString()),
+      discount: double.parse(map['discount'].toString()),
+      quantity: map['quantity'],
+    );
+  }
+}
+
+class BillCodItemModelItemIDFetch {
+  String reference;
+  String description;
+
+  BillCodItemModelItemIDFetch({
+    required this.reference,
+    required this.description,
+  });
+
+  factory BillCodItemModelItemIDFetch.fromMap(Map<String, dynamic> map) {
+    return BillCodItemModelItemIDFetch(
+      reference: map['reference'],
+      description: map['description'],
+    );
+  }
+}
+
+class BillCodePaymentModelFetch {
+  String type;
+  num amount;
+
+  BillCodePaymentModelFetch({
+    required this.type,
+    required this.amount,
+  });
+
+  factory BillCodePaymentModelFetch.fromMap(Map<String, dynamic> map) {
+    return BillCodePaymentModelFetch(
+      type: map['type'],
+      amount: map['amount'],
+    );
   }
 }

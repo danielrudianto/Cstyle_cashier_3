@@ -37,7 +37,7 @@ class CartNotifier extends ChangeNotifier {
   Future<int?> createNewCart() async {
     var random = Random();
     var name =
-        "B-CS-${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, "0")}";
+        "B-CS-${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, "0")}-";
     for (var i = 0; i < 8; i++) {
       name += random.nextInt(10).toString();
     }

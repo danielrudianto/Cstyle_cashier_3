@@ -1,8 +1,10 @@
 import 'package:cstyle_cashier_3/components/checkout-card/checkout-card.dart';
 import 'package:cstyle_cashier_3/components/dashed-line/dashed-line.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
+import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class DashboardCheckoutFooter extends StatelessWidget {
   final num value;
@@ -39,43 +41,62 @@ class DashboardCheckoutFooter extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      "Subtotal",
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      "Total",
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ),
                   Expanded(
                     child: Text(
-                      NumberFormat("#,##0.##").format(
-                        value / 1.11,
+                      NumberFormat("#,##0.00").format(
+                        value,
                       ),
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: Theme.of(context).textTheme.headlineSmall,
                       textAlign: TextAlign.right,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      "Tax",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      NumberFormat("#,##0.##").format(
-                        value - value / 1.11,
-                      ),
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: Text(
+              //         "Subtotal",
+              //         style: Theme.of(context).textTheme.bodyLarge,
+              //       ),
+              //     ),
+              //     Expanded(
+              //       child: Text(
+              //         NumberFormat("#,##0.##").format(
+              //           value / 1.11,
+              //         ),
+              //         style: Theme.of(context).textTheme.bodyLarge,
+              //         textAlign: TextAlign.right,
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(
+              //   height: 10,
+              // ),
+              // Row(
+              //   children: [
+              //     Expanded(
+              //       child: Text(
+              //         "Tax",
+              //         style: Theme.of(context).textTheme.bodyLarge,
+              //       ),
+              //     ),
+              //     Expanded(
+              //       child: Text(
+              //         NumberFormat("#,##0.##").format(
+              //           value - value / 1.11,
+              //         ),
+              //         style: Theme.of(context).textTheme.bodyLarge,
+              //         textAlign: TextAlign.right,
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ),
@@ -156,24 +177,68 @@ class DashboardCheckoutFooter extends StatelessWidget {
             left: 10,
             right: 10,
           ),
-          child: ElevatedButton(
-            // style to have padding
-
-            onPressed: () {
-              router.push("/checkout");
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).secondaryHeaderColor,
-              padding: const EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 50,
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  // style to have padding
+                  onPressed: () {
+                    // Check the stock first
+                    Provider.of<CartNotifier>(context, listen: false)
+                        .checkStock()
+                        .then((value) {
+                      if (!value) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                "Insufficient stock, please check the cart!"),
+                          ),
+                        );
+                      } else {
+                        router.push("/checkout");
+                      }
+                    });
+                    // router.push("/checkout");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).secondaryHeaderColor,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 50,
+                    ),
+                    // radius
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text("Checkout"),
+                ),
               ),
-              // radius
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              IconButton(
+                onPressed: () {
+                  Provider.of<CartNotifier>(
+                    context,
+                    listen: false,
+                  ).deselectCart();
+                },
+                icon: Icon(
+                  Icons.archive,
+                  color: Theme.of(context).iconTheme.color,
+                ),
               ),
-            ),
-            child: const Text("Checkout"),
+              IconButton(
+                onPressed: () {
+                  Provider.of<CartNotifier>(
+                    context,
+                    listen: false,
+                  ).deleteCurrentCart();
+                },
+                icon: Icon(
+                  Icons.delete,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              ),
+            ],
           ),
         )
       ],

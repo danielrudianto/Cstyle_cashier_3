@@ -2,25 +2,21 @@ import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart
 import 'package:cstyle_cashier_3/model/model.countries.dart';
 import 'package:cstyle_cashier_3/model/model.daily-report.model.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
-import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/view/check-stock/check-stock.page.dart';
+import 'package:cstyle_cashier_3/view/history/history.page.dart';
 import 'package:cstyle_cashier_3/view/member-list/member-list.page.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/create-stock-transfer/create-stock-transfer.page.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/list-stock-transfer/list-stock-transfer.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/receive-stock-transfer/receive-stock-transfer.page.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/send-stock-transfer/send-stock.transfer.page.dart';
-import 'package:cstyle_cashier_3/view/store/components/bill-history.dart';
 import 'package:cstyle_cashier_3/view/store/components/store-dashboard.dart';
-import 'package:cstyle_cashier_3/viewmodel/theme.viewmodel.dart';
 import 'package:flag/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class StorePage extends StatefulWidget {
   const StorePage({super.key});
@@ -893,7 +889,7 @@ class _StorePageState extends State<StorePage> {
       case 6:
         return const CheckStockPage();
       case 7:
-        return const BillHistory();
+        return const HistoryPage();
       default:
         return const SizedBox();
     }
@@ -937,7 +933,7 @@ class _StorePageState extends State<StorePage> {
                                 });
                               },
                         title: Text(
-                          "Dashboard",
+                          "Home",
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: selectedMenu == 0

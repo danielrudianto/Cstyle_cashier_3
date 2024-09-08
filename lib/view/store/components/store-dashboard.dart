@@ -173,6 +173,13 @@ class _StoreDashboardState extends State<StoreDashboard> {
               ),
         ),
         const SizedBox(
+          height: 15,
+        ),
+        Text(
+          "Currently operating on ${storeModel == null ? "" : storeModel!.name}",
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+        const SizedBox(
           height: 5,
         ),
         Text(
@@ -599,7 +606,39 @@ class _StoreDashboardState extends State<StoreDashboard> {
                     height: 15,
                   ),
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Printing.pickPrinter(context: context)
+                          .then((selectedPrinter) {
+                        if (selectedPrinter != null) {
+                          if (selectedPrinter.isAvailable == false) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text("Printer is currently not available"),
+                              ),
+                            );
+                          } else {
+                            setState(() {
+                              printer = selectedPrinter;
+                            });
+
+                            SharedPreferences.getInstance().then((prefs) {
+                              prefs.setString(
+                                  "printer:url", selectedPrinter.url);
+                              prefs.setString(
+                                  "printer:name", selectedPrinter.name);
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    "Printer has been changed successfully"),
+                              ),
+                            );
+                          }
+                        }
+                      });
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           vertical: 10, horizontal: 25),
@@ -630,7 +669,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
           onTap: () async {
             StoreModel.removeCurrentProfile().then((_) {
               // Go to main page
-              router.go("/");
+              exit(0);
             }).catchError((error) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

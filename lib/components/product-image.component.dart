@@ -7,12 +7,14 @@ class ProductImageComponent extends StatefulWidget {
   final String id;
   bool autoPlay;
   bool bordered;
+  bool static;
 
   ProductImageComponent({
     super.key,
     required this.id,
     required this.autoPlay,
     required this.bordered,
+    required this.static,
   });
 
   @override
@@ -39,44 +41,74 @@ class _ProductImageComponentState extends State<ProductImageComponent> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        // Border radius
-        borderRadius: BorderRadius.circular(0),
-        // Border 1px solid
-        border: Border.all(
-          color: widget.bordered ? Colors.grey.shade300 : Colors.transparent,
-          width: 1,
-        ),
-      ),
-      height: 200,
-      width: 200,
-      padding: const EdgeInsets.all(5),
-      child: isLoading
-          ? const CircularProgressIndicator()
-          : images.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Image.asset(
-                    "assets/images/lost.png",
-                    opacity: const AlwaysStoppedAnimation(0.5),
-                  ),
-                )
-              : CarouselSlider(
-                  items: images.map((x) {
-                    return FastCachedImage(
-                      url: x.imageUrl,
-                    );
-                  }).toList(),
-                  options: CarouselOptions(
-                    enlargeCenterPage: true,
-                    autoPlay: widget.autoPlay,
-                    aspectRatio: 1,
-                    enlargeStrategy: CenterPageEnlargeStrategy.height,
-                    viewportFraction: 1.0,
-                    initialPage: 0,
-                  ),
-                ),
-    );
+    return widget.static
+        ? Container(
+            decoration: BoxDecoration(
+              // Border radius
+              borderRadius: BorderRadius.circular(0),
+              // Border 1px solid
+              border: Border.all(
+                color:
+                    widget.bordered ? Colors.grey.shade300 : Colors.transparent,
+                width: 1,
+              ),
+            ),
+            height: 200,
+            width: 200,
+            padding: const EdgeInsets.all(5),
+            child: isLoading
+                ? const CircularProgressIndicator()
+                : images.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Image.asset(
+                          "assets/images/lost.png",
+                          opacity: const AlwaysStoppedAnimation(0.5),
+                        ),
+                      )
+                    : FastCachedImage(
+                        url: images.first.imageUrl,
+                      ),
+          )
+        : Container(
+            decoration: BoxDecoration(
+              // Border radius
+              borderRadius: BorderRadius.circular(0),
+              // Border 1px solid
+              border: Border.all(
+                color:
+                    widget.bordered ? Colors.grey.shade300 : Colors.transparent,
+                width: 1,
+              ),
+            ),
+            height: 200,
+            width: 200,
+            padding: const EdgeInsets.all(5),
+            child: isLoading
+                ? const CircularProgressIndicator()
+                : images.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Image.asset(
+                          "assets/images/lost.png",
+                          opacity: const AlwaysStoppedAnimation(0.5),
+                        ),
+                      )
+                    : CarouselSlider(
+                        items: images.map((x) {
+                          return FastCachedImage(
+                            url: x.imageUrl,
+                          );
+                        }).toList(),
+                        options: CarouselOptions(
+                          enlargeCenterPage: true,
+                          autoPlay: widget.autoPlay,
+                          aspectRatio: 1,
+                          enlargeStrategy: CenterPageEnlargeStrategy.height,
+                          viewportFraction: 1.0,
+                          initialPage: 0,
+                        ),
+                      ),
+          );
   }
 }
