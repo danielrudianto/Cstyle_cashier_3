@@ -5,9 +5,9 @@ class ApiUtils {
 
   // final String baseURL = "https://api.cstyle.cloud/";
 
-  ApiUtils() : _dio = Dio(BaseOptions(baseUrl: "http://127.0.0.1:5000/"));
-  // ApiUtils()
-  // : _dio = Dio(BaseOptions(baseUrl: "https://service.cstyle.cloud/"));
+  // ApiUtils() : _dio = Dio(BaseOptions(baseUrl: "http://127.0.0.1:5000/"));
+  ApiUtils()
+      : _dio = Dio(BaseOptions(baseUrl: "https://service.cstyle.cloud/"));
 
   Future<dynamic> getRequest(
     String endpoint,

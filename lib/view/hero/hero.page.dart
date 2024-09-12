@@ -61,9 +61,7 @@ class _HeroPageState extends State<HeroPage> {
 
         if (value.commands!.isNotEmpty) {
           try {
-            for (var command in value.commands!) {
-              await DatabaseUtils().runCommand(command);
-            }
+            await DatabaseUtils().runCommands(value.commands!);
             LoggerUtils().log(
               "${value.commands!.length} commands successfully ran 🚀🚀🚀",
               LogType.info,

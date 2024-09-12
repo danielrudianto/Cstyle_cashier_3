@@ -275,6 +275,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
         );
       },
     ).then((value) {
+      Provider.of<CartNotifier>(context, listen: false).updatePrice();
       setState(() {});
     });
   }

@@ -39,7 +39,7 @@ class SyncUtils {
       LoggerUtils().log(error.toString(), LogType.error);
     }).whenComplete(() {
       LoggerUtils().log("Sync completed", LogType.info);
-      Future.delayed(const Duration(minutes: 15), () {
+      Future.delayed(const Duration(minutes: 1), () {
         sync();
       });
     });

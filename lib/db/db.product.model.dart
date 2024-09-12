@@ -90,7 +90,8 @@ class SQLProductModel {
           where: "reference LIKE ? OR description LIKE ? AND isActive = 1",
           limit: 25,
           offset: (page - 1) * 25,
-          whereArgs: ["%$keyword%", "%$keyword%"]);
+          whereArgs: ["%$keyword%", "%$keyword%"],
+          orderBy: "reference ASC");
       return result.map((e) => SQLProductModel.fromMap(e)).toList();
     } else {
       var result = await db.query("product",
@@ -98,7 +99,8 @@ class SQLProductModel {
               "type IN (${selectedTypes.map((x) => "'${x.replaceAll("'", "'''")}'").join(",")}) AND (reference LIKE ? OR description LIKE ?  AND isActive = 1)",
           limit: 25,
           offset: (page - 1) * 25,
-          whereArgs: ["%$keyword%", "%$keyword%"]);
+          whereArgs: ["%$keyword%", "%$keyword%"],
+          orderBy: "reference ASC");
       return result.map((e) => SQLProductModel.fromMap(e)).toList();
     }
   }

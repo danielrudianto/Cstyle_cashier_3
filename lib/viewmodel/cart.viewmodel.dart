@@ -156,6 +156,9 @@ class CartNotifier extends ChangeNotifier {
   }
 
   void updatePrice() {
+    print("Updating price");
+    print(selectedCart!.products.first);
+
     _totalPrice = selectedCart == null
         ? 0.0
         : selectedCart!.products.fold(
@@ -163,7 +166,7 @@ class CartNotifier extends ChangeNotifier {
             (sum, element) =>
                 sum +
                 element.quantity *
-                    (element.price * (100 - element.discount)) /
+                    ((element.price * (100 - element.discount)) ~/ 1) /
                     100);
     notifyListeners();
   }

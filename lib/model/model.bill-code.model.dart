@@ -130,7 +130,8 @@ class BillCodeModelCreate extends BillCodeModel {
         modifiedBills.add(bill);
       }
 
-      totalPrice += (bill.price * (100 - bill.discount) / 100) * bill.quantity;
+      totalPrice +=
+          ((bill.price * (100 - bill.discount) / 100) ~/ 1) * bill.quantity;
     }
 
     // Next we're going to deduct the cash payments based on the changes
