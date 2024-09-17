@@ -26,8 +26,8 @@ class SyncUtils {
                 ))
             .then((result) async {
           for (var i = 0; i < result.length; i++) {
-            var billCode = BillCodeModelSync.fromMap(result[i]);
-            await billCode.updateSync();
+            await BillCodeModelSync.updateSync(
+                result[i]['name'], result[i]['_id']);
           }
         }).catchError((error) {
           LoggerUtils().log(error.toString(), LogType.error);
@@ -39,7 +39,7 @@ class SyncUtils {
       LoggerUtils().log(error.toString(), LogType.error);
     }).whenComplete(() {
       LoggerUtils().log("Sync completed", LogType.info);
-      Future.delayed(const Duration(minutes: 1), () {
+      Future.delayed(const Duration(seconds: 30), () {
         sync();
       });
     });

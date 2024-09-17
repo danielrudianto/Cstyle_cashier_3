@@ -5,7 +5,6 @@ import 'package:cstyle_cashier_3/view/store/store.page.dart';
 import 'package:cstyle_cashier_3/view/page-view/components/appbar-pageview.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
@@ -517,9 +516,7 @@ class _PageViewPageState extends State<PageViewPage> {
             if (!validation) {
               ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Insufficient stock")));
-            } else {
-              GoRouter.of(context).push("/checkout");
-            }
+            } else {}
           } else if (value == "clear") {
             Future.delayed(
                 const Duration(

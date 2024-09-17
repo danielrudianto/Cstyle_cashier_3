@@ -1191,7 +1191,7 @@ class _StorePageState extends State<StorePage> {
                     child: Padding(
                       padding: const EdgeInsets.all(15),
                       child: AnimatedContainer(
-                        duration: Duration(
+                        duration: const Duration(
                           milliseconds: 200,
                         ),
                         child: currentPage,

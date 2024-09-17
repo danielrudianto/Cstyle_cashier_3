@@ -25,8 +25,9 @@ class CartNotifier extends ChangeNotifier {
 
   void selectCart(CartModel cart) {
     _selectedCart = cart;
-    updatePrice();
     notifyListeners();
+
+    updatePrice();
   }
 
   void deselectCart() {
@@ -156,18 +157,17 @@ class CartNotifier extends ChangeNotifier {
   }
 
   void updatePrice() {
-    print("Updating price");
-    print(selectedCart!.products.first);
-
     _totalPrice = selectedCart == null
         ? 0.0
         : selectedCart!.products.fold(
-            0.0,
+            0,
             (sum, element) =>
                 sum +
                 element.quantity *
-                    ((element.price * (100 - element.discount)) ~/ 1) /
-                    100);
+                    (element.price * (100 - element.discount) / 100000)
+                        .floor() *
+                    1000);
+
     notifyListeners();
   }
 
@@ -199,7 +199,7 @@ class CartNotifier extends ChangeNotifier {
       }).toList(),
       payments: payments.map((e) {
         return BillPaymentModelCreate(
-          amount: e['amount'],
+          amount: double.parse(e['amount'].toString()),
           paymentMethod: e['method'],
         );
       }).toList(),
@@ -225,17 +225,20 @@ class CartNotifier extends ChangeNotifier {
       return Future.value(false);
     }
 
-    // Combine where productID is the same
-    var modifiedCartItems = selectedCart!.products.fold<Map<String, int>>(
-        {},
-        (previousValue, element) => {
-              ...previousValue,
-              element.itemID:
-                  (previousValue[element.itemID] ?? 0) + element.quantity
-            });
+    Map<String, int> listCheckStock = {};
+
+    // for each products
+    for (var product in selectedCart!.products) {
+      if (listCheckStock.containsKey(product.itemID)) {
+        listCheckStock[product.itemID] =
+            listCheckStock[product.itemID]! + product.quantity;
+      } else {
+        listCheckStock[product.itemID] = product.quantity;
+      }
+    }
 
     // Check stock
-    return ProductModel.checkStock(modifiedCartItems);
+    return ProductModel.checkStock(listCheckStock);
   }
 
   int checkProductQuantity(String id) {

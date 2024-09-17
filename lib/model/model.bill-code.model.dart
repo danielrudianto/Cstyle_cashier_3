@@ -64,6 +64,26 @@ class BillCodeModel {
     }
   }
 
+  static Future<BillCodeModel?> fetchLastBillCode() async {
+    try {
+      var billCode = await SQLBillCodeModel.fetchLastBillCode();
+      if (billCode == null) {
+        return null;
+      } else {
+        return BillCodeModel(
+          id: billCode.id,
+          date: billCode.date,
+          name: billCode.name,
+          memberID: billCode.memberID,
+          mongoID: billCode.mongoID,
+          createdBy: billCode.createdBy,
+        );
+      }
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
   static Future<List<BillCodeModel>> fetchProblematicBills() async {
     try {
       var bills = await SQLBillCodeModel.fetchProblematicBills();
@@ -130,8 +150,9 @@ class BillCodeModelCreate extends BillCodeModel {
         modifiedBills.add(bill);
       }
 
-      totalPrice +=
-          ((bill.price * (100 - bill.discount) / 100) ~/ 1) * bill.quantity;
+      totalPrice += ((bill.price * (100 - bill.discount) / 100) ~/ 1000) *
+          1000 *
+          bill.quantity;
     }
 
     // Next we're going to deduct the cash payments based on the changes
@@ -290,7 +311,7 @@ class BillCodeModelSync {
     };
   }
 
-  updateSync() async {
+  static updateSync(String name, String id) async {
     try {
       await SQLBillCodeModel.updateUnsyncedBill(id, name);
     } catch (error) {

@@ -66,11 +66,13 @@ class SQLProductModel {
   static Future<SQLProductModel> fetchByBarcode(String barcode) async {
     try {
       final db = await DatabaseUtils().database;
-      var result = await db.query("product",
-          where: "barcode = ?  AND isActive = 1",
-          whereArgs: [barcode],
-          limit: 1,
-          offset: 0);
+      var result = await db.query(
+        "product",
+        where: "barcode = ?  AND isActive = 1",
+        whereArgs: [barcode],
+        limit: 1,
+        offset: 0,
+      );
 
       if (result.isNotEmpty) {
         return SQLProductModel.fromMap(result.first);

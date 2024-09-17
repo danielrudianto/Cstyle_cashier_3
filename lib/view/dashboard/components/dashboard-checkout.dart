@@ -1,4 +1,5 @@
 import 'package:cstyle_cashier_3/model/model.cart-item.model.dart';
+import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-checkout-footer.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DashboardCheckout extends StatefulWidget {
-  const DashboardCheckout({super.key});
+  final Function onComingBack;
+  const DashboardCheckout({
+    super.key,
+    required this.onComingBack,
+  });
 
   @override
   State<DashboardCheckout> createState() => _DashboardCheckoutState();
@@ -15,7 +20,7 @@ class DashboardCheckout extends StatefulWidget {
 
 class _DashboardCheckoutState extends State<DashboardCheckout> {
   _updatePriceDiscount(CartItemModel item, int index) {
-    GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+    GlobalKey<FormState> formKey = GlobalKey<FormState>();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -29,7 +34,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
         return Material(
           type: MaterialType.transparency,
           child: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
@@ -157,7 +162,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                               ),
                             ),
                             onChanged: (value) {
-                              _formKey.currentState!.validate();
+                              formKey.currentState!.validate();
                               setState(() {});
                             },
                             controller: discountController,
@@ -207,7 +212,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                               ),
                             ),
                             onChanged: (value) {
-                              _formKey.currentState!.validate();
+                              formKey.currentState!.validate();
                               setState(() {});
                             },
                             controller: quantityController,
@@ -252,7 +257,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
+                                  if (formKey.currentState!.validate()) {
                                     item.discount =
                                         double.parse(discountController.text);
                                     item.quantity =
@@ -366,19 +371,19 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                                                 .format(value.selectedCart!
                                                     .products[index].price)
                                             : NumberFormat.decimalPattern()
-                                                .format(
-                                                value.selectedCart!
-                                                        .products[index].price -
-                                                    (value
-                                                            .selectedCart!
-                                                            .products[index]
-                                                            .price *
-                                                        value
-                                                            .selectedCart!
-                                                            .products[index]
-                                                            .discount /
-                                                        100),
-                                              ),
+                                                .format((value
+                                                                .selectedCart!
+                                                                .products[index]
+                                                                .price *
+                                                            (100 -
+                                                                value
+                                                                    .selectedCart!
+                                                                    .products[
+                                                                        index]
+                                                                    .discount) /
+                                                            100000)
+                                                        .floor() *
+                                                    1000),
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyMedium,
@@ -403,7 +408,14 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                       itemCount: value.selectedCart!.products.length,
                     ),
                   ),
-                  DashboardCheckoutFooter(value: value.totalPrice),
+                  DashboardCheckoutFooter(
+                    value: value.totalPrice,
+                    checkout: () {
+                      router.push("/checkout").then((_) {
+                        widget.onComingBack();
+                      });
+                    },
+                  ),
                 ],
               ),
       );

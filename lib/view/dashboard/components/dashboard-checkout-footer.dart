@@ -1,6 +1,5 @@
 import 'package:cstyle_cashier_3/components/checkout-card/checkout-card.dart';
 import 'package:cstyle_cashier_3/components/dashed-line/dashed-line.dart';
-import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +7,12 @@ import 'package:provider/provider.dart';
 
 class DashboardCheckoutFooter extends StatelessWidget {
   final num value;
-  const DashboardCheckoutFooter({super.key, required this.value});
+  final Function checkout;
+  const DashboardCheckoutFooter({
+    super.key,
+    required this.value,
+    required this.checkout,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -189,16 +193,15 @@ class DashboardCheckoutFooter extends StatelessWidget {
                         .then((value) {
                       if (!value) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                             content: Text(
                                 "Insufficient stock, please check the cart!"),
                           ),
                         );
                       } else {
-                        router.push("/checkout");
+                        checkout();
                       }
                     });
-                    // router.push("/checkout");
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).secondaryHeaderColor,

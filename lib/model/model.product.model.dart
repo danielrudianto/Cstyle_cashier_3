@@ -41,7 +41,7 @@ class ProductModel {
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
     return ProductModel(
-      id: map['id'],
+      id: map['mongoID'],
       reference: map['reference'],
       description: map['description'],
       brand: map['brand'],
@@ -94,8 +94,10 @@ class ProductModel {
     var products =
         await SQLProductModel.fetchByItemIDs(modifiedCartItems.keys.toList());
     for (var modifiedCartItem in modifiedCartItems.entries) {
-      var stock =
-          products.firstWhere((x) => x.mongoID == modifiedCartItem.key).stock;
+      var stockData =
+          products.indexWhere((x) => x.mongoID == modifiedCartItem.key);
+
+      var stock = stockData == -1 ? 0 : products[stockData].stock;
 
       if (stock < modifiedCartItem.value) {
         return false;

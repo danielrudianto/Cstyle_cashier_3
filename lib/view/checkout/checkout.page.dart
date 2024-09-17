@@ -8,10 +8,8 @@ import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/view/checkout/components/add-member-checkout.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
@@ -72,18 +70,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   int get totalAmount {
-    return (Provider.of<CartNotifier>(context, listen: false)
-            .selectedCart!
-            .products
-            .fold(
-                0.0,
-                (previousValue, element) =>
-                    previousValue +
-                    element.price *
-                        element.quantity *
-                        (100 - element.discount) /
-                        100) ~/
-        1);
+    int value = (Provider.of<CartNotifier>(context, listen: false)
+        .selectedCart!
+        .products
+        .fold(
+            0,
+            (previousValue, element) =>
+                previousValue +
+                element.quantity *
+                    (element.price * (100 - element.discount) / 100000)
+                        .floor() *
+                    1000));
+
+    return value;
   }
 
   bool isPaymentMethodExists(String e) {
@@ -92,17 +91,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   void _calculateChange() {
     int value = (Provider.of<CartNotifier>(context, listen: false)
-            .selectedCart!
-            .products
-            .fold(
-                0.0,
-                (previousValue, element) =>
-                    previousValue +
-                    element.price *
-                        element.quantity *
-                        (100 - element.discount) /
-                        100) ~/
-        1);
+        .selectedCart!
+        .products
+        .fold(
+            0,
+            (previousValue, element) =>
+                previousValue +
+                element.quantity *
+                    (element.price * (100 - element.discount) / 100000)
+                        .floor() *
+                    1000));
 
     setState(() {
       change = value - totalPayment;
@@ -119,18 +117,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return;
     }
 
-    int value = (Provider.of<CartNotifier>(context, listen: false)
-            .selectedCart!
-            .products
-            .fold(
-                0.0,
-                (previousValue, element) =>
-                    previousValue +
-                    element.price *
-                        element.quantity *
-                        (100 - element.discount) /
-                        100)) ~/
-        1;
+    int value = totalAmount;
 
     if (totalPayment < value) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -369,6 +356,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                               payments.removeWhere((element) =>
                                                   element['method'] == e);
                                             });
+                                            amountController(e).text = "";
+                                            _calculateChange();
                                           } else {
                                             setState(() {
                                               if (e != 'Cash' &&
@@ -377,6 +366,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                   'method': e,
                                                   'amount': totalAmount,
                                                 });
+
+                                                _calculateChange();
 
                                                 if (e == 'Card') {
                                                   cardController.text =
@@ -401,6 +392,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                   'method': e,
                                                   'amount': 0.0,
                                                 });
+
+                                                _calculateChange();
                                               }
                                             });
                                           }
@@ -682,22 +675,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                 children: [
                                                   Text(
                                                     "${NumberFormat().format(value.selectedCart!.products[index].quantity)} x ${value.selectedCart!.products[index].discount == 0 ? NumberFormat("#,##0.00").format(value.selectedCart!.products[index].price) : NumberFormat("#,##0.00").format(
-                                                        ((value
-                                                                .selectedCart!
-                                                                .products[index]
-                                                                .price) -
+                                                        1000 *
                                                             ((value
-                                                                        .selectedCart!
-                                                                        .products[
-                                                                            index]
-                                                                        .price *
+                                                                    .selectedCart!
+                                                                    .products[
+                                                                        index]
+                                                                    .price) *
+                                                                (100 -
                                                                     value
                                                                         .selectedCart!
                                                                         .products[
                                                                             index]
-                                                                        .discount /
-                                                                    100)) ~/
-                                                                1),
+                                                                        .discount) /
+                                                                100 ~/
+                                                                1000),
                                                       )}",
                                                     style: Theme.of(context)
                                                         .textTheme
@@ -716,36 +707,37 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                             0
                                                         ? NumberFormat(
                                                                 "#,##0.00")
-                                                            .format(value
-                                                                    .selectedCart!
-                                                                    .products[
-                                                                        index]
-                                                                    .quantity *
-                                                                value
-                                                                    .selectedCart!
-                                                                    .products[
-                                                                        index]
-                                                                    .price)
-                                                        : NumberFormat(
-                                                                "#,##0.00")
                                                             .format(
                                                             (value.selectedCart!.products[index].quantity *
-                                                                        (value
-                                                                            .selectedCart!
-                                                                            .products[
-                                                                                index]
-                                                                            .price) -
-                                                                    ((value
+                                                                        value
                                                                             .selectedCart!
                                                                             .products[
                                                                                 index]
                                                                             .price *
-                                                                        value
+                                                                        (100 -
+                                                                            value.selectedCart!.products[index].discount) /
+                                                                        100000)
+                                                                    .floor() *
+                                                                1000,
+                                                          )
+                                                        : NumberFormat(
+                                                                "#,##0.00")
+                                                            .format(
+                                                            value
+                                                                    .selectedCart!
+                                                                    .products[
+                                                                        index]
+                                                                    .quantity *
+                                                                (value
                                                                             .selectedCart!
-                                                                            .products[index]
-                                                                            .discount /
-                                                                        100))) ~/
-                                                                1,
+                                                                            .products[
+                                                                                index]
+                                                                            .price *
+                                                                        (100 -
+                                                                            value.selectedCart!.products[index].discount) /
+                                                                        100000)
+                                                                    .floor() *
+                                                                1000,
                                                           ),
                                                     style: Theme.of(context)
                                                         .textTheme

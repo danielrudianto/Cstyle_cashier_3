@@ -7,7 +7,6 @@ import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:table_sticky_headers/table_sticky_headers.dart';
 
@@ -190,7 +189,7 @@ class _CheckStockPageState extends State<CheckStockPage> {
                                 "${directory.path}/stock_${DateTime.now().microsecondsSinceEpoch.toString()}.xlsx";
                             if (value == null) {
                               ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
+                                  .showSnackBar(const SnackBar(
                                 content: Text("Failed to encode Excel fild"),
                               ));
                             } else {
@@ -199,7 +198,7 @@ class _CheckStockPageState extends State<CheckStockPage> {
                                 ..writeAsBytesSync(value);
 
                               ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
+                                  .showSnackBar(const SnackBar(
                                 content:
                                     Text("Stock card downloaded successfully."),
                               ));

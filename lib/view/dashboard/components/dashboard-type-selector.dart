@@ -1,7 +1,11 @@
+import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
+import 'package:cstyle_cashier_3/utils/printing.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardTypeSelector extends StatefulWidget {
   final List<String> productTypes;
@@ -27,6 +31,30 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
   void initState() {
     searchFocusNode = FocusNode();
     super.initState();
+  }
+
+  Future<Printer?> checkPrinter() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString("printer:name") == null ||
+        prefs.getString("printer:url") == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Default printer is not found. Please select a printer"),
+      ));
+    } else {
+      var selectedPrinter = Printer(
+          url: prefs.getString("printer:url")!,
+          name: prefs.getString("printer:name")!);
+
+      if (selectedPrinter.isAvailable) {
+        return selectedPrinter;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content:
+              Text("Default printer is not available. Please select a printer"),
+        ));
+      }
+    }
+    return null;
   }
 
   @override
@@ -174,24 +202,49 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                           : Theme.of(context).disabledColor),
                 );
               }),
-              // IconButton(
-              //   onPressed: () {
-              //     router.push("/upload");
-              //   },
-              //   icon: Icon(
-              //     Icons.cloud_upload,
-              //     color: Theme.of(context).iconTheme.color,
-              //   ),
-              // ),
+              IconButton(
+                onPressed: () {
+                  // Check last bill
+                  BillCodeModel.fetchLastBillCode().then((value) {
+                    if (value == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "No bill found",
+                          ),
+                        ),
+                      );
+                    } else {
+                      // Check printer
+                      checkPrinter().then((printer) async {
+                        if (printer == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "No printer found. Please select printer from your store page.",
+                              ),
+                            ),
+                          );
+                        } else {
+                          await Printing.directPrintPdf(
+                            printer: printer,
+                            onLayout: (format) =>
+                                PrintingUtils.generatePDF(value.name),
+                          );
+                        }
+                      });
+                    }
+                  });
+                },
+                icon: Icon(
+                  Icons.print,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              ),
             ],
           )
         ],
       ),
     );
-  }
-
-  focus() {
-    print("called");
-    searchFocusNode.requestFocus();
   }
 }

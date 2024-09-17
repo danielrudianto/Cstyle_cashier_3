@@ -141,6 +141,8 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> addProductToCart(ProductModel product) async {
     final cartNotifier = Provider.of<CartNotifier>(context, listen: false);
     var selectedCart = cartNotifier.selectedCart;
+    LoggerUtils().log(
+        "Add Product to Cart terpanggil ${DateTime.now()}", LogType.warning);
 
     if (selectedCart == null) {
       try {
@@ -169,21 +171,43 @@ class _DashboardPageState extends State<DashboardPage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         key: scaffoldKey,
         body: BarcodeKeyboardListener(
-          bufferDuration: const Duration(milliseconds: 500),
+          caseSensitive: false,
+          bufferDuration: const Duration(milliseconds: 100),
           onBarcodeScanned: (barcode) {
-            LoggerUtils().log("Barcode scanned: $barcode", LogType.info);
-            ProductModel.fetchByBarcode(barcode).then((product) {
-              if (product == null) {
-                LoggerUtils().log("Product not found", LogType.error);
-                showSnackbar("Product not found.");
-              } else {
-                LoggerUtils().log("Product found", LogType.info);
-                addProductToCart(product);
-              }
-            }).catchError((error) {
-              LoggerUtils().log(error.toString(), LogType.error);
-              showSnackbar("Product not found");
-            });
+            if (barcode.length < 2) {
+              return;
+            } else {
+              LoggerUtils().log("Barcode scanned: $barcode", LogType.info);
+              ProductModel.fetchByBarcode(barcode).then((product) {
+                if (product == null) {
+                  LoggerUtils().log("Product not found", LogType.error);
+                  showSnackbar("Product not found.");
+                } else {
+                  LoggerUtils().log("Product found", LogType.info);
+                  if (product.stock == 0) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
+                        ),
+                        action: SnackBarAction(
+                          label: "OK",
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          },
+                        ),
+                      ),
+                    );
+                  } else {
+                    addProductToCart(product);
+                  }
+                }
+              }).catchError((error) {
+                LoggerUtils().log(error.toString(), LogType.error);
+                showSnackbar("Product not found");
+              });
+            }
           },
           useKeyDownEvent: true,
           child: Column(
@@ -233,7 +257,11 @@ class _DashboardPageState extends State<DashboardPage> {
                         ],
                       ),
                     ),
-                    const DashboardCheckout(),
+                    DashboardCheckout(
+                      onComingBack: () {
+                        fetchProducts(1);
+                      },
+                    ),
                   ],
                 ),
               ),

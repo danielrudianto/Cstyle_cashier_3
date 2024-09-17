@@ -78,6 +78,21 @@ class SQLBillCodeModel {
     return result.map((e) => SQLBillCodeModel.fromMap(e)).toList();
   }
 
+  static Future<SQLBillCodeModel?> fetchLastBillCode() async {
+    var database = await DatabaseUtils().database;
+    var result = await database.query(
+      "bill_code",
+      orderBy: "id DESC",
+      limit: 1,
+    );
+
+    if (result.isEmpty) {
+      return null;
+    } else {
+      return SQLBillCodeModel.fromMap(result.first);
+    }
+  }
+
   static Future<List<SQLBillCodeModel>> fetchProblematicBills() async {
     var database = await DatabaseUtils().database;
     var result = await database.query(

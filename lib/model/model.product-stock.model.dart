@@ -3,7 +3,6 @@ import 'package:cstyle_cashier_3/db/db.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/api.utils.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 
 class ProductStockModel {
   String mongoID;

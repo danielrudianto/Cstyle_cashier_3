@@ -111,7 +111,7 @@ class _SelectEmployeeState extends State<SelectEmployee> {
               onChanged: (value) {
                 _checkEmployeeCode(value);
               },
-              obscureText: true,
+              obscureText: false,
               controller: membershipCodeController,
               decoration: InputDecoration(
                 hintText: "Enter your employee code",
