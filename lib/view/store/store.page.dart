@@ -304,6 +304,7 @@ class _StorePageState extends State<StorePage> {
           return StatefulBuilder(builder: (context, setState) {
             return Dialog(
               surfaceTintColor: Theme.of(context).cardColor,
+              backgroundColor: Theme.of(context).cardColor,
               child: SizedBox(
                 width: 400,
                 child: SingleChildScrollView(
@@ -466,7 +467,7 @@ class _StorePageState extends State<StorePage> {
                                   child: Material(
                                     child: Container(
                                       width: 370,
-                                      color: Colors.white,
+                                      color: Theme.of(context).canvasColor,
                                       child: ListView.builder(
                                         shrinkWrap: true,
                                         padding: const EdgeInsets.all(10.0),
@@ -491,8 +492,12 @@ class _StorePageState extends State<StorePage> {
                                                     Expanded(
                                                       child: Text(
                                                         "${option.name} (${option.code})",
-                                                        style: const TextStyle(
-                                                          color: Colors.black87,
+                                                        style: TextStyle(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodyLarge!
+                                                                  .color,
                                                         ),
                                                         maxLines: 1,
                                                         overflow: TextOverflow
@@ -546,8 +551,11 @@ class _StorePageState extends State<StorePage> {
                                 "Remove nationality",
                                 style: TextStyle(
                                   color: nationality == null
-                                      ? Colors.grey
-                                      : Colors.black,
+                                      ? Theme.of(context).disabledColor
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .color,
                                   fontWeight: FontWeight.normal,
                                 ),
                               ),
@@ -630,6 +638,33 @@ class _StorePageState extends State<StorePage> {
                                 firstDate = DateTime(firstDate.year - 100);
                                 lastDate = DateTime(lastDate.year - 18);
                                 showDatePicker(
+                                        // container color
+                                        builder: (context, child) {
+                                          return Theme(
+                                            data: Theme.of(context).copyWith(
+                                              colorScheme: Theme.of(context)
+                                                          .brightness ==
+                                                      Brightness.dark
+                                                  ? ColorScheme.dark(
+                                                      surface: Theme.of(context)
+                                                          .canvasColor,
+                                                    )
+                                                  : ColorScheme.light(
+                                                      surface: Theme.of(context)
+                                                          .canvasColor,
+                                                    ),
+                                              textButtonTheme:
+                                                  TextButtonThemeData(
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor:
+                                                      Theme.of(context)
+                                                          .secondaryHeaderColor,
+                                                ),
+                                              ),
+                                            ),
+                                            child: child!,
+                                          );
+                                        },
                                         context: context,
                                         firstDate: firstDate,
                                         lastDate: lastDate)
@@ -651,20 +686,28 @@ class _StorePageState extends State<StorePage> {
                               height: 15,
                             ),
                             RadioListTile<language>(
-                                title: const Text("English"),
+                                title: Text(
+                                  "English",
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
                                 groupValue: selectedLanguage,
                                 value: language.EN,
-                                activeColor: Colors.black54,
+                                activeColor:
+                                    Theme.of(context).secondaryHeaderColor,
                                 onChanged: (value) {
                                   setState(() {
                                     selectedLanguage = value;
                                   });
                                 }),
                             RadioListTile<language>(
-                                title: const Text("Bahasa"),
+                                title: Text(
+                                  "Bahasa",
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
                                 groupValue: selectedLanguage,
                                 value: language.ID,
-                                activeColor: Colors.black54,
+                                activeColor:
+                                    Theme.of(context).secondaryHeaderColor,
                                 onChanged: (value) {
                                   setState(() {
                                     selectedLanguage = value;
@@ -864,6 +907,8 @@ class _StorePageState extends State<StorePage> {
           });
     }).catchError((error) {
       LoggerUtils().log(error.toString(), LogType.error);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error)));
     });
   }
 
@@ -1108,7 +1153,9 @@ class _StorePageState extends State<StorePage> {
                         ),
                       ),
                       ListTile(
-                        onTap: openDailyReport,
+                        onTap: () {
+                          openDailyReport();
+                        },
                         title: Text(
                           "Daily Report",
                           style: Theme.of(context).textTheme.bodyMedium,

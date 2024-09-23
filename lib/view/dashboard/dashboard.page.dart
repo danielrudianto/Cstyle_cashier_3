@@ -8,9 +8,8 @@ import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-grid-list.d
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-header.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-type-selector.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
-import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_listener/flutter_barcode_listener.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -33,6 +32,9 @@ class _DashboardPageState extends State<DashboardPage> {
   List<String> selectedProductTypes = [];
   bool isLastPage = false;
   Timer? _debounce;
+  Timer? _debounceBarcode;
+
+  bool _isFocusing = false;
 
   int maxPage = 3;
 
@@ -164,111 +166,147 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  void _onBarcodeScanned() {
+    LoggerUtils().log("Barcode scanned: $barcode", LogType.info);
+    if (barcode.length < 2) {
+      return;
+    } else {
+      ProductModel.fetchByBarcode(barcode).then((product) {
+        if (product == null) {
+          LoggerUtils().log("Product not found", LogType.error);
+          showSnackbar("Product not found.");
+        } else {
+          LoggerUtils().log("Product found", LogType.info);
+          if ((product.stock ?? 0) <= 0) {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text(
+                  "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
+                ),
+                action: SnackBarAction(
+                  label: "OK",
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                ),
+              ),
+            );
+          } else {
+            addProductToCart(product);
+          }
+        }
+      }).catchError((error) {
+        LoggerUtils().log(error.toString(), LogType.error);
+        showSnackbar("Product not found");
+      });
+    }
+  }
+
+  var barcode = "";
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<CompareNotifier>(builder: (_, value, __) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        key: scaffoldKey,
-        body: BarcodeKeyboardListener(
-          caseSensitive: false,
-          bufferDuration: const Duration(milliseconds: 100),
-          onBarcodeScanned: (barcode) {
-            if (barcode.length < 2) {
-              return;
-            } else {
-              LoggerUtils().log("Barcode scanned: $barcode", LogType.info);
-              ProductModel.fetchByBarcode(barcode).then((product) {
-                if (product == null) {
-                  LoggerUtils().log("Product not found", LogType.error);
-                  showSnackbar("Product not found.");
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      key: scaffoldKey,
+      // ignore: deprecated_member_use
+      body: RawKeyboardListener(
+        autofocus: true,
+        focusNode: FocusNode(),
+        onKey: (event) {
+          if (_isFocusing) {
+            barcode = "";
+            return;
+          } else {
+            if (event is RawKeyDownEvent) {
+              if (event.logicalKey.keyLabel.length == 1 &&
+                  event.logicalKey.keyLabel.contains(RegExp(r'[0-9]'))) {
+                barcode += event.logicalKey.keyLabel;
+                _debounceBarcode?.cancel();
+                _debounceBarcode = Timer(const Duration(milliseconds: 100), () {
+                  // Reset the state here
+                  setState(() {
+                    barcode = '';
+                  });
+                });
+              } else if (event.logicalKey.keyLabel == 'Enter') {
+                if (barcode.length < 2) {
+                  return;
                 } else {
-                  LoggerUtils().log("Product found", LogType.info);
-                  if (product.stock == 0) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                          "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
-                        ),
-                        action: SnackBarAction(
-                          label: "OK",
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          },
-                        ),
-                      ),
-                    );
-                  } else {
-                    addProductToCart(product);
-                  }
+                  _onBarcodeScanned();
                 }
-              }).catchError((error) {
-                LoggerUtils().log(error.toString(), LogType.error);
-                showSnackbar("Product not found");
-              });
+              }
             }
-          },
-          useKeyDownEvent: true,
-          child: Column(
-            children: [
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DashboardTypeSelector(
-                      key: typeSelectorState,
-                      productTypes:
-                          productTypeNames.map((x) => x.name).toList(),
-                      selectedTypes: selectedProductTypes,
-                      onUpdateSelectedTypes: (List<String> types) {
-                        setState(() {
-                          selectedProductTypes = types;
-                        });
+          }
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DashboardTypeSelector(
+                    key: typeSelectorState,
+                    productTypes: productTypeNames.map((x) => x.name).toList(),
+                    selectedTypes: selectedProductTypes,
+                    onUpdateSelectedTypes: (List<String> types) {
+                      setState(() {
+                        selectedProductTypes = types;
+                      });
 
-                        fetchProducts(1);
-                      },
-                      onSearch: (value) {
-                        onSearch(value);
-                      },
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          const DashboardHeader(),
-                          Expanded(
-                            child: RawScrollbar(
+                      fetchProducts(1);
+                    },
+                    onSearch: (value) {
+                      onSearch(value);
+                    },
+                    onFocus: () {
+                      setState(() {
+                        _isFocusing = true;
+                      });
+                    },
+                    onUnfocus: () {
+                      setState(() {
+                        _isFocusing = false;
+                      });
+                    },
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        const DashboardHeader(),
+                        Expanded(
+                          child: RawScrollbar(
+                            controller: scrollController,
+                            thumbColor:
+                                const Color.fromARGB(255, 161, 121, 220),
+                            radius: const Radius.circular(8.0),
+                            thickness: 8.0,
+                            child: SingleChildScrollView(
                               controller: scrollController,
-                              thumbColor:
-                                  const Color.fromARGB(255, 161, 121, 220),
-                              radius: const Radius.circular(8.0),
-                              thickness: 8.0,
-                              child: SingleChildScrollView(
-                                controller: scrollController,
-                                child: DashboardGridList(
-                                  products: products,
-                                  onAddProduct: (ProductModel product) async {
-                                    await addProductToCart(product);
-                                  },
-                                ),
+                              child: DashboardGridList(
+                                products: products,
+                                onAddProduct: (ProductModel product) async {
+                                  await addProductToCart(product);
+                                },
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    DashboardCheckout(
-                      onComingBack: () {
-                        fetchProducts(1);
-                      },
-                    ),
-                  ],
-                ),
+                  ),
+                  DashboardCheckout(
+                    onComingBack: () {
+                      fetchProducts(1);
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 }

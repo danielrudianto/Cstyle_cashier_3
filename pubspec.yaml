@@ -32,7 +32,7 @@ dependencies:
   logger: ^2.3.0
   sqflite_common_ffi: ^2.3.3
   intl: ^0.19.0
-  carousel_slider: ^4.2.1
+  carousel_slider: ^5.0.0
   expansion_tile_group: ^1.2.4
   smooth_scroll_multiplatform: ^1.0.8
   ntp: ^2.0.0
@@ -52,6 +52,7 @@ dependencies:
   screenshot: ^3.0.0
   super_clipboard: ^0.8.19
   flutter_launcher_icons: ^0.13.1
+  barcode_input_listener: ^0.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -68,7 +69,7 @@ msix_config:
   display_name: CStyle Cashier Application V3
   publisher_display_name: PT. Terra Nusa Teknologi
   identity_name: terranusa.tech.cstyle.cashier3
-  msix_version: 3.0.3.0
+  msix_version: 3.0.6.0
   logo_path: E:\source\repos\OJS Pelangi Harapan\cstyle_cashier_3\Icon.png
   capabilities: internetClient
   languages: en-US

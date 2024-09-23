@@ -22,3 +22,16 @@ We made changes on 16 September 2024
 Sync duration changed from 1 minute to 30 seconds
 Change how it works on update bill, reducing the error on duplicate
 Made improvements on dashboard, enabling user to fetch the stock from the very first time, every time check out process is completed
+
+## Changelog 3.0.5
+
+We made changes on 19 September 2024
+
+Bug fix on double input during barcode scan
+Added snackbar when error on daily report.
+
+## Changelog 3.0.6
+
+We made changes on 20 September 2024
+
+Bug fix on printing not rounding down

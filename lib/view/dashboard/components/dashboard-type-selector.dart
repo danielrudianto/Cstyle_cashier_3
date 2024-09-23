@@ -12,12 +12,17 @@ class DashboardTypeSelector extends StatefulWidget {
   final List<String> selectedTypes;
   final Function onUpdateSelectedTypes;
   final Function onSearch;
+  final Function onFocus;
+  final Function onUnfocus;
+
   const DashboardTypeSelector({
     super.key,
     required this.selectedTypes,
     required this.productTypes,
     required this.onUpdateSelectedTypes,
     required this.onSearch,
+    required this.onFocus,
+    required this.onUnfocus,
   });
 
   @override
@@ -30,6 +35,13 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
   @override
   void initState() {
     searchFocusNode = FocusNode();
+    searchFocusNode.addListener(() {
+      if (searchFocusNode.hasFocus) {
+        widget.onFocus();
+      } else {
+        widget.onUnfocus();
+      }
+    });
     super.initState();
   }
 

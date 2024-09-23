@@ -138,7 +138,7 @@ class PrintingUtils {
                                 pw.Expanded(
                                   flex: 3,
                                   child: pw.Text(
-                                    "${NumberFormat().format(e.quantity)} x ${NumberFormat().format((e.price * (100 - e.discount) / 100))}",
+                                    "${NumberFormat().format(e.quantity)} x ${NumberFormat().format((e.price * (100 - e.discount) / 100000).floor() * 1000)}",
                                     style: pw.TextStyle(
                                       font: regularFont,
                                       fontSize: 8,
@@ -162,7 +162,8 @@ class PrintingUtils {
                         ),
                         pw.Text(
                           NumberFormat().format(e.quantity *
-                              (e.price * (100 - e.discount) / 100)),
+                              (e.price * (100 - e.discount) / 100000).floor() *
+                              1000),
                           style: pw.TextStyle(
                             font: regularFont,
                             fontSize: 8,
@@ -191,8 +192,10 @@ class PrintingUtils {
                               previousValue +
                               (element.quantity *
                                   (element.price *
-                                      (100 - element.discount) /
-                                      100)),
+                                          (100 - element.discount) /
+                                          100000)
+                                      .floor() *
+                                  1000),
                         ),
                       ),
                       style: pw.TextStyle(
