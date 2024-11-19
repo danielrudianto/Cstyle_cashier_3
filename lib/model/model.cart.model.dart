@@ -152,4 +152,32 @@ class CartModel {
                   element.quantity),
     );
   }
+
+  static Future<CartModel> fetchByName(String name) async {
+    var cartCode = await SQLCartCodeModel.fetchByName(name);
+    var cartItems = await SQLCartModelPrint.fetchByCodeID(cartCode.id!);
+
+    return CartModel(
+      id: cartCode.id!,
+      date: DateTime.parse(cartCode.date),
+      name: cartCode.name,
+      products: cartItems.map((e) {
+        return CartItemModel(
+          id: e.id,
+          itemID: e.itemID,
+          quantity: e.quantity,
+          discount: e.discount,
+          price: e.price,
+          reference: e.reference,
+          description: e.description,
+        );
+      }).toList(),
+      totalPrice: cartItems.fold(
+          0,
+          (previousValue, element) =>
+              previousValue +
+              (element.price * (100 - element.discount) / 100) *
+                  element.quantity),
+    );
+  }
 }

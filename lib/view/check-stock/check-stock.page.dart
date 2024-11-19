@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
@@ -38,19 +39,58 @@ class _CheckStockPageState extends State<CheckStockPage> {
       isLoading = true;
     });
 
-    ProductStockFetchModel.checkServerStock(page, searchController.text)
-        .then((value) {
-      setState(() {
-        isLoading = false;
-        stores = value.stores;
-        items = value.data;
-        count = value.count;
-      });
-    }).catchError((error) {
-      LoggerUtils().log(error.toString(), LogType.error);
-    }).whenComplete(() {
-      setState(() {
-        isLoading = false;
+    StoreModel.getCurrentProfile().then((store) {
+      ProductStockFetchModel.checkServerStock(page, searchController.text)
+          .then((value) {
+        ProductStockModel.fetchLocalStock(value.data.map((e) {
+          return e.id;
+        }).toList())
+            .then((stocks) {
+          List<ProductStockFetchItemModel> itemList = [];
+          for (var e in value.data) {
+            var stockIndex = stocks.indexWhere((x) => x.mongoID == e.id);
+            var availableStocks = [
+              ProductStockFetchStoreModel(
+                storeID: store!.code,
+                quantity: stockIndex == -1 ? 0 : stocks[stockIndex].stock,
+              ),
+            ];
+            availableStocks.addAll(e.stock);
+
+            itemList.add(
+              ProductStockFetchItemModel(
+                id: e.id,
+                reference: e.reference,
+                description: e.description,
+                brand: e.brand,
+                type: e.type,
+                stock: availableStocks,
+              ),
+            );
+          }
+
+          List<StoreModel> finalStores = [
+            StoreModel(
+              name: store!.name,
+              address: store!.address,
+              id: store!.code,
+            )
+          ];
+          finalStores.addAll(value.stores);
+
+          setState(() {
+            isLoading = false;
+            stores = finalStores;
+            items = itemList;
+            count = value.count;
+          });
+        });
+      }).catchError((error) {
+        LoggerUtils().log(error.toString(), LogType.error);
+      }).whenComplete(() {
+        setState(() {
+          isLoading = false;
+        });
       });
     });
   }
@@ -122,13 +162,13 @@ class _CheckStockPageState extends State<CheckStockPage> {
   @override
   void initState() {
     _fetchItems(1);
-    controller.addListener(() {
-      // debounce 500ms
-      if (_debounce?.isActive ?? false) _debounce?.cancel();
-      _debounce = Timer(const Duration(milliseconds: 500), () {
-        _fetchItems(1);
-      });
-    });
+    // controller.addListener(() {
+    //   // debounce 500ms
+    //   if (_debounce?.isActive ?? false) _debounce?.cancel();
+    //   _debounce = Timer(const Duration(milliseconds: 500), () {
+    //     _fetchItems(1);
+    //   });
+    // });
     super.initState();
   }
 
@@ -309,6 +349,12 @@ class _CheckStockPageState extends State<CheckStockPage> {
             onPageChange: (value) {
               page = value + 1;
               _fetchItems(page);
+              // scroll controller, go to top
+              controller.animateTo(
+                0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+              );
             }),
       ],
     );

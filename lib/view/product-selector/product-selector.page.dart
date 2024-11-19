@@ -8,7 +8,12 @@ import 'package:intl/intl.dart';
 
 class ProductSelectorPage extends StatefulWidget {
   final String? storeID;
-  const ProductSelectorPage({super.key, this.storeID});
+  final List<dynamic> selectedItems;
+  const ProductSelectorPage({
+    super.key,
+    this.storeID,
+    required this.selectedItems,
+  });
 
   @override
   State<ProductSelectorPage> createState() => _ProductSelectorPageState();
@@ -19,6 +24,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
   List<ProductModel> products = [];
   int page = 1;
   int productCount = 0;
+  List<dynamic> selectedItems = [];
 
   TextEditingController searchController = TextEditingController();
   Timer? debounceTime;
@@ -65,14 +71,16 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
       });
     });
 
+    selectedItems = widget.selectedItems;
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 400,
-      height: 400,
+      width: 750,
+      height: 500,
       padding: const EdgeInsets.all(20),
       color: Theme.of(context).cardColor,
       child: Material(
@@ -101,7 +109,6 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                 )
               ],
             ),
-
             Expanded(
               child: isLoading
                   ? const Center(
@@ -112,6 +119,14 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                       itemCount: products.length,
                       itemBuilder: (context, index) {
                         return ListTile(
+                          leading: CircleAvatar(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              child: selectedItems
+                                      .any((e) => e['id'] == products[index].id)
+                                  ? const Icon(Icons.check)
+                                  : const Icon(
+                                      Icons.add,
+                                    )),
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 15,
                             horizontal: 25,
@@ -139,7 +154,23 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                             ],
                           ),
                           onTap: () {
-                            closeDialog(products[index]);
+                            // closeDialog(products[index]);
+                            var itemIndex = selectedItems.indexWhere(
+                                (e) => e['id'] == products[index].id);
+
+                            if (itemIndex == -1) {
+                              setState(() {
+                                selectedItems.add({
+                                  "id": products[index].id,
+                                  "reference": products[index].reference,
+                                  "description": products[index].description,
+                                });
+                              });
+                            } else {
+                              setState(() {
+                                selectedItems.removeAt(itemIndex);
+                              });
+                            }
                           },
                         );
                       },
@@ -147,17 +178,30 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
             ),
             // Paginator
 
-            PaginationComponent(
-                pageIndex: page - 1,
-                dataCount: productCount,
-                pageSize: 20,
-                onPageChange: (selectedPage) {
-                  setState(() {
-                    page = selectedPage + 1;
-                  });
+            Row(
+              children: [
+                Expanded(
+                  child: PaginationComponent(
+                      pageIndex: page - 1,
+                      dataCount: productCount,
+                      pageSize: 20,
+                      onPageChange: (selectedPage) {
+                        setState(() {
+                          page = selectedPage + 1;
+                        });
 
-                  fetchProducts(page);
-                })
+                        fetchProducts(page);
+                      }),
+                ),
+                // button to apply
+                ElevatedButton(
+                  onPressed: () {
+                    closeDialog(selectedItems);
+                  },
+                  child: const Text("Apply"),
+                ),
+              ],
+            ),
           ],
         ),
       ),

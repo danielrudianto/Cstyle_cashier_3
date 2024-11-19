@@ -207,4 +207,13 @@ class SQLProductStock {
           "UPDATE product SET stock = stock - ${item.stock} WHERE mongoId = '${item.mongoID}';");
     }
   }
+
+  static Future<List<SQLProductStock>> fetchCurrentStock(
+      List<String> itemIDs) async {
+    final db = await DatabaseUtils().database;
+    var result = await db.query("product",
+        columns: ["mongoID", "stock"],
+        where: "mongoID IN (${itemIDs.map((x) => "'$x'").join(",")})");
+    return result.map((e) => SQLProductStock.fromMap(e)).toList();
+  }
 }

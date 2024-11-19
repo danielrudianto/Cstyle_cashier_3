@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
 import 'package:cstyle_cashier_3/model/model.product-type.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
@@ -39,6 +40,7 @@ class _DashboardPageState extends State<DashboardPage> {
   int maxPage = 3;
 
   ScrollController scrollController = ScrollController();
+  FocusNode barcodeFocusNode = FocusNode();
 
   @override
   void didChangeDependencies() {
@@ -213,7 +215,7 @@ class _DashboardPageState extends State<DashboardPage> {
       // ignore: deprecated_member_use
       body: RawKeyboardListener(
         autofocus: true,
-        focusNode: FocusNode(),
+        focusNode: barcodeFocusNode,
         onKey: (event) {
           if (_isFocusing) {
             barcode = "";
@@ -268,6 +270,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     onUnfocus: () {
                       setState(() {
                         _isFocusing = false;
+                        barcodeFocusNode.requestFocus();
                       });
                     },
                   ),

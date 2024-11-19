@@ -33,5 +33,56 @@ Added snackbar when error on daily report.
 ## Changelog 3.0.6
 
 We made changes on 20 September 2024
-
 Bug fix on printing not rounding down
+
+## Changelog 3.0.7
+
+Update on daily report view, making sure discount is properly calculated.
+
+
+## Changelog 3.0.8
+
+Added sales value on daily report
+Added self stock on check stock function
+Fix typo on stock transfer request
+Fix print member
+
+## Changelog 3.0.8.1
+
+Fix on stock reading
+
+## Changelog 3.0.8.2
+
+Change destination server
+
+## Changelog 3.0.8.3
+
+Now selecting member has to use online data
+Printed stock transfer send
+Fix bug on pagination stock
+Create print preview on checkout before printing
+Scale factor on daily report
+Move select employee to bottom
+
+## Changelog 3.0.8.5
+
+Fix on awaiting printing when sending stock transfer.
+Fix on bill pagination
+
+## Changelog 3.0.8.6
+Change destination server
+
+## Changelog 3.0.8.7
+Fix on printing format send stock transfer
+
+## Changelog 3.0.8.8
+Added note on printing stock transfer request
+Enabling to edit discount on check out page
+
+## Changelog 3.0.8.9
+Change price updater
+Change print preview enabling scroll
+
+## Changelog 3.0.8.10
+The commands ran, will be separated and skipped if found error.
+Different from previous approach.

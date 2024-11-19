@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -147,11 +148,14 @@ class DatabaseUtils {
 
   Future runCommands(List<String> command) async {
     final db = await database;
-    return db.transaction((txn) async {
-      for (var i = 0; i < command.length; i++) {
-        await txn.execute(command[i]);
+    for (var i = 0; i < command.length; i++) {
+      try {
+        await db.execute(command[i]);
+      } catch (e) {
+        LoggerUtils()
+            .log("Error on running command: ${command[i]}, $e", LogType.error);
       }
-    });
+    }
   }
 
   Future runCommand(String command) async {

@@ -3,9 +3,12 @@ import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart
 import 'package:cstyle_cashier_3/db/db.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
+import 'package:cstyle_cashier_3/utils/printing.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SendStockTransferPage extends StatefulWidget {
   const SendStockTransferPage({super.key});
@@ -74,47 +77,81 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
     });
   }
 
+  Future<Printer?> _checkPrinter() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString("printer:name") == null ||
+        prefs.getString("printer:url") == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Default printer is not found. Please select a printer"),
+      ));
+      return await Printing.pickPrinter(context: context);
+    } else {
+      return Printer(url: prefs.getString("printer:url")!);
+    }
+  }
+
   _sendStockTransfer() {
-    showDialog<UserModel?>(
-        context: context,
-        builder: (context) {
-          return const Dialog(
-            child: SelectEmployee(),
-          );
-        }).then((value) {
-      if (value != null) {
-        setState(() {
-          isSubmitting = true;
-        });
+    _checkPrinter().then((printer) {
+      if (printer == null || !printer.isAvailable) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Printer is not available"),
+        ));
+      } else {
+        showModalBottomSheet<UserModel?>(
+            // ignore: use_build_context_synchronously
+            context: context,
+            showDragHandle: false,
+            enableDrag: false,
+            isDismissible: false,
+            builder: (context) {
+              return const SelectEmployee();
+            }).then((user) async {
+          if (user != null) {
+            setState(() {
+              isSubmitting = true;
+            });
 
-        StockTransferModel.send({
-          "id": stockTransferModel!.id,
-          "items": stockTransferModel!.items.map((e) {
-            return {
-              "itemID": e.id,
-              "quantity": e.quantity,
-            };
-          }).toList(),
-        }).then((value) {
-          stockTransferModel!.items.forEach((x) async {
-            await SQLProductModel.updateStock(x.id, x.quantity);
-          });
+            StockTransferModel.send({
+              "id": stockTransferModel!.id,
+              "items": stockTransferModel!.items.map((e) {
+                return {
+                  "itemID": e.id,
+                  "quantity": e.quantity,
+                };
+              }).toList(),
+            }).then((value) async {
+              try {
+                await Printing.directPrintPdf(
+                  printer: printer,
+                  onLayout: (format) => PrintingUtils.generateStockTransferPDF(
+                      stockTransferModel!, user),
+                );
 
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Stock transfer successfully sent")));
+                stockTransferModel!.items.forEach((x) async {
+                  await SQLProductModel.updateStock(x.id, x.quantity);
+                });
 
-          setState(() {
-            stockTransferModel = null;
-          });
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text("Stock transfer successfully sent")));
 
-          _fetchStockTransfers(1);
-        }).catchError((error) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(error.toString())));
-        }).whenComplete(() {
-          setState(() {
-            isSubmitting = false;
-          });
+                setState(() {
+                  stockTransferModel = null;
+                });
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to send stock transfer.")));
+              }
+
+              _fetchStockTransfers(1);
+            }).catchError((error) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(error.toString())));
+            }).whenComplete(() {
+              setState(() {
+                isSubmitting = false;
+              });
+            });
+          }
         });
       }
     });
@@ -225,9 +262,15 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                                                 },
                                                 title: Text(
                                                   stockTransfers[index].name,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge,
                                                 ),
                                                 subtitle: Text(
                                                   "Requsted from ${(stockTransfers[index].requestFrom == null ? 'Office' : stockTransfers[index].requestFrom!['name'])}",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyMedium,
                                                 ),
                                               );
                                             },

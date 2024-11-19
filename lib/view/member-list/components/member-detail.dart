@@ -1,5 +1,6 @@
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class MemberDetailPage extends StatefulWidget {
@@ -49,9 +50,32 @@ class _MemberDetailPageState extends State<MemberDetailPage> {
                 "Code",
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              Text(
-                member!.code,
-                style: Theme.of(context).textTheme.bodyLarge,
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: member!.code));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Code copied to clipboard"),
+                          duration: Duration(
+                            seconds: 1,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.copy,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      member!.code,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 15,

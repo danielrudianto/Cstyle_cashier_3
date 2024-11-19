@@ -221,12 +221,14 @@ class _StorePageState extends State<StorePage> {
   }
 
   preOpenAddMember() {
-    showDialog<UserModel?>(
+    showModalBottomSheet<UserModel?>(
+        // ignore: use_build_context_synchronously
         context: context,
+        showDragHandle: false,
+        enableDrag: false,
+        isDismissible: false,
         builder: (context) {
-          return const Dialog(
-            child: SelectEmployee(),
-          );
+          return const SelectEmployee();
         }).then((value) {
       if (value != null) {
         openAddMember(value.id);
@@ -827,10 +829,24 @@ class _StorePageState extends State<StorePage> {
                               Text(
                                 "Date",
                                 style: Theme.of(context).textTheme.labelSmall,
+                                textScaleFactor: 1.1,
                               ),
                               Text(
                                 DateFormat("dd/MM/yyyy").format(DateTime.now()),
                                 style: Theme.of(context).textTheme.bodyLarge,
+                                textScaleFactor: 1.1,
+                              ),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              Text(
+                                "Sales : Rp. ${NumberFormat("#,##0.00").format(value['payments'].fold(
+                                  0,
+                                  (previousValue, element) =>
+                                      previousValue + element['value'],
+                                ))}",
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                textScaleFactor: 1.1,
                               ),
                               const SizedBox(
                                 height: 15,
@@ -847,12 +863,14 @@ class _StorePageState extends State<StorePage> {
                                       style: Theme.of(context)
                                           .textTheme
                                           .headlineSmall,
+                                      textScaleFactor: 1.1,
                                     ),
                                     subtitle: Text(
                                       NumberFormat("#,##0.00").format(
                                           value['payments'][index]['value']),
                                       style:
                                           Theme.of(context).textTheme.bodyLarge,
+                                      textScaleFactor: 1.1,
                                     ),
                                   );
                                 },
@@ -908,7 +926,7 @@ class _StorePageState extends State<StorePage> {
     }).catchError((error) {
       LoggerUtils().log(error.toString(), LogType.error);
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error)));
+          .showSnackBar(SnackBar(content: Text(error.toString())));
     });
   }
 

@@ -42,7 +42,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                   width: 400,
                   padding: const EdgeInsets.all(0),
                   child: Container(
-                    height: 380,
+                    height: 420,
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       // border radius only top
@@ -107,35 +107,12 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                             height: 15,
                           ),
                           //form field
-                          Flexible(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                labelText: "Price",
-                                labelStyle:
-                                    Theme.of(context).textTheme.bodySmall,
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                  ),
-                                ),
-                              ),
-                              controller: TextEditingController(
-                                text: NumberFormat.decimalPattern()
-                                    .format(item.price),
-                              ),
-                              readOnly: true,
-                            ),
+                          Text(
+                            "Price",
+                            style: Theme.of(context).textTheme.labelLarge,
                           ),
+                          Text(NumberFormat.decimalPattern().format(item.price),
+                              style: Theme.of(context).textTheme.bodyMedium),
                           const SizedBox(
                             height: 15,
                           ),

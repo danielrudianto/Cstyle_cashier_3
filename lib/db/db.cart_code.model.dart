@@ -104,4 +104,19 @@ class SQLCartCodeModel {
       return SQLCartCodeModel.fromMap(result.first);
     }
   }
+
+  static Future<SQLCartCodeModel> fetchByName(String name) async {
+    final db = await DatabaseUtils().database;
+    var result = await db.query(
+      "cart_code",
+      where: "name = ?",
+      whereArgs: [name],
+    );
+
+    if (result.isEmpty) {
+      throw Exception("Cart not found");
+    } else {
+      return SQLCartCodeModel.fromMap(result.first);
+    }
+  }
 }

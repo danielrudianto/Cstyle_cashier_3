@@ -254,6 +254,48 @@ class _MemberListPageState extends State<MemberListPage> {
                                               ),
                                               ListTile(
                                                 onTap: () {
+                                                  Clipboard.setData(
+                                                    ClipboardData(
+                                                      text: e.code,
+                                                    ),
+                                                  );
+
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                        "Successfully copied code.",
+                                                      ),
+                                                      duration:
+                                                          Duration(seconds: 1),
+                                                    ),
+                                                  );
+
+                                                  Navigator.of(context).pop();
+                                                },
+                                                leading: Icon(
+                                                  Icons.copy,
+                                                  color: Theme.of(context)
+                                                      .iconTheme
+                                                      .color,
+                                                ),
+                                                title: Text(
+                                                  "Copy code",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge!
+                                                      .copyWith(
+                                                        color: e.email == ""
+                                                            ? Theme.of(context)
+                                                                .disabledColor
+                                                            : Theme.of(context)
+                                                                .iconTheme
+                                                                .color,
+                                                      ),
+                                                ),
+                                              ),
+                                              ListTile(
+                                                onTap: () {
                                                   Navigator.of(context)
                                                       .pop("detail");
                                                 },

@@ -76,6 +76,17 @@ class ProductStockModel {
       throw Exception(error);
     }
   }
+
+  static Future<List<ProductStockModel>> fetchLocalStock(
+      List<String> itemIDs) async {
+    var stocks = await SQLProductStock.fetchCurrentStock(itemIDs);
+    return stocks.map((e) {
+      return ProductStockModel(
+        mongoID: e.mongoID,
+        stock: e.stock,
+      );
+    }).toList();
+  }
 }
 
 class ProductStockFetchModel {

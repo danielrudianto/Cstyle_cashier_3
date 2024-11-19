@@ -141,12 +141,15 @@ class _AddMemberCheckoutState extends State<AddMemberCheckout> {
                   ),
                   onPressed: isChecking
                       ? null
-                      : () {
-                          Navigator.of(context).pop(membershipCodeController
-                                  .text.isEmpty
-                              ? null
-                              : membershipCodeController.text.toUpperCase());
-                        },
+                      : isChecked
+                          ? () {
+                              Navigator.of(context).pop(
+                                  membershipCodeController.text.isEmpty
+                                      ? null
+                                      : membershipCodeController.text
+                                          .toUpperCase());
+                            }
+                          : null,
                   child: const Text(
                     "Select member",
                     style: TextStyle(

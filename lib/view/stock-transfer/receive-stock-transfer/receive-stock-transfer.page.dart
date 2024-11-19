@@ -42,6 +42,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
 
   _fetchStockTransfers(int selectedPage) {
     setState(() {
+      page = selectedPage;
       isLoading = true;
     });
 
@@ -81,12 +82,14 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
   }
 
   _receiveStockTransfer() {
-    showDialog<UserModel?>(
+    showModalBottomSheet<UserModel?>(
+        // ignore: use_build_context_synchronously
         context: context,
+        showDragHandle: false,
+        enableDrag: false,
+        isDismissible: false,
         builder: (context) {
-          return const Dialog(
-            child: SelectEmployee(),
-          );
+          return const SelectEmployee();
         }).then((value) {
       if (value != null) {
         setState(() {
@@ -122,12 +125,14 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
   }
 
   _preRejectStockTransfer() {
-    showDialog<UserModel?>(
+    showModalBottomSheet<UserModel?>(
+        // ignore: use_build_context_synchronously
         context: context,
+        showDragHandle: false,
+        enableDrag: false,
+        isDismissible: false,
         builder: (context) {
-          return const Dialog(
-            child: SelectEmployee(),
-          );
+          return const SelectEmployee();
         }).then((user) {
       if (user != null) {
         showDialog(
@@ -350,9 +355,15 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                                                 },
                                                 title: Text(
                                                   stockTransfers[index].name,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge,
                                                 ),
                                                 subtitle: Text(
                                                   "Requsted from ${(stockTransfers[index].requestFrom == null ? 'Office' : stockTransfers[index].requestFrom!['name'])}",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyMedium,
                                                 ),
                                               );
                                             },

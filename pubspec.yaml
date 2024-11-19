@@ -69,11 +69,11 @@ msix_config:
   display_name: CStyle Cashier Application V3
   publisher_display_name: PT. Terra Nusa Teknologi
   identity_name: terranusa.tech.cstyle.cashier3
-  msix_version: 3.0.6.0
+  msix_version: 3.0.8.10
   logo_path: E:\source\repos\OJS Pelangi Harapan\cstyle_cashier_3\Icon.png
   capabilities: internetClient
   languages: en-US
-  certificate_path: E:\source\repos\OJS Pelangi Harapan\cstyle_cashier_3\certificate\certificate.pfx
+  certificate_path: E:\source\repos\OJS Pelangi Harapan\cstyle_cashier_3\certificate\4102024\certificate.pfx
   certificate_password: jamuju18
   architecture: x64
   verbose: true

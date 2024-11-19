@@ -20,6 +20,7 @@ class _SetupStorePageState extends State<SetupStorePage> {
       LoggerUtils()
           .log("Store found, applying to local database", LogType.info);
       StoreModel(
+        id: value.id,
         address: value.address,
         name: value.name,
         code: value.code,

@@ -54,7 +54,7 @@ class StockTransferModel {
         // date to be YYYY-MM-DD
         "date": createdAt.toIso8601String().split("T")[0],
         "requestFrom": store.id,
-        "requesetTo": storeID,
+        "requestTo": storeID,
         "item": items
             .map((e) => {
                   "id": e.itemID,
@@ -110,6 +110,7 @@ class StockTransferFetchmodel {
   final List<StockTransferFetchItemModel> items;
   final String createdBy;
   DateTime createdAt;
+  final String note;
 
   StockTransferFetchmodel({
     this.id,
@@ -119,6 +120,7 @@ class StockTransferFetchmodel {
     required this.items,
     required this.createdBy,
     required this.createdAt,
+    required this.note,
   });
 
   Map<String, dynamic> toMap() {
@@ -129,6 +131,7 @@ class StockTransferFetchmodel {
       'items': items.map((x) => x.toMap()).toList(),
       'createdBy': createdBy,
       'createdAt': createdAt.toIso8601String(),
+      'note': note,
     };
   }
 
@@ -141,6 +144,7 @@ class StockTransferFetchmodel {
       items: [],
       createdBy: map['createdBy']['name'],
       createdAt: DateTime.parse(map['createdAt']),
+      note: map['note'] ?? "",
     );
   }
 
@@ -154,6 +158,7 @@ class StockTransferFetchmodel {
           map['items'].map((x) => StockTransferFetchItemModel.fromMap(x))),
       createdBy: map['createdBy']['name'],
       createdAt: DateTime.parse(map['createdAt']),
+      note: map['note'] ?? "",
     );
   }
 

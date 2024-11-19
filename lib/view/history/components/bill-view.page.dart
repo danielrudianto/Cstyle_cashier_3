@@ -224,7 +224,9 @@ class _BillViewPageState extends State<BillViewPage> {
                         padding: const EdgeInsets.all(5),
                         child: Text(
                           NumberFormat.currency(locale: 'id', symbol: 'Rp ')
-                              .format(x.discount),
+                              .format(x.price -
+                                  ((x.price - x.discount) / 1000).floor() *
+                                      1000),
                           style: Theme.of(context).textTheme.bodyLarge,
                           textAlign: TextAlign.center,
                         ),
@@ -239,7 +241,9 @@ class _BillViewPageState extends State<BillViewPage> {
                         padding: const EdgeInsets.all(5),
                         child: Text(
                           NumberFormat.currency(locale: 'id', symbol: 'Rp ')
-                              .format((x.price - x.discount) * x.quantity),
+                              .format(((x.price - x.discount) / 1000).floor() *
+                                  1000 *
+                                  x.quantity),
                           style: Theme.of(context).textTheme.bodyLarge,
                           textAlign: TextAlign.center,
                         ),
@@ -285,7 +289,10 @@ class _BillViewPageState extends State<BillViewPage> {
                         NumberFormat.currency(locale: 'id', symbol: 'Rp ')
                             .format(
                           billCode!.items!
-                              .map((x) => (x.price - x.discount) * x.quantity)
+                              .map((x) =>
+                                  ((x.price - x.discount) / 1000).floor() *
+                                  1000 *
+                                  x.quantity)
                               .reduce((value, element) => value + element),
                         ),
                         style: Theme.of(context).textTheme.bodyLarge,

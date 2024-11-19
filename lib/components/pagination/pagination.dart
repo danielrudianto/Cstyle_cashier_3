@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class PaginationComponent extends StatelessWidget {
@@ -16,7 +18,7 @@ class PaginationComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalPages = (dataCount / pageSize).ceil();
+    final totalPages = max((dataCount / pageSize).ceil(), 1);
     return Container(
       padding: const EdgeInsets.symmetric(
         vertical: 15,

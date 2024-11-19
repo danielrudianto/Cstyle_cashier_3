@@ -50,34 +50,40 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
     showDialog(
         context: context,
         builder: (context) {
-          return const Dialog(
-            child: ProductSelectorPage(),
+          return Dialog(
+            child: ProductSelectorPage(
+              storeID: store?.id,
+              selectedItems: products.map((e) {
+                return {
+                  "id": e.id,
+                  "reference": e.reference,
+                  "description": e.description,
+                };
+              }).toList(),
+            ),
           );
         }).then((value) {
       if (value != null) {
-        var product = value as ProductModel;
-        var index = products.indexWhere((element) => element.id == product.id);
-        if (index == -1) {
-          setState(() {
-            products.add(
-              ProductModelStockTransfer(
-                id: product.id,
-                reference: product.reference,
-                description: product.description,
-                brand: product.brand,
-                type: product.type,
-                price: product.price,
-                stock: product.stock ?? 0,
-                quantity: 1,
-              ),
+        setState(() {
+          print(value.runtimeType);
+          var selectedProducts =
+              List<ProductModelStockTransfer>.from(value.map((e) {
+            var index = products.indexWhere((element) => element.id == e['id']);
+
+            return ProductModelStockTransfer(
+              id: e['id'],
+              reference: e['reference'],
+              description: e['description'],
+              brand: "",
+              type: "",
+              price: 0,
+              stock: 0,
+              quantity: index == -1 ? 1 : products[index].quantity,
             );
-          });
-        } else {
-          // add the quantity to existing
-          setState(() {
-            products[index].quantity++;
-          });
-        }
+          }).toList());
+
+          products = selectedProducts;
+        });
       }
     });
   }
@@ -197,12 +203,14 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
       return;
     }
 
-    showDialog<UserModel?>(
+    showModalBottomSheet<UserModel?>(
+        // ignore: use_build_context_synchronously
         context: context,
+        showDragHandle: false,
+        enableDrag: false,
+        isDismissible: false,
         builder: (context) {
-          return const Dialog(
-            child: SelectEmployee(),
-          );
+          return const SelectEmployee();
         }).then((value) {
       if (value != null) {
         StockTransferModel(
@@ -222,6 +230,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
           setState(() {
             products.clear();
             store = null;
+            noteController.text = "";
           });
         }).catchError((error) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -340,9 +349,8 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                   children: [
                                     Text(
                                       store!.name,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
                                     ),
                                     Text(
                                       store!.address,
@@ -352,6 +360,18 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                     ),
                                   ],
                                 ),
+                          const SizedBox(
+                            height: 35,
+                          ),
+                          // text field for note
+                          TextField(
+                            controller: noteController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: "Note",
+                            ),
+                            maxLines: 3,
+                          ),
                         ],
                       ),
                     ),
