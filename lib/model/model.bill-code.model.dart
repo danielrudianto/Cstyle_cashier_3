@@ -131,7 +131,7 @@ class BillCodeModelCreate extends BillCodeModel {
     required this.bills,
   });
 
-  Future<void> create() async {
+  Future<int?> create() async {
     List<BillModelCreate> modifiedBills = [];
     double totalPrice = 0.0;
     // First we have to combine if bill has the same itemID, price, and discount
@@ -169,45 +169,54 @@ class BillCodeModelCreate extends BillCodeModel {
           payments[index].amount - (totalPayments - totalPrice);
     }
 
-    try {
-      var billCodeID = await SQLBillCodeModelCreate(
-        name: name,
-        date: DateTime.parse(date.toIso8601String().substring(0, 10)),
-        memberID: memberID,
-        createdBy: createdBy,
-        createdAt: DateTime.now(),
-        mongoID: null,
-        isSynced: 0,
-        isDeleted: 0,
-        deletedBy: null,
-        deletedAt: null,
-      ).create();
+    SQLBillCodeModelCreate(
+      name: name,
+      date: DateTime.parse(date.toIso8601String().substring(0, 10)),
+      memberID: memberID,
+      createdBy: createdBy,
+      createdAt: DateTime.now(),
+      mongoID: null,
+      isSynced: 0,
+      isDeleted: 0,
+      deletedBy: null,
+      deletedAt: null,
+    ).create().then((billCodeID) {
+      // promise all
+      Future.wait<void>([
+        SQLBillModelCreate.create(modifiedBills.map((e) {
+          return SQLBillModelCreate(
+            itemID: e.itemID,
+            quantity: e.quantity,
+            price: e.price,
+            discount: e.discount,
+            billCodeID: billCodeID,
+          );
+        }).toList()),
+        SQLBillPaymentModelCreate.create(payments.map((e) {
+          return SQLBillPaymentModelCreate(
+            billCodeID: billCodeID,
+            paymentMethod: e.paymentMethod,
+            amount: e.amount,
+          );
+        }).toList()),
+      ]).then((_) {
+        modifiedBills.forEach((x) async {
+          await SQLProductModel.updateStock(x.itemID, x.quantity);
+        });
 
-      // After obtaining valid billCodeID, then create the bills and payments
-      await SQLBillModelCreate.create(modifiedBills.map((e) {
-        return SQLBillModelCreate(
-          itemID: e.itemID,
-          quantity: e.quantity,
-          price: e.price,
-          discount: e.discount,
-          billCodeID: billCodeID,
-        );
-      }).toList());
-
-      await SQLBillPaymentModelCreate.create(payments.map((e) {
-        return SQLBillPaymentModelCreate(
-          billCodeID: billCodeID,
-          paymentMethod: e.paymentMethod,
-          amount: e.amount,
-        );
-      }).toList());
-
-      modifiedBills.forEach((x) async {
-        await SQLProductModel.updateStock(x.itemID, x.quantity);
+        return billCodeID;
+      }).catchError((error) {
+        // Delete the bill code if there's an error
+        SQLBillCodeModel.delete(billCodeID).then((_) {
+          throw Exception(error);
+        }).catchError((error) {
+          throw Exception(error);
+        });
       });
-    } catch (error) {
+    }).catchError((error) {
       throw Exception(error);
-    }
+    });
+    return null;
   }
 }
 
@@ -311,12 +320,8 @@ class BillCodeModelSync {
     };
   }
 
-  static updateSync(String name, String id) async {
-    try {
-      await SQLBillCodeModel.updateUnsyncedBill(id, name);
-    } catch (error) {
-      throw Exception(error);
-    }
+  static updateSync(String name, String id) {
+    return SQLBillCodeModel.updateUnsyncedBill(id, name);
   }
 }
 
@@ -413,6 +418,30 @@ class BillCodeModelFetch {
           }));
 
       return BillCodeModelFetch.fromMap(bill);
+    } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  static Future<Map<String, dynamic>> fetch(int page) async {
+    try {
+      var bills = await SQLBillCodeModel.fetch(page);
+      var count = await SQLBillCodeModel.count();
+      return {
+        "data": bills.map((e) {
+          return BillCodeModelFetch(
+            id: e.id.toString(),
+            name: e.name,
+            date: e.date,
+            createdAt: e.createdAt,
+            createdBy: BillCodeCreatedByModel(
+              name: e.createdBy,
+            ),
+            memberID: null,
+          );
+        }).toList(),
+        "count": count,
+      };
     } catch (error) {
       throw Exception(error);
     }

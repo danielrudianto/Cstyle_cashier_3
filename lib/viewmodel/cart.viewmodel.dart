@@ -171,7 +171,7 @@ class CartNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> checkout(String? memberID, List<Map<String, dynamic>> payments,
+  Future<int?> checkout(String? memberID, List<Map<String, dynamic>> payments,
       String createdBy) async {
     if (selectedCart == null) {
       throw Exception("Cart not found");
@@ -185,26 +185,36 @@ class CartNotifier extends ChangeNotifier {
       throw Exception("Cart not found");
     }
 
-    await BillCodeModelCreate(
-      date: DateTime.now(),
-      name: selectedCart!.name,
-      memberID: memberID,
-      bills: selectedCart!.products.map((e) {
-        return BillModelCreate(
-          itemID: e.itemID,
-          quantity: e.quantity,
-          price: e.price,
-          discount: e.discount,
-        );
-      }).toList(),
-      payments: payments.map((e) {
-        return BillPaymentModelCreate(
-          amount: double.parse(e['amount'].toString()),
-          paymentMethod: e['method'],
-        );
-      }).toList(),
-      createdBy: createdBy,
-    ).create();
+    if (payments.isEmpty) {
+      throw Exception("Payment is empty");
+    }
+
+    try {
+      var billCodeID = await BillCodeModelCreate(
+        date: DateTime.now(),
+        name: selectedCart!.name,
+        memberID: memberID,
+        bills: selectedCart!.products.map((e) {
+          return BillModelCreate(
+            itemID: e.itemID,
+            quantity: e.quantity,
+            price: e.price,
+            discount: e.discount,
+          );
+        }).toList(),
+        payments: payments.map((e) {
+          return BillPaymentModelCreate(
+            amount: double.parse(e['amount'].toString()),
+            paymentMethod: e['method'],
+          );
+        }).toList(),
+        createdBy: createdBy,
+      ).create();
+
+      return billCodeID;
+    } catch (error) {
+      throw Exception(error);
+    }
   }
 
   Future<List<CartModel>> getCarts() async {

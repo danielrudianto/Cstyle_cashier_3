@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/model/model.cart.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
@@ -14,7 +15,11 @@ import 'package:provider/provider.dart';
 
 class PrintingUtils {
   static Future<Uint8List> generateCartPDF(
-      CartModel cart, List<Map<String, dynamic>> payments) async {
+    CartModel cart,
+    List<Map<String, dynamic>> payments,
+    String? memberID,
+    UserModel employeeID,
+  ) async {
     try {
       final doc = pw.Document();
       var store = await StoreModel.getCurrentProfile();
@@ -23,6 +28,19 @@ class PrintingUtils {
       final regularFont = await PdfGoogleFonts.nunitoRegular();
 
       final image = await imageFromAssetBundle('assets/images/logo-bill.png');
+
+      double payment = payments.fold(
+          0.0, (previousValue, element) => previousValue + element['amount']);
+
+      double value = cart.products.fold(
+          0,
+          (previousValue, element) =>
+              previousValue +
+              element.quantity *
+                  (element.price * (100 - element.discount) / 100000).floor() *
+                  1000);
+
+      double changes = payment - value;
 
       doc.addPage(
         pw.Page(
@@ -107,9 +125,9 @@ class PrintingUtils {
                     ),
                     pw.Spacer(),
                     pw.Text(
-                      (cart.memberID == null
+                      (memberID == null
                           ? "Non-member"
-                          : cart.memberID.toString().toUpperCase()),
+                          : memberID.toString().toUpperCase()),
                       style: pw.TextStyle(
                         font: regularFont,
                         fontSize: 8,
@@ -236,13 +254,21 @@ class PrintingUtils {
                           fontSize: 6,
                         ),
                       ),
-                      pw.Text(
-                        NumberFormat().format(e['amount']),
-                        style: pw.TextStyle(
-                          font: regularFont,
-                          fontSize: 6,
-                        ),
-                      ),
+                      e['method'].toString() == "Cash"
+                          ? pw.Text(
+                              NumberFormat().format(e['amount'] - changes),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 6,
+                              ),
+                            )
+                          : pw.Text(
+                              NumberFormat().format(e['amount']),
+                              style: pw.TextStyle(
+                                font: regularFont,
+                                fontSize: 6,
+                              ),
+                            ),
                     ],
                   );
                 }).toList()),
@@ -305,6 +331,13 @@ class PrintingUtils {
                 ),
                 pw.Text(
                   "Have a nice day",
+                  style: pw.TextStyle(
+                    font: regularFont,
+                    fontSize: 6,
+                  ),
+                ),
+                pw.Text(
+                  "Created by ${employeeID.name}",
                   style: pw.TextStyle(
                     font: regularFont,
                     fontSize: 6,
@@ -708,7 +741,7 @@ class PrintingUtils {
                         ),
                         pw.Expanded(
                           child: pw.Text(
-                            DateFormat.yMMMMd().format(transfer.createdAt!),
+                            DateFormat.yMMMMd().format(transfer.createdAt),
                             style: pw.TextStyle(
                               fontSize: 8,
                               font: regularFont,
@@ -928,7 +961,7 @@ class PrintingUtils {
                             horizontal: 5,
                           ),
                           child: pw.Text(
-                            "[${transfer.items![i].reference}] ${transfer.items![i].description}",
+                            "[${transfer.items[i].reference}] ${transfer.items[i].description}",
                             style: pw.TextStyle(
                               color: PdfColors.black,
                               fontSize: 8,
@@ -944,7 +977,7 @@ class PrintingUtils {
                           ),
                           child: pw.Text(
                             NumberFormat.decimalPattern()
-                                .format(transfer.items![i].quantity),
+                                .format(transfer.items[i].quantity),
                             style: pw.TextStyle(
                               color: PdfColors.black,
                               fontSize: 8,

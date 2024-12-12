@@ -3,6 +3,7 @@ import 'package:cstyle_cashier_3/view/checkout/checkout.page.dart';
 import 'package:cstyle_cashier_3/view/compare/compare.page.dart';
 import 'package:cstyle_cashier_3/view/hero/hero.page.dart';
 import 'package:cstyle_cashier_3/view/history/history.page.dart';
+import 'package:cstyle_cashier_3/view/local-history/local-history.page.dart';
 import 'package:cstyle_cashier_3/view/member-list/member-list.page.dart';
 import 'package:cstyle_cashier_3/view/page-view/pageview.page.dart';
 import 'package:cstyle_cashier_3/view/setting/setting.page.dart';
@@ -91,7 +92,13 @@ final GoRouter router = GoRouter(
         path: "/settings",
         builder: (context, state) {
           return const SettingPage();
-        })
+        }),
+    GoRoute(
+      path: "/local",
+      builder: (context, state) {
+        return const LocalHistoryPage();
+      },
+    ),
   ],
   initialLocation: "/",
 );

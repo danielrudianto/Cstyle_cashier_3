@@ -86,3 +86,18 @@ Change print preview enabling scroll
 ## Changelog 3.0.8.10
 The commands ran, will be separated and skipped if found error.
 Different from previous approach.
+
+## Changelog 3.0.8.11
+Try to make the sync only once. 
+
+## Changelog 3.0.8.12
+Fix empty payment problem
+
+## Changelog 3.0.8.13
+Fix on generating PDF print
+
+## Changelog 3.0.8.14
+Fix on generating PDF Print again. Third time is the charm.
+
+## Changelog 3.0.8.15
+Kurangin kembalian pada saat print

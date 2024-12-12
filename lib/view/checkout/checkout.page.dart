@@ -25,7 +25,7 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   int selectedIndex = 0;
-  String? employeeID;
+  UserModel? employeeID;
   String? memberID;
 
   List<Map<String, dynamic>> payments = [];
@@ -405,7 +405,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           }).then((value) {
         if (value != null) {
           setState(() {
-            employeeID = value.code;
+            employeeID = value;
           });
           _checkout(selectedPrinter!);
         }
@@ -471,6 +471,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     build: (format) => PrintingUtils.generateCartPDF(
                       cart,
                       payments,
+                      memberID,
+                      employeeID!,
                     ),
                     allowPrinting: false,
                     allowSharing: false,
@@ -505,21 +507,35 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ),
       ).then((value) async {
         if (value == "print") {
-          await Provider.of<CartNotifier>(context, listen: false).checkout(
+          Provider.of<CartNotifier>(context, listen: false)
+              .checkout(
             memberID,
             payments,
-            employeeID!,
-          );
+            employeeID!.code,
+          )
+              .then((value) async {
+            await Printing.directPrintPdf(
+              name: name,
+              printer: printer,
+              onLayout: (format) => PrintingUtils.generateCartPDF(
+                cart,
+                payments,
+                memberID,
+                employeeID!,
+              ),
+            );
 
-          await Printing.directPrintPdf(
-            name: name,
-            printer: printer,
-            onLayout: (format) => PrintingUtils.generatePDF(name),
-          );
-
-          await Provider.of<CartNotifier>(context, listen: false)
-              .deleteCurrentCart();
-          router.pop();
+            await Provider.of<CartNotifier>(context, listen: false)
+                .deleteCurrentCart();
+            router.pop();
+          }).catchError((error) {
+            LoggerUtils().log(error.toString(), LogType.error);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(error.toString()),
+              ),
+            );
+          });
         }
       });
     } catch (error) {

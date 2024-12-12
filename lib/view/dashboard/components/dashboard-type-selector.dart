@@ -253,6 +253,16 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                   color: Theme.of(context).iconTheme.color,
                 ),
               ),
+              IconButton(
+                onPressed: () {
+                  // Check last bill
+                  router.push("/local");
+                },
+                icon: Icon(
+                  Icons.data_array,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              ),
             ],
           )
         ],

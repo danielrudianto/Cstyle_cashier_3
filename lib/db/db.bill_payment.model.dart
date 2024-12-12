@@ -73,14 +73,10 @@ class SQLBillPaymentModelCreate extends SQLBillPaymentModel {
     );
   }
 
-  static create(List<SQLBillPaymentModelCreate> payments) async {
-    try {
-      await DatabaseUtils().runCommands(payments.map((e) {
-        return "INSERT INTO bill_payment (billCodeID, paymentMethod, amount) VALUES (${e.billCodeID}, '${e.paymentMethod}', ${e.amount})";
-      }).toList());
-    } catch (error) {
-      throw Exception(error);
-    }
+  static Future<void> create(List<SQLBillPaymentModelCreate> payments) async {
+    return DatabaseUtils().runCommands(payments.map((e) {
+      return "INSERT INTO bill_payment (billCodeID, paymentMethod, amount) VALUES (${e.billCodeID}, '${e.paymentMethod}', ${e.amount})";
+    }).toList());
   }
 }
 
@@ -146,9 +142,13 @@ class SQLBillPaymentModelSync {
 
   static Future<List<SQLBillPaymentModelSync>> fetchByBillCodeIDs(
       List<int> ids) async {
-    final db = await DatabaseUtils().database;
-    var result = await db.rawQuery(
-        "SELECT * FROM bill_payment WHERE billCodeID IN (${ids.join(",")})");
-    return result.map((e) => SQLBillPaymentModelSync.fromMap(e)).toList();
+    try {
+      final db = await DatabaseUtils().database;
+      var result = await db.query("bill_payment",
+          where: "billCodeID IN (?)", whereArgs: ids);
+      return result.map((e) => SQLBillPaymentModelSync.fromMap(e)).toList();
+    } catch (error) {
+      throw Exception(error);
+    }
   }
 }

@@ -149,6 +149,21 @@ class SQLBillCodeModel {
 
     return result.map((e) => SQLBillCodeModel.fromMap(e)).toList();
   }
+
+  static Future<int> count() async {
+    final db = await DatabaseUtils().database;
+    var result = await db.rawQuery("SELECT COUNT(*) AS count FROM bill_code");
+    return result.isEmpty ? 0 : result.first['count'] as int;
+  }
+
+  static Future<int> delete(int id) async {
+    final db = await DatabaseUtils().database;
+    await db.delete("bill", where: "billCodeID = ?", whereArgs: [id]);
+    await db.delete("bill_payment", where: "billCodeID = ?", whereArgs: [id]);
+    var result = await db.delete("bill_code", where: "id = ?", whereArgs: [id]);
+
+    return result;
+  }
 }
 
 class SQLBillCodeModelCreate extends SQLBillCodeModel {
@@ -201,7 +216,7 @@ class SQLBillCodeModelCreate extends SQLBillCodeModel {
     );
   }
 
-  Future create() async {
+  Future<int> create() async {
     try {
       final db = await DatabaseUtils().database;
       var billCodeID = await db.insert("bill_code", toMap());
@@ -369,27 +384,38 @@ class SQLBillSyncModel {
   }
 
   static Future<List<SQLBillSyncModel>> fetchUnsyncedBills() async {
-    final db = await DatabaseUtils().database;
-    var result = await db.rawQuery(
-        "SELECT bill_code.*, user.userID as createdBy FROM bill_code JOIN user ON bill_code.createdBy = user.code WHERE isSynced = 0 AND isDeleted = 0");
+    try {
+      final db = await DatabaseUtils().database;
+      final result = await db.rawQuery(
+          "SELECT bill_code.*, user.userID as createdBy FROM bill_code JOIN user ON bill_code.createdBy = user.code WHERE isSynced = 0 AND isDeleted = 0");
 
-    var ids = result.map((e) {
-      return e['id'] as int;
-    }).toList();
+      var ids = result.map((e) => e['id'] as int).toList();
 
-    var payments = await SQLBillPaymentModelSync.fetchByBillCodeIDs(ids);
-    var bills = await SQLBillModelSync.fetchByBillCodeIDs(ids);
-    var response = result.map((e) {
-      return SQLBillSyncModel.fromMap(e);
-    }).toList();
+      if (ids.isEmpty) {
+        return [];
+      }
 
-    for (var item in response) {
-      item.payments =
-          payments.where((element) => element.billCodeID == item.id).toList();
-      item.bills =
-          bills.where((element) => element.billCodeID == item.id).toList();
+      // Wait for both futures to complete
+      final values = await Future.wait([
+        SQLBillPaymentModelSync.fetchByBillCodeIDs(ids),
+        SQLBillModelSync.fetchByBillCodeIDs(ids)
+      ]);
+
+      var payments = values[0] as List<SQLBillPaymentModelSync>;
+      var bills = values[1] as List<SQLBillModelSync>;
+
+      var response = result.map((e) => SQLBillSyncModel.fromMap(e)).toList();
+
+      for (var item in response) {
+        item.payments =
+            payments.where((element) => element.billCodeID == item.id).toList();
+        item.bills =
+            bills.where((element) => element.billCodeID == item.id).toList();
+      }
+
+      return response;
+    } catch (error) {
+      throw Exception(error);
     }
-
-    return response;
   }
 }

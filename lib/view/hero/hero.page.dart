@@ -208,7 +208,7 @@ class _HeroPageState extends State<HeroPage> {
                     ),
                   ),
                   const Text(
-                    "Version 3.0.8.9",
+                    "Version 3.0.8.15",
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: "Lato",
