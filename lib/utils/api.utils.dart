@@ -7,6 +7,22 @@ class ApiUtils {
   ApiUtils()
       : _dio = Dio(BaseOptions(baseUrl: "https://service.cstyle.cloud/"));
 
+  // e.response cuma keisi kalau server sempat balas (mis. 4xx/5xx).
+  // Kalau gagal connect (timeout, DNS, refused, dll), e.response NULL,
+  // jadi detail asli errornya harus diambil dari e.type / e.message / e.error,
+  // bukan dari e.response (yang bakal cuma keluar "Exception" doang).
+  Exception _describeError(DioException e) {
+    if (e.response != null) {
+      return Exception(
+        "HTTP ${e.response?.statusCode}: ${e.response?.data}",
+      );
+    }
+    return Exception(
+      "${e.type}${e.message != null ? ' - ${e.message}' : ''}"
+      "${e.error != null ? ' (${e.error})' : ''}",
+    );
+  }
+
   Future<dynamic> getRequest(
     String endpoint,
     Map<String, dynamic>? queryParams,
@@ -20,7 +36,7 @@ class ApiUtils {
       );
       return response.data;
     } on DioException catch (e) {
-      throw Exception(e.response);
+      throw _describeError(e);
     }
   }
 
@@ -33,7 +49,7 @@ class ApiUtils {
       final response = await _dio.post(endpoint, data: data, options: options);
       return response.data;
     } on DioException catch (e) {
-      throw Exception(e.response);
+      throw _describeError(e);
     }
   }
 
@@ -42,7 +58,7 @@ class ApiUtils {
       final response = await _dio.put(endpoint, data: data);
       return response.data;
     } on DioException catch (e) {
-      throw Exception(e.response);
+      throw _describeError(e);
     }
   }
 
@@ -51,7 +67,7 @@ class ApiUtils {
       final response = await _dio.delete(endpoint);
       return response.data;
     } on DioException catch (e) {
-      throw Exception(e.response);
+      throw _describeError(e);
     }
   }
 }
