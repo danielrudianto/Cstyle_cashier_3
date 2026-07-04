@@ -33,13 +33,16 @@ class _SetupStorePageState extends State<SetupStorePage> {
           SyncUtils.sync();
           router.replace("/main");
         }).catchError((error) {
-          LoggerUtils().log(error.toString(), LogType.error);
+          LoggerUtils().log("Error", LogType.error,
+              error: error, stackTrace: StackTrace.current);
         });
       }).catchError((error) {
-        LoggerUtils().log(error.toString(), LogType.error);
+        LoggerUtils().log("Error", LogType.error,
+            error: error, stackTrace: StackTrace.current);
       });
     }).catchError((error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
     });
   }
 

@@ -150,9 +150,9 @@ class BillCodeModelCreate extends BillCodeModel {
         modifiedBills.add(bill);
       }
 
-      totalPrice += ((bill.price * (100 - bill.discount) / 100) ~/ 1000) *
-          1000 *
-          bill.quantity;
+      totalPrice +=
+          ((bill.price * (100 - bill.discount) * bill.quantity / 100) ~/ 1000) *
+              1000;
     }
 
     // Next we're going to deduct the cash payments based on the changes
@@ -422,30 +422,6 @@ class BillCodeModelFetch {
       throw Exception(error);
     }
   }
-
-  static Future<Map<String, dynamic>> fetch(int page) async {
-    try {
-      var bills = await SQLBillCodeModel.fetch(page);
-      var count = await SQLBillCodeModel.count();
-      return {
-        "data": bills.map((e) {
-          return BillCodeModelFetch(
-            id: e.id.toString(),
-            name: e.name,
-            date: e.date,
-            createdAt: e.createdAt,
-            createdBy: BillCodeCreatedByModel(
-              name: e.createdBy,
-            ),
-            memberID: null,
-          );
-        }).toList(),
-        "count": count,
-      };
-    } catch (error) {
-      throw Exception(error);
-    }
-  }
 }
 
 class BillCodeMembershipModel {
@@ -534,5 +510,48 @@ class BillCodePaymentModelFetch {
       type: map['type'],
       amount: map['amount'],
     );
+  }
+}
+
+class BillCodeModelFetchLocal {
+  int? id;
+  DateTime date;
+  String name;
+  String? memberID;
+  String? mongoID;
+  String createdBy;
+  DateTime createdAt;
+
+  BillCodeModelFetchLocal({
+    this.id,
+    required this.date,
+    required this.name,
+    this.memberID,
+    this.mongoID,
+    required this.createdBy,
+    required this.createdAt,
+  });
+
+  static Future<Map<String, dynamic>> fetch(int page) async {
+    try {
+      var bills = await SQLBillCodeModel.fetch(page);
+      var count = await SQLBillCodeModel.count();
+      return {
+        "data": bills.map((e) {
+          return BillCodeModelFetchLocal(
+            id: e.id,
+            name: e.name,
+            date: e.date,
+            createdAt: e.createdAt,
+            createdBy: e.createdBy,
+            memberID: e.memberID,
+            mongoID: e.mongoID,
+          );
+        }).toList(),
+        "count": count,
+      };
+    } catch (error) {
+      throw Exception(error);
+    }
   }
 }

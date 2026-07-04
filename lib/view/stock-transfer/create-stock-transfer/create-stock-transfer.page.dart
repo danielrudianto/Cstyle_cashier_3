@@ -47,6 +47,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
   }
 
   _openProductSelector() {
+    var isDialogOpened = true;
     showDialog(
         context: context,
         builder: (context) {
@@ -60,31 +61,40 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                   "description": e.description,
                 };
               }).toList(),
+              closeDialog: (p0) {
+                if (p0 is List<dynamic>) {
+                  // set the state
+                  var selectedProducts =
+                      List<ProductModelStockTransfer>.from(p0.map((e) {
+                    var index = products.indexWhere(
+                        (element) => element.id == e['id'].toString());
+
+                    return ProductModelStockTransfer(
+                      id: e['id'].toString(),
+                      reference: e['reference'],
+                      description: e['description'],
+                      brand: "",
+                      type: "",
+                      price: 0,
+                      stock: 0,
+                      quantity: index == -1 ? 1 : products[index].quantity,
+                    );
+                  }).toList());
+
+                  // set the state
+                  setState(() {
+                    products = selectedProducts;
+                  });
+                }
+
+                if (isDialogOpened) {
+                  Navigator.of(context).pop();
+                }
+              },
             ),
           );
-        }).then((value) {
-      if (value != null) {
-        setState(() {
-          print(value.runtimeType);
-          var selectedProducts =
-              List<ProductModelStockTransfer>.from(value.map((e) {
-            var index = products.indexWhere((element) => element.id == e['id']);
-
-            return ProductModelStockTransfer(
-              id: e['id'],
-              reference: e['reference'],
-              description: e['description'],
-              brand: "",
-              type: "",
-              price: 0,
-              stock: 0,
-              quantity: index == -1 ? 1 : products[index].quantity,
-            );
-          }).toList());
-
-          products = selectedProducts;
-        });
-      }
+        }).then((value) {}).whenComplete(() {
+      isDialogOpened = false;
     });
   }
 
@@ -220,6 +230,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
           }).toList(),
           createdBy: value.id,
           createdAt: DateTime.now(),
+          note: noteController.text,
         ).create().then((value) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

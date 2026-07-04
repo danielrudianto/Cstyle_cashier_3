@@ -143,9 +143,18 @@ class SQLBillPaymentModelSync {
   static Future<List<SQLBillPaymentModelSync>> fetchByBillCodeIDs(
       List<int> ids) async {
     try {
+      String placeholders = "";
+      for (int i = 0; i < ids.length; i++) {
+        placeholders += ids[i].toString();
+        if (i != ids.length - 1) {
+          placeholders += ",";
+        }
+      }
       final db = await DatabaseUtils().database;
-      var result = await db.query("bill_payment",
-          where: "billCodeID IN (?)", whereArgs: ids);
+      print(placeholders);
+      var result = await db.rawQuery(
+          'SELECT * FROM bill_payment WHERE billCodeID IN ($placeholders)', []);
+      print(result);
       return result.map((e) => SQLBillPaymentModelSync.fromMap(e)).toList();
     } catch (error) {
       throw Exception(error);

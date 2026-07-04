@@ -139,7 +139,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                 });
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to send stock transfer.")));
+                    const SnackBar(content: Text("Failed to send stock transfer.")));
               }
 
               _fetchStockTransfers(1);

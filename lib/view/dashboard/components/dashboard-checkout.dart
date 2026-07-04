@@ -349,17 +349,15 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                                                     .products[index].price)
                                             : NumberFormat.decimalPattern()
                                                 .format((value
+                                                            .selectedCart!
+                                                            .products[index]
+                                                            .price *
+                                                        (100 -
+                                                            value
                                                                 .selectedCart!
                                                                 .products[index]
-                                                                .price *
-                                                            (100 -
-                                                                value
-                                                                    .selectedCart!
-                                                                    .products[
-                                                                        index]
-                                                                    .discount) /
-                                                            100000)
-                                                        .floor() *
+                                                                .discount) /
+                                                        100000) *
                                                     1000),
                                         style: Theme.of(context)
                                             .textTheme

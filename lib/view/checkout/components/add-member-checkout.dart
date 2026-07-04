@@ -39,7 +39,8 @@ class _AddMemberCheckoutState extends State<AddMemberCheckout> {
           isChecked = false;
         }
       }).catchError((error) {
-        LoggerUtils().log(error.toString(), LogType.error);
+        LoggerUtils().log("Error", LogType.error,
+            error: error, stackTrace: StackTrace.current);
       }).whenComplete(() {
         setState(() {
           isChecking = false;

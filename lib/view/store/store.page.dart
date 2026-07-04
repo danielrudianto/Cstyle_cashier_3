@@ -210,7 +210,8 @@ class _StorePageState extends State<StorePage> {
             });
       } else {}
     } catch (error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error.toString())));
     } finally {
@@ -289,7 +290,8 @@ class _StorePageState extends State<StorePage> {
         );
         Navigator.pop(context);
       } catch (error) {
-        LoggerUtils().log(error.toString(), LogType.error);
+        LoggerUtils().log("Error", LogType.error,
+            error: error, stackTrace: StackTrace.current);
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(error.toString())));
       } finally {
@@ -924,7 +926,8 @@ class _StorePageState extends State<StorePage> {
             );
           });
     }).catchError((error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error.toString())));
     });

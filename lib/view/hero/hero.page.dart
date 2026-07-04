@@ -21,43 +21,98 @@ class HeroPage extends StatefulWidget {
 class _HeroPageState extends State<HeroPage> {
   String loadingStatus = "Initializing";
 
-  @override
-  void didChangeDependencies() {
-    checkDateTime().then((_) async {
-      await connectAndSync();
-    }).catchError((error) {
-      LoggerUtils().log("Error on checking date and time", LogType.error);
-    });
-    super.didChangeDependencies();
-  }
+  // Guard biar proses inisialisasi TIDAK jalan dobel
+  bool _initStarted = false;
 
   @override
   void initState() {
-    checkDateTime().then((_) async {
-      await connectAndSync();
-    }).catchError((error) {
-      LoggerUtils().log("Error on checking date and time", LogType.error);
-    });
     super.initState();
+    _initialize();
+  }
+
+  // Satu pintu masuk buat semua proses startup.
+  Future<void> _initialize() async {
+    if (_initStarted) return; // cegah dobel
+    _initStarted = true;
+
+    try {
+      await checkDateTime();
+    } catch (e, st) {
+      // Ini hanya kejadian kalau jam PC BENERAN salah (selisih > 30 detik).
+      // NTP yang gagal/diblok jaringan TIDAK sampai sini (di-skip di checkDateTime).
+      LoggerUtils().log(
+        "Startup dihentikan karena selisih waktu",
+        LogType.error,
+        error: e,
+        stackTrace: st,
+      );
+      return; // berhenti, biar user benerin jam dulu
+    }
+
+    await connectAndSync();
+  }
+
+  void _setStatus(String status) {
+    if (!mounted) return;
+    setState(() {
+      loadingStatus = status;
+    });
+  }
+
+  Future<void> checkDateTime() async {
+    _setStatus("Checking time with our online services.");
+
+    try {
+      // Timeout 5 detik: kalau NTP diblok (port 123 UDP) app gak akan hang lama.
+      DateTime ntpTime = await NTP.now().timeout(
+            const Duration(seconds: 5),
+          );
+      DateTime localTime = DateTime.now();
+
+      final diff = ntpTime.difference(localTime).inSeconds.abs();
+
+      if (diff > 30) {
+        LoggerUtils().log("Time difference is $diff seconds", LogType.error);
+        _setStatus(
+          "Time difference is too large. Please set your time and date appropriately.",
+        );
+        // Jam PC beneran salah -> ini masalah SAH, hentikan startup.
+        throw Exception("Time mismatch: $diff seconds");
+      } else {
+        _setStatus("Time is synced.");
+      }
+    } on Exception catch (e, st) {
+      // Bedakan dua kasus:
+      if (e.toString().contains("Time mismatch")) {
+        // 1. Jam PC beneran salah -> teruskan biar startup berhenti.
+        rethrow;
+      }
+
+      // 2. NTP gagal diakses (kemungkinan port 123 UDP diblok di jaringan client).
+      //    SKIP pengecekan waktu, app tetap lanjut jalan.
+      LoggerUtils().log(
+        "NTP check skipped (unreachable / blocked)",
+        LogType.error,
+        error: e,
+        stackTrace: st,
+      );
+      _setStatus("Time check skipped, continuing...");
+      // TIDAK throw -> alur lanjut ke connectAndSync().
+    }
   }
 
   Future<void> connectAndSync() async {
-    setState(() {
-      loadingStatus = "Connecting to local database";
-    });
+    _setStatus("Connecting to local database");
     try {
       await DatabaseUtils().database;
       LoggerUtils().log("Database connected", LogType.info);
-      setState(() {
-        loadingStatus = "Database connected";
-      });
+      _setStatus("Database connected");
 
       final lastMigrationVersion =
           await MigrationModel.getLastMigrationVersion();
+
       MigrationModel.syncMigration(lastMigrationVersion).then((value) async {
-        setState(() {
-          loadingStatus = "Migration obtained, applying to local database.";
-        });
+        _setStatus("Migration obtained, applying to local database.");
 
         if (value.commands!.isNotEmpty) {
           try {
@@ -66,7 +121,7 @@ class _HeroPageState extends State<HeroPage> {
               "${value.commands!.length} commands successfully ran 🚀🚀🚀",
               LogType.info,
             );
-            loadingStatus = "Migration applied to local database.";
+            _setStatus("Migration applied to local database.");
             if (lastMigrationVersion == 0 ||
                 lastMigrationVersion != value.migrationVersion) {
               await MigrationModel(
@@ -74,108 +129,97 @@ class _HeroPageState extends State<HeroPage> {
                 createdAt: DateTime.now(),
               ).create();
 
-              loadingStatus = "Migration applied to local database.";
+              _setStatus("Migration applied to local database.");
             }
-          } catch (error) {
-            LoggerUtils().log(error.toString(), LogType.error);
+          } catch (error, st) {
+            LoggerUtils().log(
+              "Gagal menjalankan migration commands",
+              LogType.error,
+              error: error,
+              stackTrace: st,
+            );
           }
         }
 
-        // Next check on shared preferences is storeID already stored in SharedPreferences
+        // Cek apakah storeID sudah tersimpan di SharedPreferences
         StoreModel.getCurrentProfile().then((value) {
-          // User has not yet set StoreID
+          if (!mounted) return;
+          // User belum set StoreID
           if (value == null) {
             context.push("/setup");
           } else {
-            setState(() {
-              loadingStatus = "Loading stock data from designated server";
-            });
+            _setStatus("Loading stock data from designated server");
             var storeCode = value.code;
             ProductStockModel.fetchServerStock(storeCode!).then((stocks) async {
-              // Update local database stock
+              // Update stock di local database
               try {
-                setState(() {
-                  loadingStatus = "Applying stock data to local database";
-                });
+                _setStatus("Applying stock data to local database");
                 await ProductStockModel.updateServerStock(stocks);
 
-                setState(() {
-                  loadingStatus =
-                      "Successfully loaded stock data from designated server";
-                });
+                _setStatus(
+                  "Successfully loaded stock data from designated server",
+                );
                 SyncUtils.sync();
 
-                // Get incompleted carts
+                // Ambil cart yang belum selesai
                 CartModel.fetchCartsCount().then((count) {
+                  if (!mounted) return;
                   Provider.of<CartNotifier>(context, listen: false)
                       .setCartCount(count);
-                }).catchError((error) {
-                  LoggerUtils().log(error.toString(), LogType.error);
+                }).catchError((error, st) {
+                  LoggerUtils().log(
+                    "Gagal fetch cart count",
+                    LogType.error,
+                    error: error,
+                    stackTrace: st,
+                  );
                 });
-                context.push("/main");
-              } catch (error) {
-                setState(() {
-                  loadingStatus =
-                      "Failed loading stock data from designated server";
-                });
-                LoggerUtils().log(error.toString(), LogType.error);
+                if (mounted) context.push("/main");
+              } catch (error, st) {
+                _setStatus("Failed loading stock data from designated server");
+                LoggerUtils().log(
+                  "Gagal apply stock data ke local database",
+                  LogType.error,
+                  error: error,
+                  stackTrace: st,
+                );
               }
-            }).catchError((error) {
-              setState(() {
-                loadingStatus =
-                    "Loading stock data from designated server encountered an error";
-              });
-              LoggerUtils().log(error.toString(), LogType.error);
+            }).catchError((error, st) {
+              _setStatus(
+                "Loading stock data from designated server encountered an error",
+              );
+              LoggerUtils().log(
+                "Gagal fetch stock dari server",
+                LogType.error,
+                error: error,
+                stackTrace: st,
+              );
             });
           }
-        }).catchError((error) {
-          LoggerUtils().log(error.toString(), LogType.error);
-        });
-      }).catchError((error) {
-        LoggerUtils().log(error.toString(), LogType.error);
-        setState(() {
-          loadingStatus = "Failed to connect to designated server";
-        });
-      });
-    } catch (error) {
-      LoggerUtils().log(error.toString(), LogType.error);
-    }
-  }
-
-  Future<void> checkDateTime() async {
-    setState(() {
-      loadingStatus = "Checking time with our online services.";
-    });
-
-    try {
-      DateTime ntpTime = await NTP.now();
-      print(ntpTime);
-      DateTime localTime = DateTime.now();
-
-      setState(() {
-        if ((ntpTime.difference(localTime).inSeconds).abs() > 30) {
+        }).catchError((error, st) {
           LoggerUtils().log(
-            "Time difference is ${ntpTime.difference(localTime).inSeconds.abs()}",
+            "Gagal ambil current profile",
             LogType.error,
+            error: error,
+            stackTrace: st,
           );
-          setState(() {
-            loadingStatus =
-                "Time difference is too large. Please set your time and date appropriately.";
-            throw Exception("Time missmatch");
-          });
-        } else {
-          loadingStatus = "Time is synced.";
-        }
+        });
+      }).catchError((error, st) {
+        LoggerUtils().log(
+          "Gagal sync migration dari server",
+          LogType.error,
+          error: error,
+          stackTrace: st,
+        );
+        _setStatus("Failed to connect to designated server");
       });
-    } catch (e) {
+    } catch (error, st) {
       LoggerUtils().log(
-          "Time sync process is error. Please try again later.", LogType.error);
-
-      setState(() {
-        loadingStatus = "Error fetching time.";
-      });
-
-      throw Exception(e);
+        "Gagal connect ke local database",
+        LogType.error,
+        error: error,
+        stackTrace: st,
+      );
     }
   }
 
@@ -196,9 +240,7 @@ class _HeroPageState extends State<HeroPage> {
                     width: 100,
                     height: 100,
                   ),
-                  const SizedBox(
-                    height: 15,
-                  ),
+                  const SizedBox(height: 15),
                   const Text(
                     "CSTYLE CASHIER APPLICATION",
                     style: TextStyle(
@@ -208,21 +250,17 @@ class _HeroPageState extends State<HeroPage> {
                     ),
                   ),
                   const Text(
-                    "Version 3.0.8.15",
+                    "Version 3.0.9.1",
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: "Lato",
                       fontWeight: FontWeight.normal,
                     ),
                   ),
-                  const SizedBox(
-                    height: 15,
-                  ),
+                  const SizedBox(height: 15),
                   Text(
                     loadingStatus,
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),

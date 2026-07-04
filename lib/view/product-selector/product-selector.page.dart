@@ -2,17 +2,20 @@ import 'dart:async';
 
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
-import 'package:cstyle_cashier_3/utils/router.utils.dart';
+import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ProductSelectorPage extends StatefulWidget {
   final String? storeID;
   final List<dynamic> selectedItems;
+  final Function closeDialog;
+
   const ProductSelectorPage({
     super.key,
     this.storeID,
     required this.selectedItems,
+    required this.closeDialog,
   });
 
   @override
@@ -29,10 +32,6 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
   TextEditingController searchController = TextEditingController();
   Timer? debounceTime;
 
-  closeDialog(data) {
-    router.pop(data);
-  }
-
   fetchProducts(int selectedPage) {
     setState(() {
       page = selectedPage;
@@ -42,15 +41,32 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
       page,
       widget.storeID,
       searchController.text,
-    ).then((value) {
-      setState(() {
-        products = value['data'];
-        productCount = value['count'];
-      });
+    ).timeout(const Duration(seconds: 5), onTimeout: () {
+      // Handle timeout
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request timed out')),
+      );
+      return null;
+    }).then((value) {
+      if (value != null && value['data'] != null) {
+        setState(() {
+          products = value['data'];
+          productCount = value['count'];
+        });
+      } else {
+        // Handle case where value is null or doesn't contain data
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No products found')),
+        );
+      }
     }).catchError((error) {
-      closeDialog(null);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error.toString())));
+      return null;
     }).whenComplete(() {
       setState(() {
         isLoading = false;
@@ -103,7 +119,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                 ),
                 IconButton(
                   onPressed: () {
-                    closeDialog(null);
+                    widget.closeDialog(null);
                   },
                   icon: const Icon(Icons.close),
                 )
@@ -196,7 +212,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                 // button to apply
                 ElevatedButton(
                   onPressed: () {
-                    closeDialog(selectedItems);
+                    widget.closeDialog(selectedItems);
                   },
                   child: const Text("Apply"),
                 ),

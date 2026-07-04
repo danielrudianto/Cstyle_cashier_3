@@ -24,7 +24,8 @@ class _BillViewPageState extends State<BillViewPage> {
         isLoading = false;
       });
     }).catchError((error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error.toString()),
@@ -241,9 +242,10 @@ class _BillViewPageState extends State<BillViewPage> {
                         padding: const EdgeInsets.all(5),
                         child: Text(
                           NumberFormat.currency(locale: 'id', symbol: 'Rp ')
-                              .format(((x.price - x.discount) / 1000).floor() *
-                                  1000 *
-                                  x.quantity),
+                              .format(
+                                  ((x.price - x.discount) * x.quantity / 1000)
+                                          .floor() *
+                                      1000),
                           style: Theme.of(context).textTheme.bodyLarge,
                           textAlign: TextAlign.center,
                         ),
@@ -290,9 +292,9 @@ class _BillViewPageState extends State<BillViewPage> {
                             .format(
                           billCode!.items!
                               .map((x) =>
-                                  ((x.price - x.discount) / 1000).floor() *
-                                  1000 *
-                                  x.quantity)
+                                  ((x.price - x.discount) * x.quantity / 1000)
+                                      .floor() *
+                                  1000)
                               .reduce((value, element) => value + element),
                         ),
                         style: Theme.of(context).textTheme.bodyLarge,

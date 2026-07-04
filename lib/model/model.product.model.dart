@@ -91,52 +91,60 @@ class ProductModel {
   }
 
   static Future<bool> checkStock(Map<String, int> modifiedCartItems) async {
-    var products =
-        await SQLProductModel.fetchByItemIDs(modifiedCartItems.keys.toList());
-    for (var modifiedCartItem in modifiedCartItems.entries) {
-      var stockData =
-          products.indexWhere((x) => x.mongoID == modifiedCartItem.key);
+    try {
+      var products =
+          await SQLProductModel.fetchByItemIDs(modifiedCartItems.keys.toList());
+      for (var modifiedCartItem in modifiedCartItems.entries) {
+        var stockData =
+            products.indexWhere((x) => x.mongoID == modifiedCartItem.key);
 
-      var stock = stockData == -1 ? 0 : products[stockData].stock;
+        var stock = stockData == -1 ? 0 : products[stockData].stock;
 
-      if (stock < modifiedCartItem.value) {
-        return false;
+        if (stock < modifiedCartItem.value) {
+          return false;
+        }
       }
+      return true;
+    } catch (error) {
+      throw Exception(error);
     }
-    return true;
   }
 
   static Future<dynamic> fetchServerProducts(
       int page, String? storeID, String keyword) async {
-    var store = await StoreModel.getCurrentProfile();
-    var result = await ApiUtils().postRequest(
-        "cashier/products",
-        {
-          "page": page,
-          "targetStoreID": storeID == "0" ? null : storeID,
-          "keyword": keyword,
-        },
-        Options(headers: {
-          "store": store?.code,
-        }));
+    try {
+      var store = await StoreModel.getCurrentProfile();
+      var result = await ApiUtils().postRequest(
+          "cashier/products",
+          {
+            "page": page,
+            "targetStoreID": storeID == "0" ? null : storeID,
+            "keyword": keyword,
+          },
+          Options(headers: {
+            "store": store?.code,
+          }));
 
-    List<ProductModel> products = [];
-    for (var i = 0; i < result['data'].length; i++) {
-      products.add(ProductModel(
-        id: result['data'][i]['item']['_id'],
-        reference: result['data'][i]['item']['reference'],
-        description: result['data'][i]['item']['description'],
-        brand: result['data'][i]['item']['brand'],
-        type: result['data'][i]['item']['type'],
-        price: double.parse(result['data'][i]['item']['price'].toString()),
-        stock: result['data'][i]['quantity'],
-      ));
+      List<ProductModel> products = [];
+      for (var i = 0; i < result['data'].length; i++) {
+        products.add(ProductModel(
+          id: result['data'][i]['item']['_id'],
+          reference: result['data'][i]['item']['reference'],
+          description: result['data'][i]['item']['description'],
+          brand: result['data'][i]['item']['brand'],
+          type: result['data'][i]['item']['type'],
+          price: double.parse(result['data'][i]['item']['price'].toString()),
+          stock: result['data'][i]['quantity'],
+        ));
+      }
+
+      return {
+        "data": products,
+        "count": result['count'],
+      };
+    } catch (error) {
+      throw Exception(error);
     }
-
-    return {
-      "data": products,
-      "count": result['count'],
-    };
   }
 }
 

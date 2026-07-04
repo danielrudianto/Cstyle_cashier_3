@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
 import 'package:cstyle_cashier_3/model/model.product-type.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
@@ -138,7 +137,8 @@ class _DashboardPageState extends State<DashboardPage> {
       LoggerUtils()
           .log("Fetching products completed ${DateTime.now()}", LogType.info);
     }).catchError((error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
     });
   }
 
@@ -153,7 +153,8 @@ class _DashboardPageState extends State<DashboardPage> {
         await cartNotifier.createNewCart();
         await cartNotifier.createNewProduct(product);
       } catch (error) {
-        LoggerUtils().log(error.toString(), LogType.error);
+        LoggerUtils().log("Error", LogType.error,
+            error: error, stackTrace: StackTrace.current);
         showSnackbar(error.toString());
       }
     } else {
@@ -199,7 +200,8 @@ class _DashboardPageState extends State<DashboardPage> {
           }
         }
       }).catchError((error) {
-        LoggerUtils().log(error.toString(), LogType.error);
+        LoggerUtils().log("Error", LogType.error,
+            error: error, stackTrace: StackTrace.current);
         showSnackbar("Product not found");
       });
     }

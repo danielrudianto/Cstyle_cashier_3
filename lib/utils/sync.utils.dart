@@ -30,13 +30,15 @@ class SyncUtils {
                 result[i]['name'], result[i]['_id']);
           }
         }).catchError((error) {
-          LoggerUtils().log(error.toString(), LogType.error);
+          LoggerUtils().log("Error", LogType.error,
+              error: error, stackTrace: StackTrace.current);
         });
       } else {
         LoggerUtils().log("No bills to sync", LogType.info);
       }
     }).catchError((error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
     }).whenComplete(() {
       LoggerUtils().log("Sync completed", LogType.info);
       Future.delayed(const Duration(seconds: 30), () {

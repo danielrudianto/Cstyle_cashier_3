@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
@@ -72,8 +71,8 @@ class _CheckStockPageState extends State<CheckStockPage> {
           List<StoreModel> finalStores = [
             StoreModel(
               name: store!.name,
-              address: store!.address,
-              id: store!.code,
+              address: store.address,
+              id: store.code,
             )
           ];
           finalStores.addAll(value.stores);
@@ -86,7 +85,8 @@ class _CheckStockPageState extends State<CheckStockPage> {
           });
         });
       }).catchError((error) {
-        LoggerUtils().log(error.toString(), LogType.error);
+        LoggerUtils().log("Error", LogType.error,
+            error: error, stackTrace: StackTrace.current);
       }).whenComplete(() {
         setState(() {
           isLoading = false;
@@ -249,12 +249,14 @@ class _CheckStockPageState extends State<CheckStockPage> {
                             }
                           }
                         } catch (error) {
-                          LoggerUtils().log(error.toString(), LogType.error);
+                          LoggerUtils().log("Error", LogType.error,
+                              error: error, stackTrace: StackTrace.current);
                           ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(error.toString())));
                         }
                       }).catchError((error) {
-                        LoggerUtils().log(error.toString(), LogType.error);
+                        LoggerUtils().log("Error", LogType.error,
+                            error: error, stackTrace: StackTrace.current);
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(error.toString())));
                       }).whenComplete(() {

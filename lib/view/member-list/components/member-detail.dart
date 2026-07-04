@@ -114,23 +114,5 @@ class _MemberDetailPageState extends State<MemberDetailPage> {
               ),
             ],
           );
-    // ) DataTable(columns: const [
-    //     DataColumn(label: Text('Name')),
-    //     DataColumn(label: Text('Code')),
-    //     DataColumn(label: Text('Phone')),
-    //     DataColumn(label: Text('Email')),
-    //     DataColumn(label: Text('Birthday')),
-    //   ], rows: [
-    //     DataRow(cells: [
-    //       DataCell(Text(member!.name)),
-    //       DataCell(Text(member!.code)),
-    //       DataCell(Text(
-    //           member!.phoneNumber == "" ? "N/A" : member!.phoneNumber)),
-    //       DataCell(Text(member!.email)),
-    //       DataCell(Text(member!.birthday == null
-    //           ? "N/A"
-    //           : DateFormat("dd MMM yyyy").format(member!.birthday!))),
-    //     ])
-    //   ]);
   }
 }

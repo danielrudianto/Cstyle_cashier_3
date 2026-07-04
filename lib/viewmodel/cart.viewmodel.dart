@@ -53,7 +53,8 @@ class CartNotifier extends ChangeNotifier {
       setCartCount(cartCount + 1);
       return cart.id;
     } catch (error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
       return null;
     }
   }
@@ -163,8 +164,10 @@ class CartNotifier extends ChangeNotifier {
             0,
             (sum, element) =>
                 sum +
-                element.quantity *
-                    (element.price * (100 - element.discount) / 100000)
+                (element.quantity *
+                            element.price *
+                            (100 - element.discount) /
+                            100000)
                         .floor() *
                     1000);
 

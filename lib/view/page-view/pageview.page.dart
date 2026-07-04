@@ -525,7 +525,8 @@ class _PageViewPageState extends State<PageViewPage> {
               try {
                 await cartNotifier.deleteCurrentCart();
               } catch (error) {
-                LoggerUtils().log(error.toString(), LogType.error);
+                LoggerUtils().log("Error", LogType.error,
+                    error: error, stackTrace: StackTrace.current);
               }
             });
           } else if (value == "archive") {
@@ -536,7 +537,8 @@ class _PageViewPageState extends State<PageViewPage> {
               try {
                 cartNotifier.deselectCart();
               } catch (error) {
-                LoggerUtils().log(error.toString(), LogType.error);
+                LoggerUtils().log("Error", LogType.error,
+                    error: error, stackTrace: StackTrace.current);
               }
             });
           }

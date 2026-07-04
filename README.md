@@ -101,3 +101,21 @@ Fix on generating PDF Print again. Third time is the charm.
 
 ## Changelog 3.0.8.15
 Kurangin kembalian pada saat print
+
+## Changelog 3.0.8.16
+Added logger and local database access for debugging purpose.
+
+## Changelog 3.0.8.17
+Ganti payment caranya. Coba kita cek ya
+
+## Changelog 3.0.8.20
+ibid
+
+## Changelog 3.0.8.19
+Fixing bug on product selector RTO problem
+
+## Changelog 3.0.8.20
+Added Grab payment
+
+## Changelog 3.0.9
+Changed the rounding down function from per item to per line

@@ -28,7 +28,8 @@ class _HistoryPageState extends State<HistoryPage> {
         count = fetchedBills['count'];
       });
     } catch (e) {
-      LoggerUtils().log(e.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: e, stackTrace: StackTrace.current);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Failed to fetch data"),

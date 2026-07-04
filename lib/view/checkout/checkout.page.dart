@@ -38,6 +38,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   TextEditingController paypalController = TextEditingController();
   TextEditingController qrisController = TextEditingController();
   TextEditingController voucherController = TextEditingController();
+  TextEditingController grabController = TextEditingController();
 
   TextEditingController amountController(String params) {
     switch (params) {
@@ -53,6 +54,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         return qrisController;
       case "Voucher":
         return voucherController;
+      case "Grab":
+        return grabController;
       default:
         return cashController;
     }
@@ -78,8 +81,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
             0,
             (previousValue, element) =>
                 previousValue +
-                element.quantity *
-                    (element.price * (100 - element.discount) / 100000)
+                (element.quantity *
+                            element.price *
+                            (100 - element.discount) /
+                            100000)
                         .floor() *
                     1000));
 
@@ -326,8 +331,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
             0,
             (previousValue, element) =>
                 previousValue +
-                element.quantity *
-                    (element.price * (100 - element.discount) / 100000)
+                (element.quantity *
+                            element.price *
+                            (100 - element.discount) /
+                            100000)
                         .floor() *
                     1000));
 
@@ -529,7 +536,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 .deleteCurrentCart();
             router.pop();
           }).catchError((error) {
-            LoggerUtils().log(error.toString(), LogType.error);
+            LoggerUtils().log("Error", LogType.error,
+                error: error, stackTrace: StackTrace.current);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(error.toString()),
@@ -539,7 +547,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         }
       });
     } catch (error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
     }
   }
 
@@ -654,6 +663,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       "Bank Transfer",
                                       "PayPal",
                                       "QRIS",
+                                      "Grab",
                                       "Voucher"
                                     ].map((e) {
                                       return ExpansionTile(
@@ -691,6 +701,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                 } else if (e ==
                                                     'Bank Transfer') {
                                                   bankTransferController.text =
+                                                      NumberFormat("#,##0.00")
+                                                          .format(totalAmount);
+                                                } else if (e == 'Grab') {
+                                                  grabController.text =
                                                       NumberFormat("#,##0.00")
                                                           .format(totalAmount);
                                                 }
@@ -1000,8 +1014,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                                         .products[
                                                                             index]
                                                                         .discount) /
-                                                                100 ~/
-                                                                1000),
+                                                                100) /
+                                                            1000,
                                                       )}",
                                                     style: Theme.of(context)
                                                         .textTheme
@@ -1036,12 +1050,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                         : NumberFormat(
                                                                 "#,##0.00")
                                                             .format(
-                                                            value
-                                                                    .selectedCart!
-                                                                    .products[
-                                                                        index]
-                                                                    .quantity *
-                                                                (value
+                                                            (value.selectedCart!.products[index].quantity *
+                                                                        value
                                                                             .selectedCart!
                                                                             .products[
                                                                                 index]

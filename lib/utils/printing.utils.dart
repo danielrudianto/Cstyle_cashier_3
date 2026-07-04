@@ -36,8 +36,11 @@ class PrintingUtils {
           0,
           (previousValue, element) =>
               previousValue +
-              element.quantity *
-                  (element.price * (100 - element.discount) / 100000).floor() *
+              (element.quantity *
+                          element.price *
+                          (100 - element.discount) /
+                          100000)
+                      .floor() *
                   1000);
 
       double changes = payment - value;
@@ -185,8 +188,11 @@ class PrintingUtils {
                           ),
                         ),
                         pw.Text(
-                          NumberFormat().format(e.quantity *
-                              (e.price * (100 - e.discount) / 100000).floor() *
+                          NumberFormat().format((e.quantity *
+                                      e.price *
+                                      (100 - e.discount) /
+                                      100000)
+                                  .floor() *
                               1000),
                           style: pw.TextStyle(
                             font: regularFont,
@@ -214,8 +220,8 @@ class PrintingUtils {
                           0.0,
                           (previousValue, element) =>
                               previousValue +
-                              (element.quantity *
-                                  (element.price *
+                              ((element.quantity *
+                                          element.price *
                                           (100 - element.discount) /
                                           100000)
                                       .floor() *
@@ -350,7 +356,8 @@ class PrintingUtils {
       );
       return doc.save();
     } catch (error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
       throw Exception(error);
     }
   }
@@ -537,8 +544,8 @@ class PrintingUtils {
                           0.0,
                           (previousValue, element) =>
                               previousValue +
-                              (element.quantity *
-                                  (element.price *
+                              ((element.quantity *
+                                          element.price *
                                           (100 - element.discount) /
                                           100000)
                                       .floor() *
@@ -668,7 +675,8 @@ class PrintingUtils {
       );
       return doc.save();
     } catch (error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
       throw Exception(error);
     }
   }

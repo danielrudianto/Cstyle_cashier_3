@@ -52,7 +52,8 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
         dataCount = value['count'];
       });
     }).catchError((error) {
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error.toString())));
     }).whenComplete(() {
@@ -215,7 +216,8 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
     }).catchError((error) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error.toString())));
-      LoggerUtils().log(error.toString(), LogType.error);
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
     });
   }
 

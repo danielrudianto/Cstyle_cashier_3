@@ -10,6 +10,7 @@ class StockTransferModel {
   final List<StockTransferItemModel> items;
   final String createdBy;
   DateTime createdAt;
+  String note;
 
   StockTransferModel({
     this.id,
@@ -18,6 +19,7 @@ class StockTransferModel {
     required this.items,
     required this.createdBy,
     required this.createdAt,
+    required this.note,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,6 +30,7 @@ class StockTransferModel {
       'items': items.map((x) => x.toMap()).toList(),
       'createdBy': createdBy,
       'createdAt': createdAt.toIso8601String(),
+      'note': note,
     };
   }
 
@@ -39,6 +42,7 @@ class StockTransferModel {
       items: [],
       createdBy: map['createdBy']['name'],
       createdAt: DateTime.parse(map['createdAt']),
+      note: map['note'] ?? "",
     );
   }
 
@@ -62,6 +66,7 @@ class StockTransferModel {
                 })
             .toList(),
         "userID": createdBy,
+        "note": note,
       },
       Options(
         headers: {"store": store.code},
