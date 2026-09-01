@@ -100,25 +100,25 @@ class _MemberListPageState extends State<MemberListPage> {
                   DataColumn(
                     label: Text(
                       "Name",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "Code",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "Email",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "Phone",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                 ],

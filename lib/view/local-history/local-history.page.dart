@@ -88,31 +88,31 @@ class _LocalHistoryPageState extends State<LocalHistoryPage> {
                       DataColumn(
                         label: Text(
                           "Date",
-                          style: Theme.of(context).textTheme.headlineMedium,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
                       DataColumn(
                         label: Text(
                           "Name",
-                          style: Theme.of(context).textTheme.headlineMedium,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
                       DataColumn(
                         label: Text(
                           "Member ID",
-                          style: Theme.of(context).textTheme.headlineMedium,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
                       DataColumn(
                         label: Text(
                           "ID",
-                          style: Theme.of(context).textTheme.headlineMedium,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
                       DataColumn(
                         label: Text(
                           "Created at",
-                          style: Theme.of(context).textTheme.headlineMedium,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ),
                     ],

@@ -62,31 +62,31 @@ class _ListStockTransferState extends State<ListStockTransfer> {
                   DataColumn(
                     label: Text(
                       "Name",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "Request From",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "Request To",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "Created by",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "Created at",
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
                 ],
