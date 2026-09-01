@@ -39,6 +39,13 @@ enum language {
 
 class _StorePageState extends State<StorePage> {
   int selectedMenu = 0;
+
+  /*
+    Dibuat SEKALI, bukan di build. Pengendali yang dibuat ulang setiap build
+    memberi penggulirnya posisi baru dari nol setiap kali setState berjalan —
+    dan tidak pernah di-dispose.
+  */
+  final ScrollController _gulir = ScrollController();
   bool isLoading = false;
 
   Future<void> fetchByCode(String code) async {
@@ -48,7 +55,7 @@ class _StorePageState extends State<StorePage> {
     try {
       var member = await MemberModel.fetchByCode(code);
       if (member != null) {
-        showDialog(
+        bukaDialog(
             barrierDismissible: true,
             context: context,
             builder: (context) {
@@ -307,7 +314,7 @@ class _StorePageState extends State<StorePage> {
       }
     }
 
-    showDialog(
+    bukaDialog(
         /*
           DULU false, JADI ESCAPE TIDAK MELAKUKAN APA-APA.
 
@@ -985,7 +992,7 @@ class _StorePageState extends State<StorePage> {
     if (!mounted) return;
 
     DailyReportModel.downloadDailyReport().then((value) {
-      showDialog(
+      bukaDialog(
           context: context,
           builder: (context) {
             return Dialog(
@@ -1220,6 +1227,23 @@ class _StorePageState extends State<StorePage> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _gulir.dispose();
+    super.dispose();
+  }
+
+  /// Berpindah halaman kelola.
+  ///
+  /// Gulirannya dikembalikan ke atas: posisi baca halaman lama bukan posisi
+  /// baca halaman baru, dan tanpa ini berpindah dari daftar panjang membuka
+  /// halaman berikutnya di tengah-tengahnya.
+  void _pilihMenu(int nomor) {
+    if (nomor == selectedMenu) return;
+    setState(() => selectedMenu = nomor);
+    if (_gulir.hasClients) _gulir.jumpTo(0);
+  }
+
   Widget get currentPage {
     switch (selectedMenu) {
       case 0:
@@ -1245,8 +1269,6 @@ class _StorePageState extends State<StorePage> {
 
   @override
   Widget build(BuildContext context) {
-    ScrollController scrollController = ScrollController();
-
     return Scaffold(
       /*
         Transparan: gradien permukaan kerja dilukis di akar halaman utama, dan
@@ -1293,7 +1315,7 @@ class _StorePageState extends State<StorePage> {
                         ikon: Icons.dashboard_outlined,
                         label: "Home",
                         aktif: selectedMenu == 0,
-                        onTekan: () => setState(() => selectedMenu = 0),
+                        onTekan: () => _pilihMenu(0),
                       ),
                       const _LabelBagian("MEMBERSHIPS"),
                       _ButirMenu(
@@ -1306,33 +1328,33 @@ class _StorePageState extends State<StorePage> {
                         ikon: Icons.groups_outlined,
                         label: "View members",
                         aktif: selectedMenu == 1,
-                        onTekan: () => setState(() => selectedMenu = 1),
+                        onTekan: () => _pilihMenu(1),
                       ),
                       const _LabelBagian("INVENTORY"),
                       _ButirMenu(
                         ikon: Icons.add_box_outlined,
                         label: "Create transfer",
                         aktif: selectedMenu == 2,
-                        onTekan: () => setState(() => selectedMenu = 2),
+                        onTekan: () => _pilihMenu(2),
                       ),
                       _ButirMenu(
                         ikon: Icons.call_made,
                         label: "Send transfer",
                         aktif: selectedMenu == 3,
-                        onTekan: () => setState(() => selectedMenu = 3),
+                        onTekan: () => _pilihMenu(3),
                       ),
                       _ButirMenu(
                         ikon: Icons.call_received,
                         label: "Receive transfer",
                         aktif: selectedMenu == 4,
-                        onTekan: () => setState(() => selectedMenu = 4),
+                        onTekan: () => _pilihMenu(4),
                       ),
                       _ButirMenu(
                         /* Dulu berjudul "List", yang tidak menyebut daftar apa. */
                         ikon: Icons.list_alt_outlined,
                         label: "Transfer list",
                         aktif: selectedMenu == 5,
-                        onTekan: () => setState(() => selectedMenu = 5),
+                        onTekan: () => _pilihMenu(5),
                       ),
                       const _LabelBagian("UTILITIES"),
                       /*
@@ -1348,13 +1370,13 @@ class _StorePageState extends State<StorePage> {
                         ikon: Icons.inventory_2_outlined,
                         label: "Stock list",
                         aktif: selectedMenu == 6,
-                        onTekan: () => setState(() => selectedMenu = 6),
+                        onTekan: () => _pilihMenu(6),
                       ),
                       _ButirMenu(
                         ikon: Icons.history,
                         label: "History",
                         aktif: selectedMenu == 7,
-                        onTekan: () => setState(() => selectedMenu = 7),
+                        onTekan: () => _pilihMenu(7),
                       ),
                     ],
                   ),
@@ -1364,12 +1386,12 @@ class _StorePageState extends State<StorePage> {
           ),
           Expanded(
             child: RawScrollbar(
-              controller: scrollController,
+              controller: _gulir,
               thumbColor: Theme.of(context).secondaryHeaderColor,
               radius: const Radius.circular(8.0),
               thickness: 8.0,
               child: SingleChildScrollView(
-                controller: scrollController,
+                controller: _gulir,
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: ConstrainedBox(
@@ -1380,11 +1402,43 @@ class _StorePageState extends State<StorePage> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(15),
-                      child: AnimatedContainer(
-                        duration: const Duration(
-                          milliseconds: 200,
+                      /*
+                        Dulu AnimatedContainer — yang menganimasikan PROPERTI
+                        yang berubah, dan di sini tidak ada satu pun: anaknya
+                        diganti utuh, jadi pergantian halamannya sekejap.
+                        AnimatedSwitcher-lah yang menganimasikan pergantian
+                        anak. Halaman lama memudar keluar, yang baru memudar
+                        masuk sambil naik sedikit — arah yang sama dengan
+                        perpindahan antar halaman utama.
+                      */
+                      child: AnimatedSwitcher(
+                        duration: Gerak.sedang,
+                        switchInCurve: Gerak.masuk,
+                        switchOutCurve: Gerak.keluar,
+                        layoutBuilder: (anakBaru, anakLama) => Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            ...anakLama,
+                            if (anakBaru != null) anakBaru,
+                          ],
                         ),
-                        child: currentPage,
+                        transitionBuilder: (anak, animasi) {
+                          if (gerakDimatikan(context)) return anak;
+                          return FadeTransition(
+                            opacity: animasi,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.008),
+                                end: Offset.zero,
+                              ).animate(animasi),
+                              child: anak,
+                            ),
+                          );
+                        },
+                        child: KeyedSubtree(
+                          key: ValueKey<int>(selectedMenu),
+                          child: currentPage,
+                        ),
                       ),
                     ),
                   ),
