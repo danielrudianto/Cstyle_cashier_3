@@ -105,7 +105,11 @@ class _CheckStockPageState extends State<CheckStockPage> {
           excel[value.stores[i].id == null ? "Office" : value.stores[i].name];
 
       // create header which consist of reference, description, brand, type, and stock
-      sheet.appendRow(const [
+      /*
+        Tanpa `const`. TextCellValue pada paket excel versi baru bukan lagi
+        const constructor, jadi daftar ini tidak bisa lagi dinyatakan const.
+      */
+      sheet.appendRow([
         TextCellValue("Reference"),
         TextCellValue("Description"),
         TextCellValue("Brand"),
