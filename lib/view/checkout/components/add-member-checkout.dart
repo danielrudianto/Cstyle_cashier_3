@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 
 class AddMemberCheckout extends StatefulWidget {
@@ -139,6 +140,7 @@ class _AddMemberCheckoutState extends State<AddMemberCheckout> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).secondaryHeaderColor,
+                    foregroundColor: diAtasAksen(context),
                   ),
                   onPressed: isChecking
                       ? null

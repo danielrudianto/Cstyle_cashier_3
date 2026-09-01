@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 
 class SelectEmployee extends StatefulWidget {
@@ -144,6 +145,7 @@ class _SelectEmployeeState extends State<SelectEmployee> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).secondaryHeaderColor,
+                    foregroundColor: diAtasAksen(context),
                   ),
                   onPressed: isChecking || !isChecked || user == null
                       ? null

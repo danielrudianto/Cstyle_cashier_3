@@ -1,4 +1,5 @@
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -150,11 +151,16 @@ class AppbarPageView extends StatelessWidget {
               flex: 1,
               child: Badge(
                 backgroundColor: Theme.of(context).secondaryHeaderColor,
+                /*
+                  Badge memakai textColor, bukan foregroundColor. Angkanya dulu
+                  dipatok Colors.white — di tema gelap aksennya ungu MUDA, dan
+                  putih di atasnya hanya 3,4:1.
+                */
+                textColor: diAtasAksen(context),
                 label: Text(
                   value.cartCount.toString(),
                   style: const TextStyle(
                     fontSize: 8,
-                    color: Colors.white,
                   ),
                 ),
                 child: IconButton(

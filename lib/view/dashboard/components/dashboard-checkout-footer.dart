@@ -180,7 +180,7 @@ class DashboardCheckoutFooter extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: ElevatedButton(
+                child: FilledButton(
                   // style to have padding
                   onPressed: () {
                     // Check the stock first
@@ -199,13 +199,24 @@ class DashboardCheckoutFooter extends StatelessWidget {
                       }
                     });
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).secondaryHeaderColor,
+                  /*
+                    FilledButton, bukan ElevatedButton berlatar
+                    secondaryHeaderColor.
+
+                    Bentuk lama menyebut warna latarnya sendiri tetapi tidak
+                    warna tulisannya, jadi labelnya mewarisi bawaan Material —
+                    colorScheme.primary — dan sejak aksen dipromosikan ke situ,
+                    hasilnya ungu di atas ungu. Tombol terpenting di aplikasi
+                    ini labelnya nyaris tidak terbaca.
+
+                    Menyerahkannya ke tema juga memberinya keadaan sorot,
+                    elevasi, dan kursor tangan tanpa satu baris tambahan.
+                  */
+                  style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       vertical: 20,
                       horizontal: 50,
                     ),
-                    // radius
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

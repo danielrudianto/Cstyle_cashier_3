@@ -28,7 +28,11 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: "/main",
-      pageBuilder: (context, state) => halamanBergerak(
+      /*
+        Halaman utama dimasuki lewat tirai dari layar sebelumnya, jadi
+        perpindahannya hanya memudar — penjelasannya di motion.utils.dart.
+      */
+      pageBuilder: (context, state) => halamanMemudar(
         kunci: state.pageKey,
         anak: const PageViewPage(),
       ),

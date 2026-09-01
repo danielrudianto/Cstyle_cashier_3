@@ -1,3 +1,5 @@
+import 'dart:ui' show FontFeature;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -41,6 +43,17 @@ class Gerak {
   /// Perubahan nilai yang perlu diikuti mata, terutama angka total.
   static const Duration sedang = Duration(milliseconds: 260);
 
+  /// Satu-satunya gerakan panjang yang dibolehkan: tirai yang tumbuh dari
+  /// sebuah kotak menjadi seluruh layar.
+  ///
+  /// Lebih panjang daripada yang lain, dan itu disengaja. Gerakan ini
+  /// MENGGANTIKAN perpindahan halaman, bukan ditambahkan padanya — yang
+  /// ditempuh matanya bukan lagi jarak beberapa piksel melainkan seluruh
+  /// layar, dan pada jarak sejauh itu 180ms terbaca sebagai kedipan, bukan
+  /// sebagai perpindahan. Ia juga terjadi sekali saja seumur pemasangan
+  /// terminal, bukan ratusan kali sehari.
+  static const Duration tirai = Duration(milliseconds: 340);
+
   /// Untuk sesuatu yang MASUK: cepat di awal, melambat di ujung.
   static const Curve masuk = Curves.easeOutCubic;
 
@@ -49,6 +62,13 @@ class Gerak {
 
   /// Untuk angka yang berubah — berhenti tegas, tidak mengambang.
   static const Curve tegas = Curves.easeOutQuart;
+
+  /// Berangkat pelan, cepat di tengah, mendarat pelan. Pasangan [tirai].
+  ///
+  /// Sesuatu yang membesar sampai seukuran layar harus terasa punya massa.
+  /// easeOut saja membuatnya melesat sejak piksel pertama, dan hasilnya
+  /// terlihat seperti kesalahan tata letak, bukan seperti perpindahan.
+  static const Curve berat = Curves.easeInOutCubic;
 }
 
 /// Apakah pengguna meminta animasi dimatikan.
@@ -108,7 +128,18 @@ class AngkaBergerak extends StatelessWidget {
       builder: (context, nilaiSekarang, _) {
         return Text(
           format.format(nilaiSekarang),
-          style: gaya,
+          /*
+            Angka selebar sama (tabular figures).
+
+            Pada huruf biasa, "1" jauh lebih sempit daripada "8", jadi angka
+            yang sedang berjalan berubah lebar di setiap bingkai dan totalnya
+            terlihat bergetar — persis lawan dari kesan yang ingin diberikan
+            angka yang bergerak halus. Ini juga membuat kolom harga berbaris
+            lurus di titik desimalnya.
+          */
+          style: (gaya ?? const TextStyle()).copyWith(
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
           textAlign: rataan,
         );
       },
@@ -229,6 +260,30 @@ class _SorotBerlatarState extends State<SorotBerlatar> {
 /// Sebelumnya seluruh route memakai `builder:`, yang berarti transisi bawaan
 /// dan berbeda-beda tergantung sistem operasinya. Sekarang keempat belas route
 /// bergerak dengan cara yang sama.
+/// Perpindahan yang HANYA memudar, tanpa pergeseran.
+///
+/// Dipakai halaman yang dimasuki lewat tirai. Tirainya sudah menutupi seluruh
+/// layar dengan warna latar halaman tujuan, jadi begitu halamannya benar-benar
+/// dipasang, yang terjadi seharusnya tidak terlihat sama sekali. Menambahkan
+/// pergeseran di situ justru merusaknya: layar yang sudah diam tiba-tiba
+/// bergerak dua belas piksel, dan sambungan yang tadinya mulus jadi
+/// terlihat sambungannya.
+CustomTransitionPage<T> halamanMemudar<T>({
+  required LocalKey kunci,
+  required Widget anak,
+}) {
+  return CustomTransitionPage<T>(
+    key: kunci,
+    child: anak,
+    transitionDuration: Gerak.cepat,
+    reverseTransitionDuration: Gerak.kilat,
+    transitionsBuilder: (context, animation, animasiKedua, child) {
+      if (gerakDimatikan(context)) return child;
+      return FadeTransition(opacity: animation, child: child);
+    },
+  );
+}
+
 CustomTransitionPage<T> halamanBergerak<T>({
   required LocalKey kunci,
   required Widget anak,

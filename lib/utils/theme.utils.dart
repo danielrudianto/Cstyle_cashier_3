@@ -452,5 +452,23 @@ ThemeData _bangunTema(_PaletTema palet) {
   );
 }
 
+/// Warna tulisan yang terbaca di atas [ThemeData.secondaryHeaderColor].
+///
+/// Aksen aplikasi berpindah arah antartema — ungu GELAP di tema terang, ungu
+/// MUDA di tema gelap — jadi warna tulisan di atasnya ikut berpindah. Di ungu
+/// muda, tulisan hitam berkontras 6,2:1 sementara putih hanya 3,4:1; di ungu
+/// gelap kebalikannya.
+///
+/// Empat tombol di aplikasi ini memakai secondaryHeaderColor sebagai latar
+/// tanpa menyebut warna tulisannya, sehingga mereka mewarisi bawaan Material —
+/// yang sejak aksen dipromosikan menjadi colorScheme.primary berarti UNGU DI
+/// ATAS UNGU. Yang paling terasa tombol Checkout: labelnya nyaris tidak
+/// terbaca.
+Color diAtasAksen(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark
+      ? Colors.black
+      : Colors.white;
+}
+
 ThemeData themeData = _bangunTema(_paletTerang);
 ThemeData darkThemeData = _bangunTema(_paletGelap);

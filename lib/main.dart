@@ -49,11 +49,26 @@ class MyApp extends StatelessWidget {
 
     return Consumer<ThemeNotifier>(builder: (_, value, __) {
       return MaterialApp.router(
+        /*
+          TOUCHPAD DULU TIDAK BISA MENGGULIR.
+
+          Daftar ini sebelumnya hanya memuat touch dan mouse. Roda tetikus
+          tetap jalan karena ia datang sebagai PointerScrollEvent, yang tidak
+          melewati dragDevices sama sekali — jadi cacatnya tidak terlihat
+          selama diuji dengan tetikus.
+
+          Touchpad presisi di Windows lain jalurnya: usapan dua jari dikirim
+          sebagai kejadian pan/zoom dengan PointerDeviceKind.trackpad, dan
+          Scrollable menolaknya kalau jenis itu tidak disebut di sini. Layarnya
+          diam, tanpa satu pun tanda bahwa gerakannya diterima lalu dibuang.
+
+          Disebut seluruhnya, bukan ditambah satu per satu. Tidak ada satu pun
+          jenis penunjuk di aplikasi kasir ini yang seharusnya DILARANG
+          menggulir, dan menyebutkan sebagian selalu berakhir dengan
+          menemukan yang terlewat lewat laporan pengguna.
+        */
         scrollBehavior: ScrollConfiguration.of(context).copyWith(
-          dragDevices: {
-            PointerDeviceKind.touch,
-            PointerDeviceKind.mouse,
-          },
+          dragDevices: PointerDeviceKind.values.toSet(),
         ),
         debugShowCheckedModeBanner: false,
         title: 'Cstyle Cashier Application',

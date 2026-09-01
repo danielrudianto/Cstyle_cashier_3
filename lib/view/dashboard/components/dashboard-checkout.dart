@@ -284,7 +284,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.hourglass_empty,
+                    Icons.shopping_cart_outlined,
                     color: Theme.of(context).secondaryHeaderColor,
                     size: 50,
                   ),
