@@ -7,6 +7,7 @@ import 'package:cstyle_cashier_3/view/store/components/stat-card.component.dart'
 import 'package:cstyle_cashier_3/viewmodel/theme.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/waktu.utils.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
@@ -166,26 +167,55 @@ class _StoreDashboardState extends State<StoreDashboard> {
         const SizedBox(
           height: 25,
         ),
+        /*
+          TIGA BARIS JUDUL BERSUSUN MENJADI SATU LOCKUP.
+
+          Dulu: "Welcome to your store page" berwarna aksen dan berukuran
+          headlineLarge, lalu "Currently operating on CSTYLE SEMINYAK" yang
+          justru LEBIH TEBAL di bawahnya, lalu satu kalimat penjelasan seukuran
+          isi. Tiga tulisan besar bersusun, dan yang paling menonjol adalah
+          sapaan — satu-satunya di antara ketiganya yang tidak membawa
+          keterangan apa pun.
+
+          Susunannya sekarang mengikuti urutan yang lazim dipakai halaman yang
+          harus dibaca sekilas: penanda tempat yang kecil dan berjarak huruf di
+          atas, judul besar di tengah, penjelasan yang diredupkan di bawah.
+          Mata membacanya sebagai satu blok, bukan tiga.
+        */
         Text(
-          "Welcome to your store page",
-          style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                color: Theme.of(context).secondaryHeaderColor,
-                fontWeight: FontWeight.bold,
+          storeModel == null ? "" : storeModel!.name.toUpperCase(),
+          style: gayaLabelKolom(context)?.copyWith(
+            color: Theme.of(context).secondaryHeaderColor,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          "Store overview",
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                fontSize: 34,
+                height: 1.1,
+                letterSpacing: -0.5,
               ),
         ),
-        const SizedBox(
-          height: 15,
-        ),
-        Text(
-          "Currently operating on ${storeModel == null ? "" : storeModel!.name}",
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        Text(
-          "Here you can check out your sales performance, track registered members, and monitor overall store activity.",
-          style: Theme.of(context).textTheme.bodyLarge,
+        const SizedBox(height: 10),
+        ConstrainedBox(
+          /*
+            Lebarnya dibatasi. Baris teks yang membentang seribu seratus piksel
+            membuat mata kehilangan awal baris berikutnya; sekitar enam puluh
+            lima huruf adalah panjang yang masih nyaman diikuti.
+          */
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: Text(
+            "Sales performance, registered members, and everything this "
+            "terminal keeps in sync with the server.",
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  height: 1.5,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.62),
+                ),
+          ),
         ),
         const SizedBox(
           height: 25,
@@ -325,12 +355,13 @@ class _StoreDashboardState extends State<StoreDashboard> {
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 50,
-                  ),
+                  const SizedBox(height: 28),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       StatCard(
+                        /* Kolom pertama: tidak ada yang perlu dipisahkan di kirinya. */
+                        pemisah: false,
                         number: NumberFormat.compact().format(newMemberCount),
                         title: "New member count",
                         description: "New members registered in your store",

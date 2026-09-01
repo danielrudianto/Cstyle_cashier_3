@@ -1154,12 +1154,15 @@ class _StorePageState extends State<StorePage> {
                         onTekan: () => setState(() => selectedMenu = 5),
                       ),
                       const _LabelBagian("UTILITIES"),
-                      _ButirMenu(
-                        ikon: Icons.summarize_outlined,
-                        label: "Daily report",
-                        aktif: false,
-                        onTekan: () => openDailyReport(),
-                      ),
+                      /*
+                        "Daily report" DIPINDAH KE HALAMAN HOME.
+
+                        Ia satu-satunya butir di menu ini yang tidak membuka
+                        halaman melainkan memunculkan dialog, jadi ia tidak
+                        pernah bisa tampil terpilih seperti tetangganya —
+                        setengah menu, setengah tombol. Tempatnya di Home,
+                        bersama tindakan lain yang dijalankan lalu selesai.
+                      */
                       _ButirMenu(
                         ikon: Icons.inventory_2_outlined,
                         label: "Stock list",
