@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/model/model.product-image.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
@@ -7,8 +6,6 @@ import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
-import 'dart:ui' show FontFeature;
-
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -17,7 +14,12 @@ import 'package:provider/provider.dart';
 class DashboardGridList extends StatelessWidget {
   final List<ProductModel> products;
   final Function onAddProduct;
+
+  /// Pengendali gulir milik halaman induk, yang juga memakainya untuk memuat
+  /// halaman berikutnya saat sampai di bawah.
+  final ScrollController controller;
   const DashboardGridList({
+    required this.controller,
     super.key,
     required this.products,
     required this.onAddProduct,
@@ -177,15 +179,31 @@ class DashboardGridList extends StatelessWidget {
       });
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 20,
-        right: 20,
-      ),
-      child: Consumer2<CompareNotifier, CartNotifier>(
-          builder: (_, compareNotifier, cartNotifier, child) {
-        return Column(
-          children: products.mapIndexed((index, e) {
+    /*
+      ListView.builder, BUKAN Column DI DALAM SingleChildScrollView.
+
+      Bentuk lama membangun SELURUH baris sekaligus. Halaman ini memuat 25
+      barang per permintaan dan menambahkannya saat digulir, jadi setelah
+      beberapa gulungan `products` berisi ratusan — dan setiap satu di antaranya
+      menjadi widget hidup, lengkap dengan kotak centang, tombol ikon, dan
+      pemformat angka, biar pun berada jauh di luar layar.
+
+      Yang membuatnya terasa saat menambah barang ke keranjang: Consumer2 di
+      bawah ini membungkus seluruh daftar, jadi satu perubahan keranjang
+      membangun ulang SEMUA baris itu. Satu klik, ratusan baris disusun ulang.
+
+      Dengan itemBuilder, yang dibangun hanya yang terlihat — belasan, bukan
+      ratusan. Consumer2-nya tetap di sini, tetapi sekarang yang ia bangun ulang
+      juga hanya yang terlihat.
+    */
+    return Consumer2<CompareNotifier, CartNotifier>(
+      builder: (_, compareNotifier, cartNotifier, child) {
+        return ListView.builder(
+          controller: controller,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final e = products[index];
             /*
               Stok yang benar-benar bisa dijual: stok gudang dikurangi yang
               sudah masuk keranjang tapi belum dibayar.
@@ -388,9 +406,9 @@ class DashboardGridList extends StatelessWidget {
                 ),
               ),
             );
-          }).toList(),
+          },
         );
-      }),
+      },
     );
   }
 }

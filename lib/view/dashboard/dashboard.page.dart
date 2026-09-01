@@ -292,14 +292,18 @@ class _DashboardPageState extends State<DashboardPage> {
                                 const Color.fromARGB(255, 161, 121, 220),
                             radius: const Radius.circular(8.0),
                             thickness: 8.0,
-                            child: SingleChildScrollView(
+                            /*
+                              SingleChildScrollView dibuang: daftarnya kini
+                              ListView.builder yang menggulir sendiri, dan dua
+                              penggulir bersarang membuat yang di dalam kehilangan
+                              tingginya sehingga semua barisnya tetap dibangun.
+                            */
+                            child: DashboardGridList(
                               controller: scrollController,
-                              child: DashboardGridList(
-                                products: products,
-                                onAddProduct: (ProductModel product) async {
-                                  await addProductToCart(product);
-                                },
-                              ),
+                              products: products,
+                              onAddProduct: (ProductModel product) async {
+                                await addProductToCart(product);
+                              },
                             ),
                           ),
                         ),
