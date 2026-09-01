@@ -28,11 +28,21 @@ class BrandBackdrop extends StatelessWidget {
   /// Versi aplikasi, ditampilkan kecil di bawah nama.
   final String versi;
 
+  /// Kunci pada logo, supaya tirai keluar bisa tumbuh dari sana.
+  ///
+  /// Logonya bujur sangkar 72x72; diberi jari-jari setengah lebarnya, kotak
+  /// asal itu BERUPA lingkaran, dan tirainya menyebar melingkar dari logo.
+  final GlobalKey? kunciLogo;
+
   const BrandBackdrop({
     super.key,
     required this.child,
     this.versi = versiAplikasi,
+    this.kunciLogo,
   });
+
+  /// Lebar dan tinggi logo. Setengahnya adalah jari-jari untuk tirai melingkar.
+  static const double ukuranLogo = 72;
 
   /// Versi yang ditampilkan di layar pembuka.
   ///
@@ -75,8 +85,9 @@ class BrandBackdrop extends StatelessWidget {
                 children: [
                   Image.asset(
                     "assets/images/IconReverted.webp",
-                    width: 72,
-                    height: 72,
+                    key: kunciLogo,
+                    width: ukuranLogo,
+                    height: ukuranLogo,
                   ),
                   const SizedBox(height: 18),
                   const Text(

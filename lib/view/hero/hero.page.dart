@@ -1,4 +1,5 @@
 import 'package:cstyle_cashier_3/components/brand-backdrop/brand-backdrop.dart';
+import 'package:cstyle_cashier_3/components/tirai-keluar/tirai-keluar.dart';
 import 'package:cstyle_cashier_3/model/model.cart.model.dart';
 import 'package:cstyle_cashier_3/model/model.migration.model.dart';
 import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
@@ -7,6 +8,7 @@ import 'package:cstyle_cashier_3/utils/database.utils.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/sync.utils.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,6 +24,12 @@ class HeroPage extends StatefulWidget {
 
 class _HeroPageState extends State<HeroPage> {
   String loadingStatus = "Initializing";
+
+  /// Logo, titik tumbuh tirai keluar.
+  final GlobalKey _kunciLogo = GlobalKey();
+
+  /// Tirai berjalan.
+  bool _menutup = false;
 
   // Guard biar proses inisialisasi TIDAK jalan dobel
   bool _initStarted = false;
@@ -176,7 +184,7 @@ class _HeroPageState extends State<HeroPage> {
                     stackTrace: st,
                   );
                 });
-                if (mounted) context.push("/main");
+                if (mounted) await _keluarKeUtama();
               } catch (error, st) {
                 _setStatus("Failed loading stock data from designated server");
                 LoggerUtils().log(
@@ -225,6 +233,26 @@ class _HeroPageState extends State<HeroPage> {
     }
   }
 
+  /// Tirai melingkar dari logo, lalu halaman utama.
+  ///
+  /// Tidak ada isi yang perlu dipudarkan lebih dulu seperti di layar
+  /// penyiapan — di sini yang tersisa hanya keterangan langkah, dan tirainya
+  /// menelannya sambil lewat.
+  Future<void> _keluarKeUtama() async {
+    if (!mounted) return;
+
+    if (gerakDimatikan(context)) {
+      context.push("/main");
+      return;
+    }
+
+    setState(() => _menutup = true);
+    await Future.delayed(Gerak.tirai);
+    if (!mounted) return;
+
+    context.push("/main");
+  }
+
   @override
   Widget build(BuildContext context) {
     /*
@@ -237,42 +265,53 @@ class _HeroPageState extends State<HeroPage> {
       Yang tersisa di sini hanya yang memang milik layar ini: keterangan
       langkah yang sedang berjalan.
     */
-    return BrandBackdrop(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: 132,
-            child: LinearProgressIndicator(
-              minHeight: 2,
-              backgroundColor: Colors.white24,
-              color: Colors.white,
+    return TiraiKeluar(
+      asal: _kunciLogo,
+      aktif: _menutup,
+      /*
+        Setengah lebar logo: kotak asalnya menjadi lingkaran, jadi tirainya
+        menyebar melingkar dari lambangnya sendiri.
+      */
+      radiusAwal: BrandBackdrop.ukuranLogo / 2,
+      gradien: gradienKerja(context),
+      child: BrandBackdrop(
+        kunciLogo: _kunciLogo,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 132,
+              child: LinearProgressIndicator(
+                minHeight: 2,
+                backgroundColor: Colors.white24,
+                color: Colors.white,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          ConstrainedBox(
-            /*
+            const SizedBox(height: 20),
+            ConstrainedBox(
+              /*
               Dibatasi lebarnya karena sebagian keterangan panjang — yang soal
               selisih waktu sampai dua kalimat — dan tanpa batas ini ia
               membentang selebar jendela dalam satu baris.
             */
-            constraints: const BoxConstraints(maxWidth: 320),
-            child: AnimatedSwitcher(
-              duration: Gerak.cepat,
-              child: Text(
-                loadingStatus,
-                key: ValueKey(loadingStatus),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontFamily: "Lato",
-                  fontSize: 13,
-                  height: 1.45,
+              constraints: const BoxConstraints(maxWidth: 320),
+              child: AnimatedSwitcher(
+                duration: Gerak.cepat,
+                child: Text(
+                  loadingStatus,
+                  key: ValueKey(loadingStatus),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontFamily: "Lato",
+                    fontSize: 13,
+                    height: 1.45,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

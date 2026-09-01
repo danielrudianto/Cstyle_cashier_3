@@ -1,10 +1,12 @@
 import 'package:cstyle_cashier_3/components/brand-backdrop/brand-backdrop.dart';
+import 'package:cstyle_cashier_3/components/tirai-keluar/tirai-keluar.dart';
 import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/utils/sync.utils.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 
 /// Layar penyiapan: mengikat satu terminal ke satu toko.
@@ -48,6 +50,15 @@ class _SetupStorePageState extends State<SetupStorePage> {
 
   bool _sedangMemeriksa = false;
   String? _galat;
+
+  /// Kartu ini yang menjadi titik tumbuh tirai keluar.
+  final GlobalKey _kunciKartu = GlobalKey();
+
+  /// Isi kartu dipudarkan lebih dulu, sebelum kartunya mengembang.
+  bool _kontenPudar = false;
+
+  /// Tirai berjalan.
+  bool _menutup = false;
 
   @override
   void dispose() {
@@ -105,7 +116,7 @@ class _SetupStorePageState extends State<SetupStorePage> {
       LoggerUtils().log("Stock updated", LogType.info);
       SyncUtils.sync();
 
-      router.replace("/main");
+      await _keluarKeUtama();
     } catch (error, jejak) {
       LoggerUtils().log(
         "Gagal menyiapkan toko",
@@ -127,157 +138,206 @@ class _SetupStorePageState extends State<SetupStorePage> {
     }
   }
 
+  /// Urutan keluar: isi memudar, kartu mengembang, halaman utama masuk.
+  ///
+  /// Dijalankan berurutan dan bukan bersamaan, karena keduanya menyampaikan
+  /// hal berbeda. Memudarnya isi berarti "yang tadi sudah selesai"; mengembang
+  /// berarti "yang ini menjadi yang berikutnya". Dijalankan bersamaan, tidak
+  /// ada satu pun yang terbaca.
+  Future<void> _keluarKeUtama() async {
+    if (!mounted) return;
+
+    if (gerakDimatikan(context)) {
+      router.replace("/main");
+      return;
+    }
+
+    setState(() => _kontenPudar = true);
+    await Future.delayed(Gerak.cepat);
+    if (!mounted) return;
+
+    setState(() => _menutup = true);
+    await Future.delayed(Gerak.tirai);
+    if (!mounted) return;
+
+    router.replace("/main");
+  }
+
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
     final warna = tema.colorScheme;
 
-    return BrandBackdrop(
-      child: ConstrainedBox(
-        /*
+    return TiraiKeluar(
+      asal: _kunciKartu,
+      aktif: _menutup,
+      radiusAwal: 14,
+      /*
+        Diisi gradien halaman TUJUAN, bukan warna netral. Begitu tirainya penuh,
+        layarnya sudah identik dengan halaman utama — jadi perpindahan route
+        sesudahnya tidak mengubah apa pun yang terlihat.
+      */
+      gradien: gradienKerja(context),
+      child: BrandBackdrop(
+        child: ConstrainedBox(
+          /*
           Lebarnya dibatasi, bukan dibuat pecahan dari lebar layar. Satu kolom
           kode toko tidak menjadi lebih mudah diisi karena membentang sembilan
           ratus piksel di monitor kasir.
         */
-        constraints: const BoxConstraints(maxWidth: 380),
-        child: Card(
-          color: tema.cardColor,
-          elevation: 8,
-          shadowColor: Colors.black45,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
-            child: Form(
-              key: _kunciForm,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    "Activate this terminal",
-                    style: tema.textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Paste the store code for the till this computer "
-                    "belongs to. Dashes are fine. It is set once and "
-                    "remembered.",
-                    style: tema.textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 22),
-                  TextFormField(
-                    controller: _kodeToko,
-                    autofocus: true,
-                    enabled: !_sedangMemeriksa,
-                    textInputAction: TextInputAction.go,
-                    /*
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: Card(
+            key: _kunciKartu,
+            color: tema.cardColor,
+            elevation: 8,
+            shadowColor: Colors.black45,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 26, 24, 24),
+              /*
+              Isi memudar sebelum kartunya mengembang. Kalau ia ikut membesar
+              bersama kartunya, tulisannya melar seukuran layar sepanjang
+              gerakan — dan yang tadinya terbaca sebagai kartu yang tumbuh
+              berubah menjadi layar yang di-zoom.
+            */
+              child: AnimatedOpacity(
+                opacity: _kontenPudar ? 0 : 1,
+                duration: Gerak.cepat,
+                curve: Gerak.keluar,
+                child: Form(
+                  key: _kunciForm,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        "Activate this terminal",
+                        style: tema.textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        "Paste the store code for the till this computer "
+                        "belongs to. Dashes are fine. It is set once and "
+                        "remembered.",
+                        style: tema.textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 22),
+                      TextFormField(
+                        controller: _kodeToko,
+                        autofocus: true,
+                        enabled: !_sedangMemeriksa,
+                        textInputAction: TextInputAction.go,
+                        /*
                       Warna tulisan disebut eksplisit dari skema warna. Inilah
                       perbaikan putih-di-atas-putih: mewarisi bodyLarge membuat
                       isian ini tidak terbaca di tema gelap.
                     */
-                    style: tema.textTheme.bodyLarge?.copyWith(
-                      color: warna.onSurface,
-                      letterSpacing: 1.1,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: "Store code",
-                      hintText: "32 characters",
-                      hintStyle: TextStyle(
-                        color: warna.onSurface.withValues(alpha: 0.4),
-                        letterSpacing: 1.1,
-                      ),
-                      filled: true,
-                      fillColor: warna.onSurface.withValues(alpha: 0.04),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 16,
-                      ),
-                    ),
-                    validator: (_) {
-                      /*
+                        style: tema.textTheme.bodyLarge?.copyWith(
+                          color: warna.onSurface,
+                          letterSpacing: 1.1,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: "Store code",
+                          hintText: "32 characters",
+                          hintStyle: TextStyle(
+                            color: warna.onSurface.withValues(alpha: 0.4),
+                            letterSpacing: 1.1,
+                          ),
+                          filled: true,
+                          fillColor: warna.onSurface.withValues(alpha: 0.04),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 16,
+                          ),
+                        ),
+                        validator: (_) {
+                          /*
                         Format diperiksa DI SINI, bukan dibiarkan gagal di
                         server. Kode yang panjangnya salah selalu ditolak, jadi
                         mengirimkannya lebih dulu hanya menukar pesan yang tepat
                         dengan pesan umum "gagal mengaktifkan" sesudah menunggu
                         satu perjalanan jaringan.
                       */
-                      if (_kodeBersih.isEmpty) {
-                        return "Enter a store code";
-                      }
-                      if (!_polaKode.hasMatch(_kodeBersih)) {
-                        return "That is not a store code. It is 32 letters and "
-                            "numbers, with or without dashes.";
-                      }
-                      return null;
-                    },
-                    onFieldSubmitted: (_) => _validateStore(),
-                  ),
-                  /*
+                          if (_kodeBersih.isEmpty) {
+                            return "Enter a store code";
+                          }
+                          if (!_polaKode.hasMatch(_kodeBersih)) {
+                            return "That is not a store code. It is 32 letters and "
+                                "numbers, with or without dashes.";
+                          }
+                          return null;
+                        },
+                        onFieldSubmitted: (_) => _validateStore(),
+                      ),
+                      /*
                     Ruang galat hanya muncul saat ada galat. Menyediakannya
                     permanen membuat kartunya bercelah tanpa sebab; menyisipkan
                     saat perlu membuat kartunya sedikit memanjang, dan gerakan
                     itu sendiri sudah menjadi tanda bahwa ada yang berubah.
                   */
-                  AnimatedSize(
-                    duration: Gerak.cepat,
-                    curve: Gerak.masuk,
-                    child: _galat == null
-                        ? const SizedBox(width: double.infinity)
-                        : Padding(
-                            padding: const EdgeInsets.only(top: 14),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 18,
-                                  color: warna.error,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _galat!,
-                                    style: tema.textTheme.bodySmall?.copyWith(
+                      AnimatedSize(
+                        duration: Gerak.cepat,
+                        curve: Gerak.masuk,
+                        child: _galat == null
+                            ? const SizedBox(width: double.infinity)
+                            : Padding(
+                                padding: const EdgeInsets.only(top: 14),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      size: 18,
                                       color: warna.error,
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _galat!,
+                                        style:
+                                            tema.textTheme.bodySmall?.copyWith(
+                                          color: warna.error,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 22),
-                  FilledButton(
-                    onPressed: _sedangMemeriksa ? null : _validateStore,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                              ),
                       ),
-                    ),
-                    /*
+                      const SizedBox(height: 22),
+                      FilledButton(
+                        onPressed: _sedangMemeriksa ? null : _validateStore,
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        /*
                       Tombolnya menunjukkan bahwa ia sedang bekerja. Sebelumnya
                       pemeriksaan berjalan tanpa satu pun tanda, jadi menekan
                       dua kali karena mengira tidak tertekan adalah reaksi yang
                       wajar — dan itu menjalankan penyiapan dua kali.
                     */
-                    child: _sedangMemeriksa
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2,
-                              color: warna.onPrimary,
-                            ),
-                          )
-                        : const Text("Activate"),
+                        child: _sedangMemeriksa
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.2,
+                                  color: warna.onPrimary,
+                                ),
+                              )
+                            : const Text("Activate"),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
