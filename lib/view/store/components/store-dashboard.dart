@@ -15,7 +15,13 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StoreDashboard extends StatefulWidget {
-  const StoreDashboard({super.key});
+  /// Membuka ringkasan penjualan hari ini.
+  ///
+  /// Dijalankan halaman induk karena dialognya milik StorePage; yang ada di
+  /// sini hanya tempat menekannya.
+  final VoidCallback onLaporanHarian;
+
+  const StoreDashboard({super.key, required this.onLaporanHarian});
 
   @override
   State<StoreDashboard> createState() => _StoreDashboardState();
@@ -402,6 +408,68 @@ class _StoreDashboardState extends State<StoreDashboard> {
                 ],
               ),
             ),
+          ),
+        ),
+        const SizedBox(
+          height: 15,
+        ),
+        /*
+          LAPORAN HARIAN, DIPINDAH DARI MENU SAMPING.
+
+          Di menu ia satu-satunya butir yang tidak membuka halaman melainkan
+          memunculkan dialog, jadi ia tidak pernah bisa tampil terpilih seperti
+          tetangganya. Di sini ia berdiri sebagai tindakan, dan batang aksen di
+          tepi kiri menandainya sebagai satu-satunya hal di halaman ini yang
+          menghasilkan sesuatu untuk dibawa keluar.
+        */
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color:
+                Theme.of(context).secondaryHeaderColor.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(12),
+            border: Border(
+              left: BorderSide(
+                color: Theme.of(context).secondaryHeaderColor,
+                width: 3,
+              ),
+            ),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Daily report",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "Everything sold today from this terminal, ready to "
+                      "read or send on.",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              FilledButton.icon(
+                onPressed: widget.onLaporanHarian,
+                icon: const Icon(Icons.summarize_outlined, size: 18),
+                label: const Text("Open report"),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(

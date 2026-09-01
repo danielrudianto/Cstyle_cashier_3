@@ -16,6 +16,7 @@ import 'package:cstyle_cashier_3/view/store/components/store-dashboard.dart';
 import 'package:flag/flag.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
+import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -859,7 +860,19 @@ class _StorePageState extends State<StorePage> {
         });
   }
 
-  openDailyReport() {
+  /// Nama toko untuk kepala laporan yang disalin.
+  ///
+  /// Diambil sekali saat laporan dibuka, bukan disimpan sebagai keadaan: ia
+  /// hanya dipakai di satu tempat, dan mengambilnya di sini membuat jelas dari
+  /// mana asalnya.
+  String _namaToko = "";
+
+  openDailyReport() async {
+    final toko = await StoreModel.getCurrentProfile();
+    _namaToko = toko?.name ?? "";
+
+    if (!mounted) return;
+
     DailyReportModel.downloadDailyReport().then((value) {
       showDialog(
           context: context,
@@ -989,34 +1002,91 @@ class _StorePageState extends State<StorePage> {
                       ),
                       child: Row(children: [
                         const Spacer(),
+                        /*
+                          TEKS YANG DISALIN DITUJUKAN UNTUK WHATSAPP.
+
+                          Bentuk lama hanya memuat jenis pembayaran dan
+                          totalnya — tanpa nama toko dan tanpa tanggal. Yang
+                          menerimanya di grup melihat deretan angka tanpa tahu
+                          itu dari toko mana atau hari apa, dan begitu ada dua
+                          toko mengirim pada hari yang sama, keduanya tidak
+                          bisa dibedakan lagi.
+
+                          Bintang tunggal di sekitar judul dibaca WhatsApp
+                          sebagai tebal, jadi barisnya menonjol di dalam
+                          percakapan. Di aplikasi lain ia tetap terbaca sebagai
+                          bintang biasa, dan itu tidak merugikan.
+
+                          Rupiah tanpa sen: dua angka nol yang selalu sama
+                          hanya memanjangkan pesan yang dibaca di layar telepon.
+                        */
                         InkWell(
                           onTap: () {
-                            String text = "";
+                            final rupiah = NumberFormat("#,##0");
+                            final namaToko = _namaToko;
+                            final tanggal = DateFormat("d MMMM yyyy")
+                                .format(DateTime.now());
+
+                            final baris = <String>[
+                              "*Daily report*",
+                              if (namaToko.isNotEmpty) namaToko,
+                              tanggal,
+                              "",
+                            ];
+
                             num total = 0.0;
                             for (var item in value['payments']) {
-                              text +=
-                                  "${item['type'].toString().toUpperCase()}: ${NumberFormat("#,##0.00").format(item['value'])}\n";
+                              final jenis =
+                                  item['type'].toString().toUpperCase();
+                              baris.add(
+                                "$jenis : Rp ${rupiah.format(item['value'])}",
+                              );
                               total += item['value'];
                             }
-                            text +=
-                                "Total: ${NumberFormat("#,##0.00").format(total)}";
-                            Clipboard.setData(ClipboardData(text: text));
+
+                            baris.add("");
+                            baris.add("*Total : Rp ${rupiah.format(total)}*");
+
+                            Clipboard.setData(
+                              ClipboardData(text: baris.join("\n")),
+                            );
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Copied to clipboard"),
-                                duration: Duration(seconds: 1),
+                                content: Text(
+                                  "Report copied — paste it into WhatsApp",
+                                ),
+                                duration: Duration(seconds: 2),
                               ),
                             );
                           },
-                          child: Text(
-                            "Copy to clipboard",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.copy_all_outlined,
+                                  size: 17,
                                   color: Theme.of(context).secondaryHeaderColor,
                                 ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "Copy for WhatsApp",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ]),
@@ -1042,7 +1112,7 @@ class _StorePageState extends State<StorePage> {
   Widget get currentPage {
     switch (selectedMenu) {
       case 0:
-        return const StoreDashboard();
+        return StoreDashboard(onLaporanHarian: openDailyReport);
       case 1:
         return const MemberListPage();
       case 2:
