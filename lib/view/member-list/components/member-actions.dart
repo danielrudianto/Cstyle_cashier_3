@@ -27,14 +27,19 @@ import 'package:flutter/services.dart';
 /// dikerjakan menyebutkan sebabnya — "No email on file" — alih-alih sekadar
 /// tampil redup tanpa keterangan.
 ///
+/// TINDAKAN "Open member details" DIBUANG.
+///
+/// Dialognya menampilkan kembali nama, kode, surel, dan telepon — empat hal
+/// yang sudah terbaca di baris tabelnya dan tiga di antaranya sudah tertulis
+/// di lembaran ini beserta nilainya. Ia menambah satu ketukan untuk sampai ke
+/// keterangan yang tidak pernah baru.
+///
 /// Dan pesan setelahnya. "Successfully copied email." dibuka dengan kata yang
 /// tidak menambah apa-apa; yang ingin dibaca sekilas adalah "Email copied".
 class MemberActions extends StatelessWidget {
   final MemberModel anggota;
 
   const MemberActions({super.key, required this.anggota});
-
-  static const String bukaDetail = "detail";
 
   void _salin(BuildContext context, String nilai, String apa) {
     Clipboard.setData(ClipboardData(text: nilai));
@@ -105,14 +110,6 @@ class MemberActions extends StatelessWidget {
             nilai: anggota.code,
             aktif: true,
             onTekan: () => _salin(context, anggota.code, "Member code"),
-          ),
-          Divider(height: 1, color: tema.dividerColor),
-          _Tindakan(
-            ikon: Icons.open_in_new,
-            label: "Open member details",
-            nilai: "Points, birthday and contact",
-            aktif: true,
-            onTekan: () => Navigator.of(context).pop(bukaDetail),
           ),
           const SizedBox(height: 8),
         ],

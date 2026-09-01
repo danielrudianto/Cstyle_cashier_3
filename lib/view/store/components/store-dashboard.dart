@@ -206,88 +206,17 @@ class _StoreDashboardState extends State<StoreDashboard> {
           height: 25,
         ),
         /*
-          TIGA BARIS JUDUL BERSUSUN MENJADI SATU LOCKUP.
-
-          Dulu: "Welcome to your store page" berwarna aksen dan berukuran
-          headlineLarge, lalu "Currently operating on CSTYLE SEMINYAK" yang
-          justru LEBIH TEBAL di bawahnya, lalu satu kalimat penjelasan seukuran
-          isi. Tiga tulisan besar bersusun, dan yang paling menonjol adalah
-          sapaan — satu-satunya di antara ketiganya yang tidak membawa
-          keterangan apa pun.
-
-          Susunannya sekarang mengikuti urutan yang lazim dipakai halaman yang
-          harus dibaca sekilas: penanda tempat yang kecil dan berjarak huruf di
-          atas, judul besar di tengah, penjelasan yang diredupkan di bawah.
-          Mata membacanya sebagai satu blok, bukan tiga.
+          Kepala halaman ini dan kepala daftar anggota dulu ditulis terpisah
+          dengan susunan yang sama persis. Sekarang keduanya memanggil
+          KepalaHalaman; lihat components/ui.
         */
-        /*
-          Monospace, seperti penanda di kepala dokumen. Ia menyebut TEMPAT —
-          data, bukan kalimat — dan huruf yang lebarnya seragam menyatakan itu
-          sebelum isinya dibaca.
-        */
-        Text(
-          storeModel == null ? "" : storeModel!.name.toUpperCase(),
-          style: gayaKode(context, ukuran: 12).copyWith(
-            color: Theme.of(context).secondaryHeaderColor,
-          ),
+        KepalaHalaman(
+          penanda: storeModel == null ? "" : storeModel!.name.toUpperCase(),
+          judul: "Store overview",
+          keterangan: "Sales performance, registered members, and everything "
+              "this terminal keeps in sync with the server.",
         ),
-        const SizedBox(height: 8),
-        Text(
-          "Store overview",
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontSize: 34,
-                height: 1.1,
-                letterSpacing: -0.5,
-              ),
-        ),
-        const SizedBox(height: 10),
-        ConstrainedBox(
-          /*
-            Lebarnya dibatasi. Baris teks yang membentang seribu seratus piksel
-            membuat mata kehilangan awal baris berikutnya; sekitar enam puluh
-            lima huruf adalah panjang yang masih nyaman diikuti.
-          */
-          constraints: const BoxConstraints(maxWidth: 620),
-          child: Text(
-            "Sales performance, registered members, and everything this "
-            "terminal keeps in sync with the server.",
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  height: 1.5,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.62),
-                ),
-          ),
-        ),
-        const SizedBox(
-          height: 25,
-        ),
-        /*
-          SATU BAHASA UNTUK SEMUA KARTU.
-
-          Halaman ini sempat memakai tiga perlakuan sekaligus: statistik dan
-          sinkronisasi memakai permukaan bergaris rambut, tema dan pencetak
-          memakai Card berelevasi tanpa garis, dan laporan harian memakai
-          latar beraksen. Tiga bentuk untuk hal yang sederajat membuat mata
-          mencari perbedaan yang tidak ada artinya.
-
-          Sekarang semuanya sama, dan SATU yang sengaja berbeda: laporan
-          harian, karena ia satu-satunya yang menghasilkan sesuatu untuk
-          dibawa keluar. Perbedaan yang tersisa jadi berarti.
-        */
-        /*
-          KALIMAT PENJELASAN DAN "Last synced" DIBUANG.
-
-          Yang pertama menerangkan sebuah dropdown yang sudah berlabel
-          "Assessment period" — ia hanya mengisi ruang di sebelahnya, dan
-          salah eja pula. Yang kedua kini ada di baris keterangan terminal di
-          kepala halaman, jadi menuliskannya lagi di sini berarti dua tempat
-          yang harus sama-sama diperbarui.
-
-          Pemilih periodenya naik ke kanan barisan judul, tempat yang sama
-          dengan tombol pada dua kartu lainnya.
-        */
+        const SizedBox(height: 6),
         Bagian(
           label: "STORE STATS",
           aksi: SizedBox(

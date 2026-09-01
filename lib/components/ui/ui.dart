@@ -459,6 +459,72 @@ InputDecoration dekorasiIsian(
   );
 }
 
+/// Kepala halaman: penanda kecil, judul besar, satu paragraf yang diredupkan.
+///
+/// Urutan yang dipakai halaman yang harus dibaca sekilas. Penanda di atas
+/// menjawab "ini di mana", judulnya menjawab "ini apa", paragrafnya menjawab
+/// "buat apa" — dan ketiganya terbaca sebagai satu blok, bukan tiga tulisan
+/// bersusun yang saling bersaing ukuran.
+///
+/// Penandanya monospace: ia menyebut tempat atau data, bukan kalimat.
+class KepalaHalaman extends StatelessWidget {
+  /// Penanda kecil di atas judul. Ditulis huruf besar oleh pemanggilnya.
+  final String penanda;
+
+  final String judul;
+
+  /// Satu paragraf. Lebarnya dibatasi 620 piksel — baris yang membentang
+  /// seribu seratus membuat mata kehilangan awal baris berikutnya.
+  final String? keterangan;
+
+  const KepalaHalaman({
+    super.key,
+    required this.penanda,
+    required this.judul,
+    this.keterangan,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          penanda,
+          style: gayaKode(context, ukuran: 12).copyWith(
+            color: tema.secondaryHeaderColor,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          judul,
+          style: tema.textTheme.headlineLarge?.copyWith(
+            fontSize: 34,
+            height: 1.1,
+            letterSpacing: -0.5,
+          ),
+        ),
+        if (keterangan != null) ...[
+          const SizedBox(height: 10),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: Text(
+              keterangan!,
+              style: tema.textTheme.bodyLarge?.copyWith(
+                height: 1.5,
+                color: tema.colorScheme.onSurface.withValues(alpha: 0.62),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 /// Satu pasang keterangan pada [BarisMeta].
 class Meta {
   final String label;

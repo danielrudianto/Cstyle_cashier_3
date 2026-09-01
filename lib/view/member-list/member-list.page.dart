@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
-import 'package:cstyle_cashier_3/view/member-list/components/member-detail.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/view/member-list/components/member-actions.dart';
 import 'package:cstyle_cashier_3/components/ui/ui.dart';
@@ -56,6 +55,18 @@ class _MemberListPageState extends State<MemberListPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        const SizedBox(height: 24),
+        /*
+          Kepala halaman yang sama dengan halaman kelola. Sebelumnya daftar
+          ini dibuka langsung ke kolom pencarian, tanpa satu pun kalimat yang
+          menyebutkan halaman apa yang sedang terbuka.
+        */
+        const KepalaHalaman(
+          penanda: "MEMBERSHIPS",
+          judul: "Members",
+          keterangan: "Everyone registered at this store, with the contact "
+              "details kept for them.",
+        ),
         /*
           BAHASA YANG SAMA DENGAN HALAMAN KELOLA.
 
@@ -66,7 +77,7 @@ class _MemberListPageState extends State<MemberListPage> {
           padahal itu angka pertama yang ingin diketahui saat membukanya.
         */
         Bagian(
-          atas: 24,
+          atas: 34,
           label: members.isEmpty
               ? "MEMBERS"
               : "MEMBERS · ${NumberFormat.decimalPattern("en-US").format(memberCount)}",
@@ -201,46 +212,7 @@ class _MemberListPageState extends State<MemberListPage> {
                                       context: context,
                                       builder: (context) {
                                         return MemberActions(anggota: e);
-                                      }).then((value) {
-                                    /*
-                                      Nilai kembaliannya disebut satu tempat —
-                                      MemberActions.bukaDetail — supaya teks
-                                      "detail" tidak diketik di dua berkas yang
-                                      berbeda dan menyimpang tanpa ketahuan.
-                                    */
-                                    if (value == MemberActions.bukaDetail) {
-                                      // show dialog detail
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            title: Text(
-                                              /* Nama orangnya, bukan nama layarnya. */
-                                              e.name,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .headlineMedium,
-                                            ),
-                                            // content table
-                                            content: MemberDetailPage(e.code),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child: Text(
-                                                  "Close",
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge,
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    }
-                                  });
+                                      }).then((value) {});
                                 }
                               },
                               cells: [
