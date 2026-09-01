@@ -42,6 +42,10 @@ class _DashboardPageState extends State<DashboardPage> {
   ScrollController scrollController = ScrollController();
   FocusNode barcodeFocusNode = FocusNode();
 
+  /// Fokus kolom pencarian, dipegang di sini supaya Ctrl+F bisa mengarah
+  /// ke sana dari mana pun di halaman ini.
+  final FocusNode searchFocusNode = FocusNode();
+
   @override
   void didChangeDependencies() {
     Timer(const Duration(milliseconds: 300), () {
@@ -68,6 +72,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   void dispose() {
+    searchFocusNode.dispose();
     scrollController.dispose();
     super.dispose();
   }
@@ -75,6 +80,53 @@ class _DashboardPageState extends State<DashboardPage> {
   void showSnackbar(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Kabar singkat hasil pemindaian.
+  ///
+  /// PEMINDAIAN YANG BERHASIL DULU TIDAK MENGABARKAN APA PUN.
+  ///
+  /// Kedua kegagalannya sudah bersuara — barang tidak ditemukan, stok tidak
+  /// cukup — tetapi keberhasilannya diam. Jadi satu-satunya cara memastikan
+  /// pindaian tadi masuk adalah menoleh ke keranjang dan menghitung ulang,
+  /// dan itu dilakukan pada setiap barang.
+  ///
+  /// Diam sebagai tanda berhasil hanya bekerja kalau kegagalannya selalu
+  /// terlihat. Di sini tidak: pemindai bisa membaca setengah kode, atau
+  /// pembeli menaruh barang yang mirip. Yang dibutuhkan kasir adalah
+  /// pengakuan bahwa yang MASUK adalah yang dimaksud — karena itu namanya
+  /// ikut disebut.
+  void kabarPindai(String pesan, {bool galat = false}) {
+    final messenger = ScaffoldMessenger.of(context);
+    final warna = Theme.of(context).colorScheme;
+
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        /*
+          Yang berhasil lewat cepat; yang gagal bertahan lebih lama karena ia
+          menuntut tindakan.
+        */
+        duration: Duration(seconds: galat ? 4 : 2),
+        backgroundColor: galat ? warna.error : null,
+        content: Row(
+          children: [
+            Icon(
+              galat ? Icons.error_outline : Icons.check_circle_outline,
+              size: 18,
+              color: galat ? warna.onError : null,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                pesan,
+                style: galat ? TextStyle(color: warna.onError) : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> fetchProductTypes() async {
@@ -178,26 +230,23 @@ class _DashboardPageState extends State<DashboardPage> {
       ProductModel.fetchByBarcode(barcode).then((product) {
         if (product == null) {
           LoggerUtils().log("Product not found", LogType.error);
-          showSnackbar("Product not found.");
+          kabarPindai("No product matches that barcode", galat: true);
         } else {
           LoggerUtils().log("Product found", LogType.info);
           if ((product.stock ?? 0) <= 0) {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text(
-                  "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
-                ),
-                action: SnackBarAction(
-                  label: "OK",
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  },
-                ),
-              ),
+            /*
+              Namanya disebut. Pesan lama hanya berbunyi "Insufficient
+              stock" diikuti dua kalimat petunjuk — tidak menyebutkan barang
+              APA yang habis, padahal itulah yang perlu dikatakan kasir
+              kepada pembeli yang sedang berdiri di depannya.
+            */
+            kabarPindai(
+              "${product.description} is out of stock",
+              galat: true,
             );
           } else {
             addProductToCart(product);
+            kabarPindai("Added ${product.description}");
           }
         }
       }).catchError((error) {
@@ -224,6 +273,20 @@ class _DashboardPageState extends State<DashboardPage> {
         autofocus: true,
         focusNode: barcodeFocusNode,
         onKey: (event) {
+          /*
+            Ctrl+F diperiksa LEBIH DULU, sebelum penjaga _isFocusing di
+            bawah. Penjaga itu mengabaikan seluruh tombol ketika pencarian
+            sedang dipakai — yang benar untuk pemindai barcode, tetapi akan
+            membuat pintasan ini mati justru pada satu-satunya keadaan yang
+            tidak merugikan: menekannya saat sudah berada di sana.
+          */
+          if (event is RawKeyDownEvent &&
+              HardwareKeyboard.instance.isControlPressed &&
+              event.logicalKey == LogicalKeyboardKey.keyF) {
+            searchFocusNode.requestFocus();
+            return;
+          }
+
           if (_isFocusing) {
             barcode = "";
             return;
@@ -277,6 +340,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           hasilnya di sisi lain.
                         */
                         DashboardSearch(
+                          fokus: searchFocusNode,
                           onSearch: (value) => onSearch(value),
                           onFocus: () => setState(() => _isFocusing = true),
                           onUnfocus: () => setState(() {

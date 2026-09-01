@@ -32,11 +32,19 @@ class DashboardSearch extends StatefulWidget {
   final VoidCallback onFocus;
   final VoidCallback onUnfocus;
 
+  /// Dimiliki halaman induk, bukan widget ini.
+  ///
+  /// Halaman perlu memegangnya untuk bisa memindahkan fokus ke sini dari
+  /// luar — pintasan Ctrl+F. Kepemilikannya ikut pindah supaya hanya ada
+  /// satu tempat yang membuat dan melepasnya.
+  final FocusNode fokus;
+
   const DashboardSearch({
     super.key,
     required this.onSearch,
     required this.onFocus,
     required this.onUnfocus,
+    required this.fokus,
   });
 
   @override
@@ -44,13 +52,13 @@ class DashboardSearch extends StatefulWidget {
 }
 
 class _DashboardSearchState extends State<DashboardSearch> {
-  late final FocusNode _fokus;
   final TextEditingController _kendali = TextEditingController();
+
+  FocusNode get _fokus => widget.fokus;
 
   @override
   void initState() {
     super.initState();
-    _fokus = FocusNode();
     _fokus.addListener(_saatFokusBerubah);
   }
 
@@ -65,11 +73,10 @@ class _DashboardSearchState extends State<DashboardSearch> {
   @override
   void dispose() {
     /*
-      FocusNode versi lama tidak pernah dilepas, dan pendengarnya ikut hidup
-      terus bersamanya.
+      Pendengarnya dilepas, tetapi FocusNode-nya TIDAK — ia milik halaman
+      induk, dan yang membuat sesuatu adalah yang melepasnya.
     */
     _fokus.removeListener(_saatFokusBerubah);
-    _fokus.dispose();
     _kendali.dispose();
     super.dispose();
   }

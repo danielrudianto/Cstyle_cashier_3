@@ -5,6 +5,7 @@ import 'package:cstyle_cashier_3/view/store/store.page.dart';
 import 'package:cstyle_cashier_3/view/page-view/components/appbar-pageview.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
+import 'package:cstyle_cashier_3/utils/waktu.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -606,17 +607,24 @@ class _PageViewPageState extends State<PageViewPage> {
 
                                           Navigator.of(context).pop();
                                         },
+                                  /*
+                                    Waktu di atas, nomor nota di bawah — enam
+                                    nota tertahan pada hari yang sama hanya
+                                    dibedakan oleh jamnya, bukan oleh dua
+                                    belas angka acaknya.
+                                  */
                                   title: Text(
-                                    carts[index].name,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                                    waktuManusiawi(carts[index].date),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
                                   subtitle: Text(
-                                    DateFormat(
-                                      "dd/MM/yyyy",
-                                    ).format(carts[index].date),
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
+                                    carts[index].name,
+                                    style: gayaLabelKolom(context),
                                   ),
                                   trailing: cartNotifier.selectedCart != null &&
                                           cartNotifier.selectedCart!.id ==

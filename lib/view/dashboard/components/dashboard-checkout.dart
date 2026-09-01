@@ -2,6 +2,8 @@ import 'package:cstyle_cashier_3/model/model.cart-item.model.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-checkout-footer.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
+import 'package:cstyle_cashier_3/utils/waktu.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -298,18 +300,35 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  /*
+                    URUTANNYA DIBALIK.
+
+                    Nomor nota — dua belas angka acak — dulu menjadi tulisan
+                    terbesar di panel ini, dan tanggalnya "01/09/2026" di
+                    bawahnya. Keduanya keliru menempatkan diri: nomor itu
+                    penanda mesin yang tidak pernah dibaca kasir sambil
+                    melayani, dan tanggalnya selalu hari ini.
+
+                    Sekarang waktunya yang memimpin — itu yang membedakan
+                    satu nota tertahan dari yang lain — dan nomornya turun
+                    menjadi label kecil, tetap ada untuk dicocokkan bila
+                    perlu.
+                  */
                   Text(
-                    value.selectedCart!.name,
+                    waktuManusiawi(value.selectedCart!.date),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
+                  const SizedBox(height: 2),
                   Text(
-                    DateFormat("dd/MM/yyyy").format(value.selectedCart!.date),
+                    value.selectedCart!.name,
+                    style: gayaLabelKolom(context),
                   ),
                   const SizedBox(
                     height: 4,
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    /* Dulu grey.shade300; garis terang di atas latar gelap. */
+                    color: Theme.of(context).dividerColor,
                   ),
                   Expanded(
                     child: ListView.builder(
