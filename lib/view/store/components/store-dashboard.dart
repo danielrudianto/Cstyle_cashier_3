@@ -288,8 +288,8 @@ class _StoreDashboardState extends State<StoreDashboard> {
           Pemilih periodenya naik ke kanan barisan judul, tempat yang sama
           dengan tombol pada dua kartu lainnya.
         */
-        KartuBagian(
-          judul: "Store stats",
+        Bagian(
+          label: "STORE STATS",
           aksi: SizedBox(
             width: 210,
             child: Theme(
@@ -426,9 +426,9 @@ class _StoreDashboardState extends State<StoreDashboard> {
           hanya ini yang menghasilkan sesuatu untuk dibawa keluar. Begitu ada
           dua yang beraksen, keduanya berhenti berarti.
         */
-        KartuBagian(
+        Bagian(
           aksen: true,
-          judul: "Daily report",
+          label: "DAILY REPORT",
           keterangan: "Everything sold today from this terminal, ready to "
               "read or send on.",
           aksi: FilledButton.icon(
@@ -461,8 +461,8 @@ class _StoreDashboardState extends State<StoreDashboard> {
           satu-satunya warna di sini tinggal tombolnya, yang memang tempat
           tindakannya berada.
         */
-        KartuBagian(
-          judul: "Sync stock",
+        Bagian(
+          label: "SYNC STOCK",
           keterangan: "Pulls the latest stock figures from the server. "
               "Needs an internet connection.",
           aksi: FilledButton(
@@ -513,272 +513,179 @@ class _StoreDashboardState extends State<StoreDashboard> {
           lebih pendek berakhir menggantung, dan dua kartu bersebelahan dengan
           tinggi berbeda terbaca sebagai kesalahan, bukan sebagai pilihan.
         */
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                /* Bahasa kartu yang sama; lihat catatan di kartu statistik. */
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    /*
-                      Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
-                      pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
-                      dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
-                      justru harus menggulir jauh untuk menemukannya.
-                    */
-                    padding: const EdgeInsets.all(20),
-                    child: Consumer<ThemeNotifier>(builder: (_, value, __) {
-                      /*
-                        Center DIBUANG.
+        /*
+          DUA KARTU BERSANDING MENJADI DUA BAGIAN SELEBAR PENUH.
 
-                        Isinya — satu judul dan tiga tombol, totalnya sekitar tiga
-                        ratus piksel — ditaruh di tengah kartu selebar seribu seratus.
-                        Yang terlihat bukan kartu yang lapang, melainkan kartu yang
-                        KOSONG, karena tidak ada apa pun di kiri dan kanan isinya yang
-                        menjelaskan kenapa ruang itu ada.
-                      */
-                      return Align(
-                        alignment: Alignment.centerLeft,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "Theme setting",
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            ),
-                            const SizedBox(
-                              height: 25,
-                            ),
-                            /*
-                              Dulu RadioListTile<Brightness> dengan groupValue berbunyi
-                              "terang kalau light, selain itu gelap". Mode "ikut sistem"
-                              tidak punya wakil di situ, jadi ia tampil sebagai "Dark"
-                              terpilih walaupun layarnya sedang terang.
-
-                              Sekarang bertipe ThemeMode dan ketiga keadaannya diwakili
-                              apa adanya, termasuk "ikut sistem" yang sebelumnya tidak
-                              bisa dicapai sama sekali — penjelasannya di
-                              viewmodel/theme.viewmodel.dart.
-                            */
-                            /*
-                              TIGA RadioListTile MENJADI SATU BARIS BERSEGMEN.
-
-                              Masing-masing tile setinggi lima puluh piksel dan selebar
-                              kartu, jadi tiga pilihan yang saling meniadakan memakan
-                              seratus lima puluh piksel dan tampak seperti daftar yang
-                              bisa panjang. Padahal jumlahnya tetap tiga, selamanya, dan
-                              ketiganya muat berdampingan dalam satu baris.
-
-                              Bentuk bersegmen juga menyatakan hubungannya dengan lebih
-                              jujur: memilih salah satu berarti melepas dua lainnya.
-                            */
-                            PilihanSegmen<ThemeMode>(
-                              terpilih: value.themeMode,
-                              opsi: const [
-                                OpsiSegmen(
-                                  nilai: ThemeMode.system,
-                                  label: "Follow system",
-                                  ikon: Icons.brightness_auto_outlined,
-                                ),
-                                OpsiSegmen(
-                                  nilai: ThemeMode.light,
-                                  label: "Light",
-                                  ikon: Icons.light_mode_outlined,
-                                ),
-                                OpsiSegmen(
-                                  nilai: ThemeMode.dark,
-                                  label: "Dark",
-                                  ikon: Icons.dark_mode_outlined,
-                                ),
-                              ],
-                              onPilih: (mode) => Provider.of<ThemeNotifier>(
-                                context,
-                                listen: false,
-                              ).setThemeMode(mode),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ),
+          Menyandingkannya dulu memang menghemat gulungan, tetapi keduanya
+          tetap kotak — dan begitu halaman ini berhenti memakai kotak, dua
+          kotak yang tersisa justru menjadi satu-satunya yang berdinding.
+          Melebar penuh, keduanya ikut irama bagian di atasnya, dan
+          tindakannya berada di kanan barisan label seperti yang lain.
+        */
+        Consumer<ThemeNotifier>(
+          builder: (_, value, __) => Bagian(
+            label: "APPEARANCE",
+            aksi: PilihanSegmen<ThemeMode>(
+              terpilih: value.themeMode,
+              opsi: const [
+                OpsiSegmen(
+                  nilai: ThemeMode.system,
+                  label: "Follow system",
+                  ikon: Icons.brightness_auto_outlined,
                 ),
+                OpsiSegmen(
+                  nilai: ThemeMode.light,
+                  label: "Light",
+                  ikon: Icons.light_mode_outlined,
+                ),
+                OpsiSegmen(
+                  nilai: ThemeMode.dark,
+                  label: "Dark",
+                  ikon: Icons.dark_mode_outlined,
+                ),
+              ],
+              onPilih: (mode) => Provider.of<ThemeNotifier>(
+                context,
+                listen: false,
+              ).setThemeMode(mode),
+            ),
+          ),
+        ),
+        Bagian(
+          label: "RECEIPT PRINTER",
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                height: 15,
               ),
-              const SizedBox(width: 15),
-              Expanded(
-                /* Bahasa kartu yang sama; lihat catatan di kartu statistik. */
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                    borderRadius: BorderRadius.circular(12),
+              if (printer == null) ...[
+                /*
+                                      Keterangan keadaan, bukan judul — dulu bodyLarge,
+                                      seukuran isi utama, sehingga kalimat yang hanya
+                                      memberi tahu bahwa pencetak belum dipilih tampil
+                                      lebih besar daripada nama pencetak itu sendiri.
+                                    */
+                Text(
+                  "No printer set. Printing is off until one is "
+                  "chosen.",
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                /*
+                                      Bergaris, bukan terisi: memilih pencetak adalah persiapan
+                                      sekali pasang, bukan tindakan utama halaman ini.
+                                    */
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.print_outlined, size: 17),
+                  label: const Text("Set printer"),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(150, 42),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: Padding(
-                    /*
-                      Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
-                      pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
-                      dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
-                      justru harus menggulir jauh untuk menemukannya.
-                    */
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(
-                          height: 5,
-                          width: double.infinity,
-                        ),
-                        Text(
-                          "Printer setting",
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        if (printer == null) ...[
-                          /*
-                            Keterangan keadaan, bukan judul — dulu bodyLarge,
-                            seukuran isi utama, sehingga kalimat yang hanya
-                            memberi tahu bahwa pencetak belum dipilih tampil
-                            lebih besar daripada nama pencetak itu sendiri.
-                          */
-                          Text(
-                            "No printer set. Printing is off until one is "
-                            "chosen.",
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          /*
-                            Bergaris, bukan terisi: memilih pencetak adalah persiapan
-                            sekali pasang, bukan tindakan utama halaman ini.
-                          */
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.print_outlined, size: 17),
-                            label: const Text("Set printer"),
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(150, 42),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                  onPressed: () async {
+                    Printing.pickPrinter(context: context)
+                        .then((selectedPrinter) {
+                      if (selectedPrinter == null) {
+                        return;
+                      } else if (selectedPrinter.isAvailable == false) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    "Printer is currently not available")));
+                        return;
+                      } else {
+                        setState(() {
+                          printer = selectedPrinter;
+                        });
+
+                        SharedPreferences.getInstance().then((prefs) {
+                          prefs.setString("printer:url", selectedPrinter.url);
+                          prefs.setString("printer:name", selectedPrinter.name);
+                        });
+                      }
+                    });
+                  },
+                ),
+              ] else ...[
+                /*
+                                      Label kecil di atas, nama pencetak di bawahnya —
+                                      sama seperti kolom lain di aplikasi ini. Dulu satu
+                                      baris "Printer: EPSONC70AE8 (L14150 Series)"
+                                      seukuran judul, yang membuat nama perangkat menjadi
+                                      hal terbesar kedua di halaman setelan.
+                                    */
+                Text("CONNECTED", style: gayaLabelKolom(context)),
+                const SizedBox(height: 4),
+                Text(
+                  printer!.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                InkWell(
+                  onTap: () {
+                    Printing.pickPrinter(context: context)
+                        .then((selectedPrinter) {
+                      if (selectedPrinter != null) {
+                        if (selectedPrinter.isAvailable == false) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text("Printer is currently not available"),
                             ),
-                            onPressed: () async {
-                              Printing.pickPrinter(context: context)
-                                  .then((selectedPrinter) {
-                                if (selectedPrinter == null) {
-                                  return;
-                                } else if (selectedPrinter.isAvailable ==
-                                    false) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              "Printer is currently not available")));
-                                  return;
-                                } else {
-                                  setState(() {
-                                    printer = selectedPrinter;
-                                  });
+                          );
+                        } else {
+                          setState(() {
+                            printer = selectedPrinter;
+                          });
 
-                                  SharedPreferences.getInstance().then((prefs) {
-                                    prefs.setString(
-                                        "printer:url", selectedPrinter.url);
-                                    prefs.setString(
-                                        "printer:name", selectedPrinter.name);
-                                  });
-                                }
-                              });
-                            },
-                          ),
-                        ] else ...[
-                          /*
-                            Label kecil di atas, nama pencetak di bawahnya —
-                            sama seperti kolom lain di aplikasi ini. Dulu satu
-                            baris "Printer: EPSONC70AE8 (L14150 Series)"
-                            seukuran judul, yang membuat nama perangkat menjadi
-                            hal terbesar kedua di halaman setelan.
-                          */
-                          Text("CONNECTED", style: gayaLabelKolom(context)),
-                          const SizedBox(height: 4),
-                          Text(
-                            printer!.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Printing.pickPrinter(context: context)
-                                  .then((selectedPrinter) {
-                                if (selectedPrinter != null) {
-                                  if (selectedPrinter.isAvailable == false) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            "Printer is currently not available"),
-                                      ),
-                                    );
-                                  } else {
-                                    setState(() {
-                                      printer = selectedPrinter;
-                                    });
+                          SharedPreferences.getInstance().then((prefs) {
+                            prefs.setString("printer:url", selectedPrinter.url);
+                            prefs.setString(
+                                "printer:name", selectedPrinter.name);
+                          });
 
-                                    SharedPreferences.getInstance()
-                                        .then((prefs) {
-                                      prefs.setString(
-                                          "printer:url", selectedPrinter.url);
-                                      prefs.setString(
-                                          "printer:name", selectedPrinter.name);
-                                    });
-
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            "Printer has been changed successfully"),
-                                      ),
-                                    );
-                                  }
-                                }
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 25),
-                              // border 1 px solid #ccc
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Theme.of(context).dividerColor,
-                                ),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Text(
-                                "Change printer",
-                                style: Theme.of(context).textTheme.bodyLarge,
-                                textAlign: TextAlign.center,
-                              ),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text("Printer has been changed successfully"),
                             ),
-                          ),
-                        ],
-                      ],
+                          );
+                        }
+                      }
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 25),
+                    // border 1 px solid #ccc
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text(
+                      "Change printer",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

@@ -26,135 +26,123 @@ import 'package:flutter/material.dart';
   dan yang terlewat akan menyimpang tanpa ada yang menyadarinya. Di sini
   bentuknya disebut SEKALI, dan layar-layarnya memanggil.
 
+  Bentuk KARTU sempat tinggal di sini juga, lalu dibuang: halaman kelola
+  berhenti memakai kotak sama sekali, dan komponen yang tidak dipakai siapa
+  pun di lapisan bersama justru menjadi bibit penyimpangan berikutnya —
+  seseorang akan memakainya lagi karena ia ada, bukan karena ia tepat.
+
   Yang TIDAK masuk ke sini: warna dan ukuran huruf. Keduanya sudah tinggal di
   utils/theme.utils.dart, dan tempo gerak di utils/motion.utils.dart. Berkas ini
   hanya menyusun keduanya menjadi bentuk yang berulang.
 */
-
-/// Permukaan berkotak yang dipakai seluruh aplikasi.
+/// Satu bagian pada halaman yang dibaca sebagai DOKUMEN.
 ///
-/// Satu bentuk: warna kartu tema, garis rambut, jari-jari 12. Yang membedakan
-/// isinya, bukan wadahnya — dan kalau suatu saat memang ada yang perlu
-/// dibedakan, [aksen] menyalakan batang di tepi kiri, seperti pada blok laporan
-/// harian yang memang satu-satunya penghasil keluaran di halamannya.
-class Kartu extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-
-  /// Menyalakan batang aksen di tepi kiri. Dipakai HEMAT: begitu ada dua,
-  /// keduanya berhenti berarti.
-  final bool aksen;
-
-  final double? lebar;
-
-  const Kartu({
-    super.key,
-    required this.child,
-    this.padding = const EdgeInsets.all(20),
-    this.aksen = false,
-    this.lebar,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-
-    return Container(
-      width: lebar,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: aksen
-            ? tema.secondaryHeaderColor.withValues(alpha: 0.07)
-            : tema.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: aksen
-            ? Border(
-                left: BorderSide(
-                  color: tema.secondaryHeaderColor,
-                  width: 3,
-                ),
-              )
-            : Border.all(color: tema.dividerColor),
-      ),
-      child: child,
-    );
-  }
-}
-
-/// Kartu satu bagian: judul, keterangan sebaris, tindakan di kanan, lalu isi.
+/// KENAPA BUKAN KARTU.
 ///
-/// SATU BENTUK UNTUK SEMUA KARTU BAGIAN.
+/// Halaman kelola sempat disusun dari kartu — permukaan berkotak, garis rambut,
+/// sudut membulat — lalu ketiganya diseragamkan supaya bentuknya sama. Yang
+/// diseragamkan ternyata hal yang keliru: masalahnya bukan kartunya berbeda-beda,
+/// melainkan ADANYA kartu.
 ///
-/// Sebelum ini ketiganya di halaman kelola disusun berbeda-beda: yang satu
-/// memakai judul besar dengan kalimat penjelasan di sampingnya, yang lain judul
-/// lebih kecil dengan tombol di kanan, yang ketiga tombolnya justru di bawah
-/// keterangan. Tiga susunan untuk tiga hal yang sederajat, jadi mata harus
-/// mencari letak tombol setiap kali berpindah kartu.
+/// Bagian halaman ini yang paling disukai justru yang tidak punya kotak sama
+/// sekali: baris keterangan terminal di kepala halaman — label monospace, nilai,
+/// dua garis rambut, selesai. Yang membentuk bagiannya di situ adalah GARIS dan
+/// JARAK, bukan dinding. Kotak menambahkan tepi yang tidak menjelaskan apa pun,
+/// dan begitu ada empat kotak bertumpuk, halamannya terbaca sebagai tumpukan
+/// benda alih-alih satu halaman yang bisa dibaca dari atas ke bawah.
 ///
-/// Tindakannya SELALU di kanan barisan judul. Itu tempat yang sama untuk
-/// semuanya, dan ia tidak ikut menggeser ke bawah ketika keterangannya panjang.
-class KartuBagian extends StatelessWidget {
-  final String judul;
+/// Jadi bentuknya: label monospace di kiri, tindakan di kanan pada baris yang
+/// sama, garis rambut di bawah keduanya, lalu isinya. Melebar penuh, karena
+/// tidak ada dinding yang menahan.
+class Bagian extends StatelessWidget {
+  final String label;
 
-  /// Satu kalimat, diredupkan. Kalau butuh lebih dari satu, yang perlu
-  /// diperbaiki biasanya kalimatnya, bukan tempatnya.
+  /// Satu kalimat, diredupkan.
   final String? keterangan;
 
-  /// Tombol atau kendali, di kanan barisan judul.
+  /// Tombol atau kendali, di kanan barisan label.
   final Widget? aksi;
 
   final Widget? child;
 
-  /// Menyalakan batang aksen di tepi kiri. Dipakai HEMAT.
+  /// Batang aksen tipis di tepi kiri. Dipakai untuk SATU bagian saja per
+  /// halaman; begitu ada dua, keduanya berhenti berarti.
   final bool aksen;
 
-  const KartuBagian({
+  final double atas;
+
+  const Bagian({
     super.key,
-    required this.judul,
+    required this.label,
     this.keterangan,
     this.aksi,
     this.child,
     this.aksen = false,
+    this.atas = 34,
   });
 
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
 
-    return Kartu(
-      aksen: aksen,
-      padding: const EdgeInsets.all(22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(judul, style: tema.textTheme.headlineMedium),
-                    if (keterangan != null) ...[
-                      const SizedBox(height: 5),
-                      Text(keterangan!, style: tema.textTheme.bodySmall),
-                    ],
-                  ],
+    return Padding(
+      padding: EdgeInsets.only(top: atas),
+      child: Container(
+        padding: EdgeInsets.only(left: aksen ? 16 : 0),
+        decoration: aksen
+            ? BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: tema.secondaryHeaderColor,
+                    width: 2,
+                  ),
+                ),
+              )
+            : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: gayaKode(context, ukuran: 11).copyWith(
+                      color: aksen
+                          ? tema.secondaryHeaderColor
+                          : tema.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+                if (aksi != null) ...[
+                  const SizedBox(width: 20),
+                  aksi!,
+                ],
+              ],
+            ),
+            const SizedBox(height: 10),
+            Divider(height: 1, color: tema.dividerColor),
+            if (keterangan != null) ...[
+              const SizedBox(height: 12),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 620),
+                child: Text(
+                  keterangan!,
+                  style: tema.textTheme.bodyMedium?.copyWith(
+                    height: 1.5,
+                    color: tema.colorScheme.onSurface.withValues(alpha: 0.62),
+                  ),
                 ),
               ),
-              if (aksi != null) ...[
-                const SizedBox(width: 20),
-                aksi!,
-              ],
             ],
-          ),
-          if (child != null) ...[
-            const SizedBox(height: 22),
-            child!,
+            if (child != null) ...[
+              const SizedBox(height: 18),
+              child!,
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
