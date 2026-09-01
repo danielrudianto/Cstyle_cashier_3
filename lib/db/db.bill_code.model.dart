@@ -1,6 +1,7 @@
 import 'package:cstyle_cashier_3/db/db.bill.model.dart';
 import 'package:cstyle_cashier_3/db/db.bill_payment.model.dart';
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
+import 'package:sqflite/sqflite.dart';
 
 class SQLBillCodeModel {
   int? id;
@@ -156,13 +157,19 @@ class SQLBillCodeModel {
     return result.isEmpty ? 0 : result.first['count'] as int;
   }
 
+  /// Menghapus nota beserta baris barang dan pembayarannya.
+  ///
+  /// Ketiganya dalam satu transaksi. Sebelumnya tiga penghapusan terpisah, dan
+  /// kegagalan di tengah meninggalkan baris yang menunjuk nota yang sudah tidak
+  /// ada. Bentuk ini menyalin apa yang sudah dipakai SQLCartCodeModel.delete.
   static Future<int> delete(int id) async {
     final db = await DatabaseUtils().database;
-    await db.delete("bill", where: "billCodeID = ?", whereArgs: [id]);
-    await db.delete("bill_payment", where: "billCodeID = ?", whereArgs: [id]);
-    var result = await db.delete("bill_code", where: "id = ?", whereArgs: [id]);
 
-    return result;
+    return db.transaction<int>((txn) async {
+      await txn.delete("bill", where: "billCodeID = ?", whereArgs: [id]);
+      await txn.delete("bill_payment", where: "billCodeID = ?", whereArgs: [id]);
+      return txn.delete("bill_code", where: "id = ?", whereArgs: [id]);
+    });
   }
 }
 
@@ -216,18 +223,21 @@ class SQLBillCodeModelCreate extends SQLBillCodeModel {
     );
   }
 
-  Future<int> create() async {
-    try {
-      final db = await DatabaseUtils().database;
-      var billCodeID = await db.insert("bill_code", toMap());
-      if (billCodeID != 0) {
-        return billCodeID;
-      } else {
-        throw Exception("Failed to create bill code");
-      }
-    } catch (error) {
-      throw Exception(error);
+  /// Menyimpan nota di dalam transaksi milik pemanggil.
+  ///
+  /// Menerima [db] supaya nota, baris barang, pembayaran, dan pengurangan stok
+  /// menjadi satu operasi yang berhasil atau gagal seluruhnya.
+  Future<int> createIn(DatabaseExecutor db) async {
+    final billCodeID = await db.insert("bill_code", toMap());
+
+    /// insert() mengembalikan 0 hanya bila barisnya tidak jadi ditulis. Nota
+    /// tanpa id tidak bisa dirujuk baris barangnya, jadi lebih baik seluruh
+    /// transaksinya dibatalkan daripada menyimpan nota yang tidak lengkap.
+    if (billCodeID == 0) {
+      throw Exception("Gagal menyimpan nota");
     }
+
+    return billCodeID;
   }
 }
 

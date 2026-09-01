@@ -1,4 +1,5 @@
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
+import 'package:sqflite/sqflite.dart';
 
 class SQLBillModel {
   int? id;
@@ -173,13 +174,26 @@ class SQLBillModelCreate {
     );
   }
 
-  static Future<void> create(List<SQLBillModelCreate> bills) async {
-    try {
-      await DatabaseUtils().runCommands(bills.map((e) {
-        return "INSERT INTO bill (itemID, quantity, price, discount, billCodeID) VALUES ('${e.itemID}', ${e.quantity}, ${e.price}, ${e.discount}, ${e.billCodeID});";
-      }).toList());
-    } catch (error) {
-      throw Exception(error);
+  /// Menyimpan baris barang di dalam transaksi milik pemanggil.
+  ///
+  /// Menerima [db] alih-alih membuka sendiri, supaya penulisan ini ikut satu
+  /// transaksi dengan nota, pembayaran, dan pengurangan stoknya.
+  ///
+  /// Sebelumnya baris-baris ini dirangkai menjadi SQL teks lalu dijalankan
+  /// lewat DatabaseUtils.runCommands(), dan runCommands MENELAN setiap galat —
+  /// dicatat ke log lalu dilewati. Akibatnya nota bisa tersimpan dengan baris
+  /// barang yang bolong tanpa satu pun tanda, dan pembatalan yang dipasang
+  /// pemanggil tidak pernah terpicu karena tidak ada galat yang sampai
+  /// kepadanya.
+  ///
+  /// db.insert() memakai parameter, jadi tanda kutip pada nama barang tidak
+  /// lagi bisa merusak pernyataannya.
+  static Future<void> createAll(
+    DatabaseExecutor db,
+    List<SQLBillModelCreate> bills,
+  ) async {
+    for (final bill in bills) {
+      await db.insert("bill", bill.toMap());
     }
   }
 }

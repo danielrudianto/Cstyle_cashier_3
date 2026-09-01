@@ -35,11 +35,39 @@ class CartNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Panjang bagian acak pada nomor nota.
+  ///
+  /// DULU DELAPAN.
+  ///
+  /// Nomor nota dibuat di sini, di perangkat masing-masing, tanpa bertanya ke
+  /// server — memang harus begitu, kasir wajib tetap jalan saat internet mati.
+  /// Konsekuensinya keunikannya bersandar sepenuhnya pada peluang.
+  ///
+  /// Dengan delapan digit ruangnya 10^8. Enam toko menghasilkan sekitar 7.950
+  /// nota sebulan, dan pada ruang sebesar itu peluang ada dua yang kembar
+  /// mencapai 27% PER BULAN — bukan sekali dalam sekian tahun.
+  ///
+  /// Dengan dua belas digit ruangnya sepuluh ribu kali lebih besar dan
+  /// peluangnya turun ke sekitar 0,003% per bulan.
+  ///
+  /// Bentuk nomornya sengaja TIDAK berubah — tetap "B-CS-TAHUN-BULAN-" diikuti
+  /// deretan angka — supaya struk dan laporan yang sudah ada tidak perlu ikut
+  /// menyesuaikan.
+  static const int _panjangAcakNomorNota = 12;
+
   Future<int?> createNewCart() async {
-    var random = Random();
+    /*
+      Random.secure(), bukan Random(). Random() biasa disemai dari waktu, dan
+      beberapa perangkat yang menyala bersamaan setiap pagi bisa mulai dari
+      semaian yang berdekatan — persis keadaan yang paling tidak diinginkan
+      pada nomor yang harus unik antar perangkat.
+    */
+    final random = Random.secure();
+    final sekarang = DateTime.now();
+
     var name =
-        "B-CS-${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, "0")}-";
-    for (var i = 0; i < 8; i++) {
+        "B-CS-${sekarang.year}-${sekarang.month.toString().padLeft(2, "0")}-";
+    for (var i = 0; i < _panjangAcakNomorNota; i++) {
       name += random.nextInt(10).toString();
     }
 
@@ -174,7 +202,13 @@ class CartNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int?> checkout(String? memberID, List<Map<String, dynamic>> payments,
+  /// Menyimpan penjualan dan mengembalikan id notanya.
+  ///
+  /// Dulu bertipe int? karena create() memang selalu mengembalikan null —
+  /// penulisannya tidak ditunggu. Sekarang ia mengembalikan id yang sebenarnya,
+  /// atau MELEMPAR bila penyimpanannya gagal. Pemanggil wajib menangkapnya
+  /// sebelum mencetak struk.
+  Future<int> checkout(String? memberID, List<Map<String, dynamic>> payments,
       String createdBy) async {
     if (selectedCart == null) {
       throw Exception("Cart not found");
@@ -192,8 +226,7 @@ class CartNotifier extends ChangeNotifier {
       throw Exception("Payment is empty");
     }
 
-    try {
-      var billCodeID = await BillCodeModelCreate(
+    return BillCodeModelCreate(
         date: DateTime.now(),
         name: selectedCart!.name,
         memberID: memberID,
@@ -211,13 +244,8 @@ class CartNotifier extends ChangeNotifier {
             paymentMethod: e['method'],
           );
         }).toList(),
-        createdBy: createdBy,
-      ).create();
-
-      return billCodeID;
-    } catch (error) {
-      throw Exception(error);
-    }
+      createdBy: createdBy,
+    ).create();
   }
 
   Future<List<CartModel>> getCarts() async {

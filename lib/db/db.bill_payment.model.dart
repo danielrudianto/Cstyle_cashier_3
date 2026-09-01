@@ -1,4 +1,5 @@
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
+import 'package:sqflite/sqflite.dart';
 
 class SQLBillPaymentModel {
   int? id;
@@ -73,10 +74,19 @@ class SQLBillPaymentModelCreate extends SQLBillPaymentModel {
     );
   }
 
-  static Future<void> create(List<SQLBillPaymentModelCreate> payments) async {
-    return DatabaseUtils().runCommands(payments.map((e) {
-      return "INSERT INTO bill_payment (billCodeID, paymentMethod, amount) VALUES (${e.billCodeID}, '${e.paymentMethod}', ${e.amount})";
-    }).toList());
+  /// Menyimpan baris pembayaran di dalam transaksi milik pemanggil.
+  ///
+  /// Alasannya sama dengan SQLBillModelCreate.createAll: bentuk lamanya
+  /// merangkai SQL teks lalu menjalankannya lewat runCommands(), yang menelan
+  /// setiap galat. Nama metode pembayaran pun ikut disisipkan apa adanya ke
+  /// dalam tanda kutip.
+  static Future<void> createAll(
+    DatabaseExecutor db,
+    List<SQLBillPaymentModelCreate> payments,
+  ) async {
+    for (final payment in payments) {
+      await db.insert("bill_payment", payment.toMap());
+    }
   }
 }
 

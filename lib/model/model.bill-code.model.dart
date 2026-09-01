@@ -6,6 +6,7 @@ import 'package:cstyle_cashier_3/model/model.bill-payment.model.dart';
 import 'package:cstyle_cashier_3/model/model.bill.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/api.utils.dart';
+import 'package:cstyle_cashier_3/utils/database.utils.dart';
 import 'package:dio/dio.dart';
 
 class BillCodeModel {
@@ -131,92 +132,129 @@ class BillCodeModelCreate extends BillCodeModel {
     required this.bills,
   });
 
-  Future<int?> create() async {
-    List<BillModelCreate> modifiedBills = [];
+  /// Menyimpan satu penjualan: nota, baris barang, pembayaran, dan pengurangan
+  /// stok.
+  ///
+  /// ================== KENAPA INI SATU TRANSAKSI ==================
+  ///
+  /// Bentuk sebelumnya menulis keempatnya secara terpisah, TIDAK menunggu
+  /// hasilnya, lalu diakhiri `return null` yang berjalan sebelum satu pun
+  /// tulisan selesai. Akibatnya pemanggil selalu menerima null seketika dan
+  /// melanjutkan seolah semuanya beres — mencetak struk, menghapus keranjang,
+  /// menutup layar — padahal penulisannya masih berjalan dan bisa gagal.
+  ///
+  /// Kegagalannya pun tidak ke mana-mana: ia dilempar dari dalam .catchError
+  /// yang sudah lepas dari pemanggil, jadi tidak pernah sampai ke layar. Dan
+  /// karena baris bill_code-nya tidak jadi ada, penjualan itu juga tidak
+  /// muncul sebagai "belum tersinkron" — ia hilang tanpa jejak.
+  ///
+  /// Sekarang keempatnya berada dalam satu transaksi SQLite: berhasil
+  /// seluruhnya atau tidak sama sekali. Pembatalan manual yang dulu ada
+  /// dibuang — itu memang pekerjaan transaksi, dan pembatalan itu sendiri bisa
+  /// gagal tanpa menyentuh stok yang telanjur berkurang.
+  ///
+  /// Nilai baliknya kini id nota yang sebenarnya. Kalau gagal, ia MELEMPAR,
+  /// dan pemanggil wajib menangkapnya sebelum mencetak struk.
+  Future<int> create() async {
+    /// Baris yang sama persis — barang, harga, DAN diskon — digabung supaya
+    /// stoknya dikurangi sekali dan strukmya tidak memuat baris kembar.
+    /// Harga berbeda tetap menjadi dua baris, karena memang harganya berbeda.
+    final List<BillModelCreate> modifiedBills = [];
     double totalPrice = 0.0;
-    // First we have to combine if bill has the same itemID, price, and discount
-    for (var bill in bills) {
-      var found = false;
-      for (var modifiedBill in modifiedBills) {
-        if (modifiedBill.itemID == bill.itemID &&
-            modifiedBill.price == bill.price &&
-            modifiedBill.discount == bill.discount) {
-          modifiedBill.quantity += bill.quantity;
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
+
+    for (final bill in bills) {
+      final kembar = modifiedBills.where((x) =>
+          x.itemID == bill.itemID &&
+          x.price == bill.price &&
+          x.discount == bill.discount);
+
+      if (kembar.isEmpty) {
         modifiedBills.add(bill);
+      } else {
+        kembar.first.quantity += bill.quantity;
       }
 
+      /// Dibulatkan ke bawah per baris ke kelipatan seribu, sama seperti yang
+      /// dilakukan server saat menyusun laporan. Kalau salah satunya diubah,
+      /// keduanya harus ikut.
       totalPrice +=
           ((bill.price * (100 - bill.discount) * bill.quantity / 100) ~/ 1000) *
               1000;
     }
 
-    // Next we're going to deduct the cash payments based on the changes
-    double totalPayments = payments.fold(
-      0.0,
-      (sum, element) => sum + element.amount,
-    );
+    /// Kelebihan bayar dipotong dari pembayaran tunai, karena tunai yang
+    /// menghasilkan kembalian.
+    final double totalPayments =
+        payments.fold(0.0, (sum, e) => sum + e.amount);
 
     if (totalPayments > totalPrice) {
-      var index =
-          payments.indexWhere((element) => element.paymentMethod == "Cash");
+      final index =
+          payments.indexWhere((e) => e.paymentMethod == "Cash");
 
-      payments[index].amount =
-          payments[index].amount - (totalPayments - totalPrice);
+      /// indexWhere mengembalikan -1 bila tidak ada pembayaran tunai, dan
+      /// payments[-1] melempar RangeError — tepat saat pelanggan sedang
+      /// menunggu. Kelebihan bayar non-tunai memang tidak lazim, tetapi voucher
+      /// yang nilainya melebihi belanja sudah cukup memicunya.
+      ///
+      /// Bila tidak ada tunai, kelebihannya dibiarkan tercatat apa adanya.
+      /// Memutuskan apa yang seharusnya terjadi — ditolak, dibulatkan, atau
+      /// dicatat sebagai kembalian non-tunai — adalah keputusan yang perlu
+      /// disepakati lebih dulu, bukan diputuskan di sini.
+      if (index != -1) {
+        payments[index].amount =
+            payments[index].amount - (totalPayments - totalPrice);
+      }
     }
 
-    SQLBillCodeModelCreate(
-      name: name,
-      date: DateTime.parse(date.toIso8601String().substring(0, 10)),
-      memberID: memberID,
-      createdBy: createdBy,
-      createdAt: DateTime.now(),
-      mongoID: null,
-      isSynced: 0,
-      isDeleted: 0,
-      deletedBy: null,
-      deletedAt: null,
-    ).create().then((billCodeID) {
-      // promise all
-      Future.wait<void>([
-        SQLBillModelCreate.create(modifiedBills.map((e) {
-          return SQLBillModelCreate(
-            itemID: e.itemID,
-            quantity: e.quantity,
-            price: e.price,
-            discount: e.discount,
-            billCodeID: billCodeID,
-          );
-        }).toList()),
-        SQLBillPaymentModelCreate.create(payments.map((e) {
-          return SQLBillPaymentModelCreate(
-            billCodeID: billCodeID,
-            paymentMethod: e.paymentMethod,
-            amount: e.amount,
-          );
-        }).toList()),
-      ]).then((_) {
-        modifiedBills.forEach((x) async {
-          await SQLProductModel.updateStock(x.itemID, x.quantity);
-        });
+    final db = await DatabaseUtils().database;
 
-        return billCodeID;
-      }).catchError((error) {
-        // Delete the bill code if there's an error
-        SQLBillCodeModel.delete(billCodeID).then((_) {
-          throw Exception(error);
-        }).catchError((error) {
-          throw Exception(error);
-        });
-      });
-    }).catchError((error) {
-      throw Exception(error);
+    return db.transaction<int>((txn) async {
+      final billCodeID = await SQLBillCodeModelCreate(
+        name: name,
+        date: DateTime.parse(date.toIso8601String().substring(0, 10)),
+        memberID: memberID,
+        createdBy: createdBy,
+        createdAt: DateTime.now(),
+        mongoID: null,
+        isSynced: 0,
+        isDeleted: 0,
+        deletedBy: null,
+        deletedAt: null,
+      ).createIn(txn);
+
+      await SQLBillModelCreate.createAll(
+        txn,
+        modifiedBills
+            .map((e) => SQLBillModelCreate(
+                  itemID: e.itemID,
+                  quantity: e.quantity,
+                  price: e.price,
+                  discount: e.discount,
+                  billCodeID: billCodeID,
+                ))
+            .toList(),
+      );
+
+      await SQLBillPaymentModelCreate.createAll(
+        txn,
+        payments
+            .map((e) => SQLBillPaymentModelCreate(
+                  billCodeID: billCodeID,
+                  paymentMethod: e.paymentMethod,
+                  amount: e.amount,
+                ))
+            .toList(),
+      );
+
+      /// Ditunggu satu per satu. Bentuk lamanya memakai forEach dengan callback
+      /// async, jadi pengurangan stok tidak ditunggu sama sekali dan berjalan
+      /// di luar segala penjagaan.
+      for (final item in modifiedBills) {
+        await SQLProductModel.updateStockIn(txn, item.itemID, item.quantity);
+      }
+
+      return billCodeID;
     });
-    return null;
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:cstyle_cashier_3/db/db.product_image.model.dart';
 import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
+import 'package:sqflite/sqflite.dart';
 
 class SQLProductModel {
   int? id;
@@ -116,14 +117,25 @@ class SQLProductModel {
   }
 
   static Future<void> updateStock(String itemID, int quantity) async {
-    var db = await DatabaseUtils().database;
-    try {
-      await db.rawUpdate(
-          "UPDATE product SET stock = stock - ? WHERE mongoID = ?;",
-          [quantity, itemID]);
-    } catch (error) {
-      throw Exception(error);
-    }
+    final db = await DatabaseUtils().database;
+    await updateStockIn(db, itemID, quantity);
+  }
+
+  /// Mengurangi stok di dalam transaksi milik pemanggil.
+  ///
+  /// Dipakai saat checkout supaya pengurangan stok ikut dibatalkan bila salah
+  /// satu langkah lain gagal. Sebelumnya pengurangan ini dijalankan di luar
+  /// segala penjagaan, lewat forEach dengan callback async yang bahkan tidak
+  /// ditunggu — jadi stok bisa berkurang untuk nota yang gagal tersimpan.
+  static Future<void> updateStockIn(
+    DatabaseExecutor db,
+    String itemID,
+    int quantity,
+  ) async {
+    await db.rawUpdate(
+      "UPDATE product SET stock = stock - ? WHERE mongoID = ?;",
+      [quantity, itemID],
+    );
   }
 
   static Future<void> updateStockBulk(List<ProductStockModel> data) async {

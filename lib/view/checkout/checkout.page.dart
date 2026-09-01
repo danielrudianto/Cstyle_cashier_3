@@ -513,37 +513,58 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ),
         ),
       ).then((value) async {
-        if (value == "print") {
-          Provider.of<CartNotifier>(context, listen: false)
-              .checkout(
-            memberID,
-            payments,
-            employeeID!.code,
-          )
-              .then((value) async {
-            await Printing.directPrintPdf(
-              name: name,
-              printer: printer,
-              onLayout: (format) => PrintingUtils.generateCartPDF(
-                cart,
-                payments,
-                memberID,
-                employeeID!,
-              ),
-            );
+        if (value != "print") return;
 
-            await Provider.of<CartNotifier>(context, listen: false)
-                .deleteCurrentCart();
-            router.pop();
-          }).catchError((error) {
-            LoggerUtils().log("Error", LogType.error,
-                error: error, stackTrace: StackTrace.current);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(error.toString()),
-              ),
-            );
-          });
+        final cartNotifier = Provider.of<CartNotifier>(context, listen: false);
+        final messenger = ScaffoldMessenger.of(context);
+        final warnaGalat = Theme.of(context).colorScheme.error;
+
+        try {
+          // URUTANNYA PENTING, DAN DULU TERBALIK.
+          //
+          // Nota disimpan LEBIH DULU dan ditunggu sampai selesai. Sebelumnya
+          // checkout() mengembalikan null seketika sementara penulisannya masih
+          // berjalan, jadi struk tercetak dan keranjang terhapus sebelum ada
+          // yang tahu penjualannya benar-benar tersimpan. Bila gagal, tidak ada
+          // satu pun jejaknya — bahkan sebagai nota yang belum tersinkron.
+          //
+          // Sekarang baris ini melempar bila penyimpanannya gagal, dan
+          // semuanya di bawah tidak pernah berjalan.
+          await cartNotifier.checkout(memberID, payments, employeeID!.code);
+
+          await Printing.directPrintPdf(
+            name: name,
+            printer: printer,
+            onLayout: (format) => PrintingUtils.generateCartPDF(
+              cart,
+              payments,
+              memberID,
+              employeeID!,
+            ),
+          );
+
+          // Keranjang baru dihapus setelah notanya tersimpan DAN struknya
+          // tercetak. Kalau pencetakan gagal, keranjangnya sengaja dibiarkan
+          // supaya kasir bisa mencetak ulang tanpa memasukkan belanjaan lagi.
+          await cartNotifier.deleteCurrentCart();
+
+          if (!mounted) return;
+          router.pop();
+        } catch (error) {
+          LoggerUtils().log("Error", LogType.error,
+              error: error, stackTrace: StackTrace.current);
+
+          // Layar checkout bisa sudah ditutup ketika kegagalannya sampai ke
+          // sini, dan memakai context yang sudah mati akan menjatuhkan
+          // aplikasi. messenger diambil sebelum await pertama supaya pesannya
+          // tetap muncul.
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text("Gagal menyimpan nota: $error"),
+              backgroundColor: warnaGalat,
+              duration: const Duration(seconds: 6),
+            ),
+          );
         }
       });
     } catch (error) {

@@ -482,34 +482,49 @@ class _StoreDashboardState extends State<StoreDashboard> {
                     const SizedBox(
                       height: 25,
                     ),
-                    // option
-                    RadioListTile<Brightness>(
+                    /*
+                      Dulu RadioListTile<Brightness> dengan groupValue berbunyi
+                      "terang kalau light, selain itu gelap". Mode "ikut sistem"
+                      tidak punya wakil di situ, jadi ia tampil sebagai "Dark"
+                      terpilih walaupun layarnya sedang terang.
+
+                      Sekarang bertipe ThemeMode dan ketiga keadaannya diwakili
+                      apa adanya, termasuk "ikut sistem" yang sebelumnya tidak
+                      bisa dicapai sama sekali — penjelasannya di
+                      viewmodel/theme.viewmodel.dart.
+                    */
+                    RadioListTile<ThemeMode>(
+                      title: Text(
+                        'Follow system',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      groupValue: value.themeMode,
+                      value: ThemeMode.system,
+                      onChanged: (_) =>
+                          Provider.of<ThemeNotifier>(context, listen: false)
+                              .setSystemScheme(),
+                    ),
+                    RadioListTile<ThemeMode>(
                       title: Text(
                         'Light',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      groupValue: value.themeMode == ThemeMode.light
-                          ? Brightness.light
-                          : Brightness.dark,
-                      value: Brightness.light,
-                      onChanged: (Brightness? value) {
-                        Provider.of<ThemeNotifier>(context, listen: false)
-                            .setLightScheme();
-                      },
+                      groupValue: value.themeMode,
+                      value: ThemeMode.light,
+                      onChanged: (_) =>
+                          Provider.of<ThemeNotifier>(context, listen: false)
+                              .setLightScheme(),
                     ),
-                    RadioListTile<Brightness>(
+                    RadioListTile<ThemeMode>(
                       title: Text(
                         'Dark',
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      groupValue: value.themeMode == ThemeMode.light
-                          ? Brightness.light
-                          : Brightness.dark,
-                      value: Brightness.dark,
-                      onChanged: (Brightness? value) {
-                        Provider.of<ThemeNotifier>(context, listen: false)
-                            .setDarkScheme();
-                      },
+                      groupValue: value.themeMode,
+                      value: ThemeMode.dark,
+                      onChanged: (_) =>
+                          Provider.of<ThemeNotifier>(context, listen: false)
+                              .setDarkScheme(),
                     ),
                   ],
                 ),
