@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 
 class DashboardHeader extends StatelessWidget {
@@ -26,31 +27,34 @@ class DashboardHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-            flex: 2,
-            child: Text("#",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium),
-          ),
+          /*
+            Dulu berjudul "#", yang tidak berarti apa-apa: kolom ini berisi
+            kotak centang pembanding, bukan nomor urut. Kolom pemilihan lazimnya
+            memang tanpa judul; keterangannya dipindah ke tooltip kotaknya.
+          */
+          const Expanded(flex: 2, child: SizedBox.shrink()),
           Expanded(
             flex: 12,
-            child: Text("Product",
+            child: Text("PRODUCT",
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.left,
-                style: Theme.of(context).textTheme.bodyMedium),
+                style: gayaLabelKolom(context)),
           ),
           Expanded(
             flex: 5,
-            child: Text("Price",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium),
+            /*
+              Rata KANAN, mengikuti nilainya. Sebelumnya judulnya rata tengah
+              sementara angkanya rata kanan, jadi kolomnya terlihat goyah —
+              judul dan isinya tidak pernah berdiri di sumbu yang sama.
+            */
+            child: Text("PRICE",
+                textAlign: TextAlign.right, style: gayaLabelKolom(context)),
           ),
           Expanded(
             flex: 5,
-            child: Text("In stock",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium),
+            child: Text("IN STOCK",
+                textAlign: TextAlign.right, style: gayaLabelKolom(context)),
           ),
           const SizedBox(
             width: 40,

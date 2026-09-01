@@ -9,6 +9,7 @@ import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'dart:ui' show FontFeature;
 
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -186,6 +187,13 @@ class DashboardGridList extends StatelessWidget {
         return Column(
           children: products.mapIndexed((index, e) {
             /*
+              Stok yang benar-benar bisa dijual: stok gudang dikurangi yang
+              sudah masuk keranjang tapi belum dibayar.
+            */
+            final tersedia =
+                (e.stock ?? 0) - cartNotifier.checkProductQuantity(e.id);
+
+            /*
               SorotBerlatar DIBUANG DARI SINI.
 
               Ia memasang satu MouseRegion dan satu AnimatedContainer PER
@@ -323,13 +331,41 @@ class DashboardGridList extends StatelessWidget {
                         ),
                       ),
                     ),
+                    /*
+                      STOK SEBAGAI KEADAAN, BUKAN SEKADAR ANGKA.
+
+                      Sebelumnya "0" tampil persis sama dengan "9" — warna,
+                      berat, dan ukuran yang sama — padahal keduanya berarti
+                      hal yang sangat berbeda di meja kasir. Yang satu tidak
+                      bisa dijual sama sekali; yang lain aman. Kasir harus
+                      MEMBACA angkanya untuk tahu bedanya, dan itu berarti
+                      memeriksa satu per satu setiap kali menyusuri daftar.
+
+                      Sekarang bedanya terlihat sebelum angkanya dibaca:
+                      habis memakai warna galat dan tulisan "Out", menipis
+                      (tiga ke bawah) memakai warna peringatan, sisanya diam.
+
+                      Batas tiga dipilih karena itu jumlah yang masih mungkin
+                      terjual habis dalam satu transaksi.
+                    */
                     Expanded(
                       flex: 5,
                       child: Text(
-                        NumberFormat.decimalPattern("en-US").format(
-                            (e.stock ?? 0) -
-                                cartNotifier.checkProductQuantity(e.id)),
-                        textAlign: TextAlign.center,
+                        tersedia <= 0
+                            ? "Out"
+                            : NumberFormat.decimalPattern("en-US")
+                                .format(tersedia),
+                        textAlign: TextAlign.right,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          fontWeight:
+                              tersedia <= 3 ? FontWeight.w700 : FontWeight.w400,
+                          color: tersedia <= 0
+                              ? Theme.of(context).colorScheme.error
+                              : tersedia <= 3
+                                  ? warnaPeringatan(context)
+                                  : null,
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -344,6 +380,7 @@ class DashboardGridList extends StatelessWidget {
                               (e.stock ?? 0) -
                                   cartNotifier.checkProductQuantity(e.id));
                         },
+                        tooltip: "Product photos",
                         icon: const Icon(Icons.view_array),
                       ),
                     )

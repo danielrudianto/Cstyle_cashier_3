@@ -532,6 +532,35 @@ String logoTema(BuildContext context) {
       : "assets/images/icon.webp";
 }
 
+/// Warna untuk keadaan yang perlu diperhatikan tetapi belum salah.
+///
+/// colorScheme punya `error` untuk yang sudah salah, tetapi tidak punya
+/// padanan untuk "hampir habis" — dan keduanya bukan hal yang sama. Stok nol
+/// menghentikan penjualan; stok tiga hanya perlu dilihat.
+///
+/// Dua nilai karena satu jingga tidak bisa terbaca di kedua latar: yang terang
+/// hilang di atas putih, yang gelap hilang di atas #2B2432.
+Color warnaPeringatan(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark
+      ? const Color(0xFFE0A44A)
+      : const Color(0xFF9A6212);
+}
+
+/// Gaya kepala kolom dan label kecil lain.
+///
+/// Sengaja sekeluarga dengan label penyaring di kolom kiri dan kode referensi
+/// di dalam baris: kecil, jarak antarhuruf dilebarkan, warna diredupkan. Ketiga
+/// tempat itu menjalankan tugas yang sama — memberi nama pada sesuatu, bukan
+/// menjadi isinya — jadi mereka sebaiknya terbaca sebagai satu lapisan.
+TextStyle? gayaLabelKolom(BuildContext context) {
+  final dasar = Theme.of(context).textTheme.bodySmall;
+  return dasar?.copyWith(
+    fontSize: 11,
+    letterSpacing: 0.9,
+    fontWeight: FontWeight.w600,
+  );
+}
+
 Color diAtasAksen(BuildContext context) {
   return Theme.of(context).brightness == Brightness.dark
       ? Colors.black
