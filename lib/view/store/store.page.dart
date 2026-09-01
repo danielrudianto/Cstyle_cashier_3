@@ -14,6 +14,8 @@ import 'package:cstyle_cashier_3/view/stock-transfer/receive-stock-transfer/rece
 import 'package:cstyle_cashier_3/view/stock-transfer/send-stock-transfer/send-stock.transfer.page.dart';
 import 'package:cstyle_cashier_3/view/store/components/store-dashboard.dart';
 import 'package:flag/flag.dart';
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -984,7 +986,8 @@ class _StorePageState extends State<StorePage> {
             decoration: BoxDecoration(
               border: Border(
                 right: BorderSide(
-                  color: Colors.grey.shade300,
+                  /* Dulu grey.shade300; garis terang di atas latar gelap. */
+                  color: Theme.of(context).dividerColor,
                   width: 1.0,
                 ),
               ),
@@ -995,252 +998,84 @@ class _StorePageState extends State<StorePage> {
             child: Column(
               children: [
                 Expanded(
+                  /*
+                    DULU 250 BARIS ListTile YANG DISALIN-TEMPEL.
+
+                    Sebelas butir, masing-masing menuliskan sendiri gaya
+                    tulisannya, warna ikonnya, dan pemeriksaan terpilihnya —
+                    jadi setiap penyesuaian kecil harus dikerjakan sebelas
+                    kali, dan yang terlewat menyimpang diam-diam. Judul
+                    bagiannya pun berupa ListTile, sehingga "Memberships"
+                    punya tinggi dan jarak yang sama persis dengan butir yang
+                    bisa ditekan: dari bentuknya tidak ada yang membedakan
+                    judul dari isinya.
+                  */
                   child: ListView(
-                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     children: [
-                      ListTile(
-                        onTap: selectedMenu == 0
-                            ? null
-                            : () {
-                                setState(() {
-                                  selectedMenu = 0;
-                                });
-                              },
-                        title: Text(
-                          "Home",
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: selectedMenu == 0
-                                        ? Theme.of(context).secondaryHeaderColor
-                                        : null,
-                                  ),
-                        ),
-                        leading: Icon(
-                          Icons.dashboard_outlined,
-                          color: selectedMenu == 0
-                              ? Theme.of(context).secondaryHeaderColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
+                      _ButirMenu(
+                        ikon: Icons.dashboard_outlined,
+                        label: "Home",
+                        aktif: selectedMenu == 0,
+                        onTekan: () => setState(() => selectedMenu = 0),
                       ),
-                      Divider(color: Theme.of(context).dividerColor),
-                      ListTile(
-                        title: Text(
-                          "Memberships",
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
+                      const _LabelBagian("MEMBERSHIPS"),
+                      _ButirMenu(
+                        ikon: Icons.person_add_alt,
+                        label: "Add member",
+                        aktif: false,
+                        onTekan: () => preOpenAddMember(),
                       ),
-                      ListTile(
-                        onTap: () {
-                          preOpenAddMember();
-                        },
-                        title: Text(
-                          "Add member",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        leading: Icon(
-                          Icons.add,
-                          color: Theme.of(context).iconTheme.color,
-                        ),
+                      _ButirMenu(
+                        ikon: Icons.groups_outlined,
+                        label: "View members",
+                        aktif: selectedMenu == 1,
+                        onTekan: () => setState(() => selectedMenu = 1),
                       ),
-                      ListTile(
-                        onTap: selectedMenu == 1
-                            ? null
-                            : () {
-                                setState(() {
-                                  selectedMenu = 1;
-                                });
-                              },
-                        // add new member
-                        title: Text(
-                          "View members",
-                          style:
-                              Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                    color: selectedMenu == 1
-                                        ? Theme.of(context).secondaryHeaderColor
-                                        : null,
-                                  ),
-                        ),
-                        leading: Icon(
-                          Icons.list,
-                          color: selectedMenu == 1
-                              ? Theme.of(context).secondaryHeaderColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
+                      const _LabelBagian("INVENTORY"),
+                      _ButirMenu(
+                        ikon: Icons.add_box_outlined,
+                        label: "Create transfer",
+                        aktif: selectedMenu == 2,
+                        onTekan: () => setState(() => selectedMenu = 2),
                       ),
-                      Divider(
-                        color: Theme.of(context).dividerColor,
+                      _ButirMenu(
+                        ikon: Icons.call_made,
+                        label: "Send transfer",
+                        aktif: selectedMenu == 3,
+                        onTekan: () => setState(() => selectedMenu = 3),
                       ),
-                      ListTile(
-                        title: Text(
-                          "Inventory",
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
+                      _ButirMenu(
+                        ikon: Icons.call_received,
+                        label: "Receive transfer",
+                        aktif: selectedMenu == 4,
+                        onTekan: () => setState(() => selectedMenu = 4),
                       ),
-                      ListTile(
-                        onTap: selectedMenu == 2
-                            ? null
-                            : () {
-                                setState(() {
-                                  selectedMenu = 2;
-                                });
-                              },
-                        title: Text(
-                          "Create transfer",
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: selectedMenu == 2
-                                        ? Theme.of(context).secondaryHeaderColor
-                                        : null,
-                                  ),
-                        ),
-                        leading: Icon(
-                          Icons.add,
-                          color: selectedMenu == 2
-                              ? Theme.of(context).secondaryHeaderColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
+                      _ButirMenu(
+                        /* Dulu berjudul "List", yang tidak menyebut daftar apa. */
+                        ikon: Icons.list_alt_outlined,
+                        label: "Transfer list",
+                        aktif: selectedMenu == 5,
+                        onTekan: () => setState(() => selectedMenu = 5),
                       ),
-                      ListTile(
-                        onTap: selectedMenu == 3
-                            ? null
-                            : () {
-                                setState(() {
-                                  selectedMenu = 3;
-                                });
-                              },
-                        title: Text(
-                          "Send transfer",
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: selectedMenu == 3
-                                        ? Theme.of(context).secondaryHeaderColor
-                                        : null,
-                                  ),
-                        ),
-                        leading: Icon(
-                          Icons.call_made,
-                          color: selectedMenu == 3
-                              ? Theme.of(context).secondaryHeaderColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
+                      const _LabelBagian("UTILITIES"),
+                      _ButirMenu(
+                        ikon: Icons.summarize_outlined,
+                        label: "Daily report",
+                        aktif: false,
+                        onTekan: () => openDailyReport(),
                       ),
-                      ListTile(
-                        onTap: selectedMenu == 4
-                            ? null
-                            : () {
-                                setState(() {
-                                  selectedMenu = 4;
-                                });
-                              },
-                        title: Text(
-                          "Receive transfer",
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: selectedMenu == 4
-                                        ? Theme.of(context).secondaryHeaderColor
-                                        : null,
-                                  ),
-                        ),
-                        leading: Icon(
-                          Icons.call_received,
-                          color: selectedMenu == 4
-                              ? Theme.of(context).secondaryHeaderColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
+                      _ButirMenu(
+                        ikon: Icons.inventory_2_outlined,
+                        label: "Stock list",
+                        aktif: selectedMenu == 6,
+                        onTekan: () => setState(() => selectedMenu = 6),
                       ),
-                      ListTile(
-                        onTap: selectedMenu == 5
-                            ? null
-                            : () {
-                                setState(() {
-                                  selectedMenu = 5;
-                                });
-                              },
-                        title: Text(
-                          "List",
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: selectedMenu == 5
-                                        ? Theme.of(context).secondaryHeaderColor
-                                        : null,
-                                  ),
-                        ),
-                        leading: Icon(
-                          Icons.list,
-                          color: selectedMenu == 5
-                              ? Theme.of(context).secondaryHeaderColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
-                      ),
-                      Divider(
-                        color: Theme.of(context).dividerColor,
-                      ),
-                      ListTile(
-                        title: Text(
-                          "Utilities",
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                      ),
-                      ListTile(
-                        onTap: () {
-                          openDailyReport();
-                        },
-                        title: Text(
-                          "Daily Report",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        leading: Icon(
-                          Icons.report,
-                          color: Theme.of(context).iconTheme.color,
-                        ),
-                      ),
-                      ListTile(
-                        onTap: selectedMenu == 6
-                            ? null
-                            : () {
-                                setState(() {
-                                  selectedMenu = 6;
-                                });
-                              },
-                        title: Text(
-                          "Stock list",
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: selectedMenu == 6
-                                        ? Theme.of(context).secondaryHeaderColor
-                                        : null,
-                                  ),
-                        ),
-                        leading: Icon(
-                          Icons.list,
-                          color: selectedMenu == 6
-                              ? Theme.of(context).secondaryHeaderColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
-                      ),
-                      ListTile(
-                        onTap: selectedMenu == 7
-                            ? null
-                            : () {
-                                setState(() {
-                                  selectedMenu = 7;
-                                });
-                              },
-                        title: Text(
-                          "History",
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: selectedMenu == 7
-                                        ? Theme.of(context).secondaryHeaderColor
-                                        : null,
-                                  ),
-                        ),
-                        leading: Icon(
-                          Icons.history,
-                          color: selectedMenu == 7
-                              ? Theme.of(context).secondaryHeaderColor
-                              : Theme.of(context).iconTheme.color,
-                        ),
+                      _ButirMenu(
+                        ikon: Icons.history,
+                        label: "History",
+                        aktif: selectedMenu == 7,
+                        onTekan: () => setState(() => selectedMenu = 7),
                       ),
                     ],
                   ),
@@ -1251,7 +1086,7 @@ class _StorePageState extends State<StorePage> {
           Expanded(
             child: RawScrollbar(
               controller: scrollController,
-              thumbColor: const Color.fromARGB(255, 161, 121, 220),
+              thumbColor: Theme.of(context).secondaryHeaderColor,
               radius: const Radius.circular(8.0),
               thickness: 8.0,
               child: SingleChildScrollView(
@@ -1279,6 +1114,123 @@ class _StorePageState extends State<StorePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Judul bagian pada menu kelola.
+///
+/// Sekeluarga dengan kepala kolom tabel barang dan label penyaring di layar
+/// jual: kecil, jarak antarhuruf dilebarkan, diredupkan. Ketiganya memberi nama
+/// pada sekumpulan hal, bukan menjadi salah satunya.
+///
+/// Sebelumnya judul di sini berupa ListTile ber-headlineSmall — dua puluh
+/// piksel, tebal, dengan tinggi dan jarak yang sama persis dengan butir yang
+/// dijudulinya. Judul yang lebih besar daripada isinya membalik urutan baca:
+/// mata jatuh ke "MEMBERSHIPS" lebih dulu, bukan ke pilihan yang dicari.
+class _LabelBagian extends StatelessWidget {
+  final String teks;
+
+  const _LabelBagian(this.teks);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
+      child: Text(teks, style: gayaLabelKolom(context)),
+    );
+  }
+}
+
+/// Satu butir pada menu kelola.
+///
+/// Yang terpilih ditandai TIGA hal sekaligus: latar beraksen, batang aksen di
+/// tepi kiri, dan tulisan tebal. Sebelumnya hanya warna tulisannya yang berubah,
+/// dan warna sendirian adalah penanda paling lemah yang ada — ia hilang bagi
+/// mata yang sulit membedakan warna, dan pada ungu di atas latar gelap bedanya
+/// dengan tulisan biasa memang tipis.
+///
+/// Butir yang menjalankan tindakan sekali jalan — "Add member", "Daily report" —
+/// tidak pernah bertanda aktif, karena ia memang tidak menjadi halaman.
+class _ButirMenu extends StatefulWidget {
+  final IconData ikon;
+  final String label;
+  final bool aktif;
+  final VoidCallback onTekan;
+
+  const _ButirMenu({
+    required this.ikon,
+    required this.label,
+    required this.aktif,
+    required this.onTekan,
+  });
+
+  @override
+  State<_ButirMenu> createState() => _ButirMenuState();
+}
+
+class _ButirMenuState extends State<_ButirMenu> {
+  bool _disorot = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final warna = tema.colorScheme;
+    final aksen = tema.secondaryHeaderColor;
+
+    final Color latar = widget.aktif
+        ? aksen.withValues(alpha: 0.14)
+        : (_disorot
+            ? warna.onSurface.withValues(alpha: 0.06)
+            : Colors.transparent);
+
+    final Color depan = widget.aktif
+        ? aksen
+        : warna.onSurface.withValues(alpha: _disorot ? 0.95 : 0.72);
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _disorot = true),
+      onExit: (_) => setState(() => _disorot = false),
+      child: GestureDetector(
+        onTap: widget.aktif ? null : widget.onTekan,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: Gerak.kilat,
+          curve: Gerak.masuk,
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+          padding: const EdgeInsets.fromLTRB(10, 9, 12, 9),
+          decoration: BoxDecoration(
+            color: latar,
+            borderRadius: BorderRadius.circular(7),
+            border: Border(
+              left: BorderSide(
+                color: widget.aktif ? aksen : Colors.transparent,
+                width: 3,
+              ),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(widget.ikon, size: 18, color: depan),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tema.textTheme.bodyMedium?.copyWith(
+                    color: depan,
+                    fontSize: 14,
+                    fontWeight:
+                        widget.aktif ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
