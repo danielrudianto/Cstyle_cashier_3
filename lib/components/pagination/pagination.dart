@@ -38,6 +38,7 @@ class PaginationComponent extends StatelessWidget {
             width: 15,
           ),
           IconButton(
+            tooltip: "Previous page",
             icon: Icon(
               size: 24,
               Icons.chevron_left_rounded,
@@ -48,6 +49,7 @@ class PaginationComponent extends StatelessWidget {
             onPressed: pageIndex > 0 ? () => onPageChange(pageIndex - 1) : null,
           ),
           IconButton(
+            tooltip: "Next page",
             icon: Icon(
               size: 24,
               Icons.chevron_right_rounded,

@@ -203,6 +203,7 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
             children: [
               Consumer<CompareNotifier>(builder: (_, value, __) {
                 return IconButton(
+                  tooltip: "Compare selected products",
                   // size
                   iconSize: 25,
                   onPressed: value.selectedComparisson.length >= 2
@@ -217,6 +218,7 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                 );
               }),
               IconButton(
+                tooltip: "Reprint last receipt",
                 onPressed: () {
                   // Check last bill
                   BillCodeModel.fetchLastBillCode().then((value) {
@@ -256,6 +258,7 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                 ),
               ),
               IconButton(
+                tooltip: "Local bill history",
                 onPressed: () {
                   // Check last bill
                   router.push("/local");

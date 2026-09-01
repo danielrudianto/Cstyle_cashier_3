@@ -53,6 +53,7 @@ class _LocalHistoryPageState extends State<LocalHistoryPage> {
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           leading: IconButton(
+            tooltip: "Back",
             icon: Icon(
               Icons.arrow_back,
               color: Theme.of(context).iconTheme.color,

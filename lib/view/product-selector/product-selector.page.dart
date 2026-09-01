@@ -118,6 +118,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
                   ),
                 ),
                 IconButton(
+                  tooltip: "Close",
                   onPressed: () {
                     widget.closeDialog(null);
                   },

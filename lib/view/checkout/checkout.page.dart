@@ -499,6 +499,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 Center(
                   child: IconButton(
+                    tooltip: "Print receipt",
                     onPressed: () {
                       router.pop("print");
                     },
@@ -594,6 +595,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           backgroundColor: Theme.of(context).canvasColor,
           // back button color
           leading: IconButton(
+            tooltip: "Back",
             icon: Icon(
               Icons.arrow_back,
               color: Theme.of(context).iconTheme.color,
@@ -890,6 +892,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                                         .bodyMedium,
                                                   ),
                                                   IconButton(
+                                                    tooltip: "Close",
                                                     onPressed: () {
                                                       setState(() {
                                                         memberID = null;

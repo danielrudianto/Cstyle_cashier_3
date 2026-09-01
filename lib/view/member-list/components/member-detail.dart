@@ -53,6 +53,7 @@ class _MemberDetailPageState extends State<MemberDetailPage> {
               Row(
                 children: [
                   IconButton(
+                    tooltip: "Copy",
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: member!.code));
                       ScaffoldMessenger.of(context).showSnackBar(

@@ -253,6 +253,7 @@ class DashboardCheckoutFooter extends StatelessWidget {
                 ),
               ),
               IconButton(
+                tooltip: "Hold this bill",
                 onPressed: () {
                   Provider.of<CartNotifier>(
                     context,
@@ -265,6 +266,7 @@ class DashboardCheckoutFooter extends StatelessWidget {
                 ),
               ),
               IconButton(
+                tooltip: "Discard this bill",
                 onPressed: () {
                   Provider.of<CartNotifier>(
                     context,

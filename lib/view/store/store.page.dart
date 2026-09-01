@@ -139,6 +139,7 @@ class _StorePageState extends State<StorePage> {
                             ),
                           ),
                           IconButton(
+                            tooltip: "Copy",
                             onPressed: () {},
                             icon: const Icon(
                               Icons.copy,
@@ -175,6 +176,7 @@ class _StorePageState extends State<StorePage> {
                             ),
                           ),
                           IconButton(
+                            tooltip: "Copy",
                             onPressed: () {},
                             icon: const Icon(
                               Icons.copy,
@@ -347,6 +349,7 @@ class _StorePageState extends State<StorePage> {
                               ),
                             ),
                             IconButton(
+                              tooltip: "Close",
                               onPressed: () {
                                 Navigator.pop(context);
                               },
@@ -803,6 +806,7 @@ class _StorePageState extends State<StorePage> {
                             ),
                           ),
                           IconButton(
+                            tooltip: "Close",
                             onPressed: () {
                               Navigator.pop(context);
                             },

@@ -48,6 +48,7 @@ class StatCard extends StatelessWidget {
                     ),
                   ),
                   IconButton(
+                    tooltip: "What is this?",
                     onPressed: () {
                       onPressed();
                     },

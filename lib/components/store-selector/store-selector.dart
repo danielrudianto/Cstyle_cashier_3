@@ -79,6 +79,7 @@ class _StoreSelectorState extends State<StoreSelector> {
                   ),
                 ),
                 IconButton(
+                  tooltip: "Close",
                   onPressed: () {
                     Navigator.pop(context);
                   },

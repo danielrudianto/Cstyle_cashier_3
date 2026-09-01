@@ -106,6 +106,7 @@ class _PageViewPageState extends State<PageViewPage> {
                       width: 25,
                       height: 25,
                       child: IconButton(
+                        tooltip: "Decrease quantity",
                         padding: const EdgeInsets.all(0),
                         onPressed: () {
                           if (quantityController.text.isNotEmpty) {
@@ -131,6 +132,7 @@ class _PageViewPageState extends State<PageViewPage> {
                       width: 25,
                       height: 25,
                       child: IconButton(
+                        tooltip: "Increase quantity",
                         padding: const EdgeInsets.all(0),
                         onPressed: () {
                           if (quantityController.text.isNotEmpty) {
@@ -294,6 +296,8 @@ class _PageViewPageState extends State<PageViewPage> {
                                                           ),
                                                         ),
                                                         IconButton(
+                                                          tooltip:
+                                                              "Remove from cart",
                                                           onPressed: () {
                                                             if (openedIndex !=
                                                                 null) {

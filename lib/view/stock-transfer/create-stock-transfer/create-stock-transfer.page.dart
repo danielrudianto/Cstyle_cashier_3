@@ -341,6 +341,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                               ),
                               const Spacer(),
                               IconButton(
+                                tooltip: "Choose destination store",
                                 onPressed: () {
                                   _openStoreSelector();
                                 },
@@ -436,6 +437,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                               ),
                               const Spacer(),
                               IconButton(
+                                tooltip: "Add product",
                                 onPressed: _openProductSelector,
                                 icon: const Icon(
                                   Icons.add,
@@ -531,6 +533,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                                                   .quantity ==
                                                               1
                                                           ? IconButton(
+                                                              tooltip: "Close",
                                                               icon: Icon(
                                                                 Icons.close,
                                                                 size: Theme.of(
@@ -552,6 +555,8 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                                               },
                                                             )
                                                           : IconButton(
+                                                              tooltip:
+                                                                  "Decrease quantity",
                                                               icon: Icon(
                                                                 Icons
                                                                     .exposure_minus_1,
@@ -578,6 +583,8 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                                                         },
                                                             ),
                                                   suffix: IconButton(
+                                                    tooltip:
+                                                        "Increase quantity",
                                                     icon: Icon(
                                                       Icons.exposure_plus_1,
                                                       size: Theme.of(context)

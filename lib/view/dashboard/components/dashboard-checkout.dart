@@ -82,6 +82,7 @@ class _DashboardCheckoutState extends State<DashboardCheckout> {
                               Tooltip(
                                 message: "Delete this item instead",
                                 child: IconButton(
+                                  tooltip: "Remove from cart",
                                   splashColor:
                                       Theme.of(context).secondaryHeaderColor,
                                   onPressed: () {

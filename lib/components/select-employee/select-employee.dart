@@ -94,6 +94,7 @@ class _SelectEmployeeState extends State<SelectEmployee> {
                   ),
                 ),
                 IconButton(
+                  tooltip: "Close",
                   onPressed: () {
                     Navigator.pop(context);
                   },

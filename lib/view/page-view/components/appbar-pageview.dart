@@ -64,20 +64,11 @@ class AppbarPageView extends StatelessWidget {
                   height: 32,
                 ),
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _TabBilah(
-                        label: "Dashboard",
-                        aktif: page == 0,
-                        onTekan: () => changePage(0),
-                      ),
-                      _TabBilah(
-                        label: "Store",
-                        aktif: page == 1,
-                        onTekan: () => changePage(1),
-                      ),
-                    ],
+                  child: Center(
+                    child: _PemilihMode(
+                      terpilih: page,
+                      onPilih: (i) => changePage(i),
+                    ),
                   ),
                 ),
                 Badge(
@@ -122,45 +113,107 @@ class AppbarPageView extends StatelessWidget {
   }
 }
 
-/// Satu tab pada bilah atas.
+/// Pemilih mode: menjual, atau mengelola.
 ///
-/// Dijadikan satu widget karena versi sebelumnya menuliskan keduanya dua kali,
-/// dan salinannya sudah mulai menyimpang — yang satu memakai warna aktif yang
-/// dipatok, yang lain membacanya dari tema.
-class _TabBilah extends StatefulWidget {
+/// DULU DUA TAB BERGARIS BAWAH BERJUDUL "Dashboard" DAN "Store".
+///
+/// Dua hal yang keliru di situ. Pertama namanya: "Dashboard" tidak menyebut
+/// bahwa itu layar tempat kasir menjual sepanjang hari, dan "Store" tidak
+/// menyebut bahwa isinya pengaturan — statistik toko, sinkronisasi stok,
+/// pengaturan tema dan pencetak, keanggotaan, persediaan. Keduanya nama tempat,
+/// bukan nama pekerjaan.
+///
+/// Kedua bentuknya. Tab bergaris bawah menyatakan "ini beberapa halaman dari
+/// satu bagian yang sama". Padahal ini bukan itu — ini dua MODE yang saling
+/// meniadakan: satu dipakai menghadap pembeli, satu lagi tidak. Bentuk yang
+/// menyatakan hal itu adalah sakelar bersegmen: satu wadah, satu segmen
+/// menyala, dan jelas bahwa memilih yang satu berarti meninggalkan yang lain.
+///
+/// Ikonnya ditambahkan karena pada dua pilihan yang berdampingan, lambang jauh
+/// lebih cepat dikenali daripada kata — dan kasir menekan ini berkali-kali
+/// sehari tanpa membacanya lagi.
+class _PemilihMode extends StatelessWidget {
+  final int terpilih;
+  final ValueChanged<int> onPilih;
+
+  const _PemilihMode({required this.terpilih, required this.onPilih});
+
+  @override
+  Widget build(BuildContext context) {
+    final warna = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: warna.onSurface.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _Segmen(
+            ikon: Icons.point_of_sale_outlined,
+            label: "Sell",
+            aktif: terpilih == 0,
+            onTekan: () => onPilih(0),
+          ),
+          const SizedBox(width: 3),
+          _Segmen(
+            ikon: Icons.storefront_outlined,
+            label: "Manage",
+            aktif: terpilih == 1,
+            onTekan: () => onPilih(1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Satu segmen pada [_PemilihMode].
+///
+/// Dijadikan satu widget karena versi tab sebelumnya menuliskan keduanya dua
+/// kali, dan salinannya sudah menyimpang: yang aktif pada tab pertama memakai
+/// ungu yang dipatok, yang kedua membacanya dari tema.
+class _Segmen extends StatefulWidget {
+  final IconData ikon;
   final String label;
   final bool aktif;
   final VoidCallback onTekan;
 
-  const _TabBilah({
+  const _Segmen({
+    required this.ikon,
     required this.label,
     required this.aktif,
     required this.onTekan,
   });
 
   @override
-  State<_TabBilah> createState() => _TabBilahState();
+  State<_Segmen> createState() => _SegmenState();
 }
 
-class _TabBilahState extends State<_TabBilah> {
+class _SegmenState extends State<_Segmen> {
   bool _disorot = false;
 
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final aksen = tema.secondaryHeaderColor;
-    final dasar = tema.textTheme.bodyMedium;
+    final warna = tema.colorScheme;
 
     /*
-      Tiga tingkat, bukan dua. Yang aktif memakai aksen penuh; yang sedang
-      disorot naik mendekati warna tulisan biasa; sisanya diredupkan. Tanpa
-      tingkat tengah, tab yang bisa ditekan tidak memberi tanda apa pun sampai
-      benar-benar ditekan.
+      Tiga tingkat, bukan dua. Yang aktif berlatar aksen; yang disorot mendapat
+      latar samar; sisanya polos. Tanpa tingkat tengah, segmen yang bisa ditekan
+      tidak memberi tanda apa pun sampai benar-benar ditekan.
     */
-    final Color warnaTulisan = widget.aktif
-        ? aksen
-        : (dasar?.color ?? Colors.white)
-            .withValues(alpha: _disorot ? 0.92 : 0.55);
+    final Color latar = widget.aktif
+        ? warna.primary
+        : (_disorot
+            ? warna.onSurface.withValues(alpha: 0.07)
+            : Colors.transparent);
+
+    final Color depan = widget.aktif
+        ? warna.onPrimary
+        : warna.onSurface.withValues(alpha: _disorot ? 0.92 : 0.6);
 
     return MouseRegion(
       cursor: widget.aktif ? MouseCursor.defer : SystemMouseCursors.click,
@@ -172,24 +225,26 @@ class _TabBilahState extends State<_TabBilah> {
         child: AnimatedContainer(
           duration: Gerak.kilat,
           curve: Gerak.masuk,
-          height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 26),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: widget.aktif ? aksen : Colors.transparent,
-                width: 2.5,
-              ),
-            ),
+            color: latar,
+            borderRadius: BorderRadius.circular(7),
           ),
-          alignment: Alignment.center,
-          child: Text(
-            widget.label,
-            style: dasar?.copyWith(
-              color: warnaTulisan,
-              letterSpacing: 0.3,
-              fontWeight: widget.aktif ? FontWeight.w700 : FontWeight.w500,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(widget.ikon, size: 17, color: depan),
+              const SizedBox(width: 8),
+              Text(
+                widget.label,
+                style: tema.textTheme.bodyMedium?.copyWith(
+                  color: depan,
+                  fontSize: 13,
+                  letterSpacing: 0.3,
+                  fontWeight: widget.aktif ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       ),

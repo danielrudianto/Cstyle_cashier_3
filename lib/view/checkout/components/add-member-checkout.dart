@@ -85,6 +85,7 @@ class _AddMemberCheckoutState extends State<AddMemberCheckout> {
                   ),
                 ),
                 IconButton(
+                  tooltip: "Close",
                   onPressed: () {
                     Navigator.pop(context);
                   },

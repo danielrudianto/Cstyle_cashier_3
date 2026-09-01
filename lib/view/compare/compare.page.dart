@@ -1,4 +1,3 @@
-
 import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
@@ -534,6 +533,7 @@ class _ComparePageState extends State<ComparePage> {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         leading: IconButton(
+          tooltip: "Back",
           icon: Icon(
             Icons.arrow_back,
             color: Theme.of(context).iconTheme.color,

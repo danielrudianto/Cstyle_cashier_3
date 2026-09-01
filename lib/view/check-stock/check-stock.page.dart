@@ -218,6 +218,7 @@ class _CheckStockPageState extends State<CheckStockPage> {
               width: 10,
             ),
             IconButton(
+              tooltip: "Download as Excel",
               onPressed: isDownloading
                   ? null
                   : () {

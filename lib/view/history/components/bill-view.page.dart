@@ -65,6 +65,7 @@ class _BillViewPageState extends State<BillViewPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
+                  tooltip: "Close",
                   onPressed: () {
                     closeDialog(null);
                   },
