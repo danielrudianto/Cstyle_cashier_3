@@ -8,6 +8,7 @@ import 'package:cstyle_cashier_3/viewmodel/theme.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/waktu.utils.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
+import 'package:cstyle_cashier_3/components/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
@@ -659,7 +660,30 @@ class _StoreDashboardState extends State<StoreDashboard> {
                               Bentuk bersegmen juga menyatakan hubungannya dengan lebih
                               jujur: memilih salah satu berarti melepas dua lainnya.
                             */
-                            _PilihanTema(terpilih: value.themeMode),
+                            PilihanSegmen<ThemeMode>(
+                              terpilih: value.themeMode,
+                              opsi: const [
+                                OpsiSegmen(
+                                  nilai: ThemeMode.system,
+                                  label: "Follow system",
+                                  ikon: Icons.brightness_auto_outlined,
+                                ),
+                                OpsiSegmen(
+                                  nilai: ThemeMode.light,
+                                  label: "Light",
+                                  ikon: Icons.light_mode_outlined,
+                                ),
+                                OpsiSegmen(
+                                  nilai: ThemeMode.dark,
+                                  label: "Dark",
+                                  ikon: Icons.dark_mode_outlined,
+                                ),
+                              ],
+                              onPilih: (mode) => Provider.of<ThemeNotifier>(
+                                context,
+                                listen: false,
+                              ).setThemeMode(mode),
+                            ),
                           ],
                         ),
                       );
@@ -882,127 +906,6 @@ class _StoreDashboardState extends State<StoreDashboard> {
           */
         ),
       ],
-    );
-  }
-}
-
-/// Pilihan tema sebagai satu baris bersegmen.
-///
-/// Menggantikan tiga RadioListTile yang masing-masing selebar kartu. Jumlah
-/// pilihannya tetap tiga selamanya, jadi tidak ada alasan memberinya bentuk
-/// daftar yang bisa bertambah panjang.
-class _PilihanTema extends StatelessWidget {
-  final ThemeMode terpilih;
-
-  const _PilihanTema({required this.terpilih});
-
-  @override
-  Widget build(BuildContext context) {
-    final warna = Theme.of(context).colorScheme;
-    final notifier = Provider.of<ThemeNotifier>(context, listen: false);
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: warna.onSurface.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _SegmenTema(
-            ikon: Icons.brightness_auto_outlined,
-            label: "Follow system",
-            aktif: terpilih == ThemeMode.system,
-            onTekan: notifier.setSystemScheme,
-          ),
-          const SizedBox(width: 3),
-          _SegmenTema(
-            ikon: Icons.light_mode_outlined,
-            label: "Light",
-            aktif: terpilih == ThemeMode.light,
-            onTekan: notifier.setLightScheme,
-          ),
-          const SizedBox(width: 3),
-          _SegmenTema(
-            ikon: Icons.dark_mode_outlined,
-            label: "Dark",
-            aktif: terpilih == ThemeMode.dark,
-            onTekan: notifier.setDarkScheme,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SegmenTema extends StatefulWidget {
-  final IconData ikon;
-  final String label;
-  final bool aktif;
-  final VoidCallback onTekan;
-
-  const _SegmenTema({
-    required this.ikon,
-    required this.label,
-    required this.aktif,
-    required this.onTekan,
-  });
-
-  @override
-  State<_SegmenTema> createState() => _SegmenTemaState();
-}
-
-class _SegmenTemaState extends State<_SegmenTema> {
-  bool _disorot = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final warna = tema.colorScheme;
-
-    final Color latar = widget.aktif
-        ? warna.primary
-        : (_disorot
-            ? warna.onSurface.withValues(alpha: 0.07)
-            : Colors.transparent);
-
-    final Color depan = widget.aktif
-        ? warna.onPrimary
-        : warna.onSurface.withValues(alpha: _disorot ? 0.92 : 0.62);
-
-    return MouseRegion(
-      cursor: widget.aktif ? MouseCursor.defer : SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _disorot = true),
-      onExit: (_) => setState(() => _disorot = false),
-      child: GestureDetector(
-        onTap: widget.aktif ? null : widget.onTekan,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: Gerak.kilat,
-          curve: Gerak.masuk,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: latar,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(widget.ikon, size: 16, color: depan),
-              const SizedBox(width: 7),
-              Text(
-                widget.label,
-                style: tema.textTheme.bodyMedium?.copyWith(
-                  color: depan,
-                  fontSize: 13,
-                  fontWeight: widget.aktif ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

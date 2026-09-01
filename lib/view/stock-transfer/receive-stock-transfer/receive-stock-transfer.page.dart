@@ -4,6 +4,7 @@ import 'package:cstyle_cashier_3/db/db.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
+import 'package:cstyle_cashier_3/components/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -435,44 +436,36 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // option between confirm and reject
-                                RadioListTile<bool>(
-                                    title: Text(
-                                      "Confirm",
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
+                                /*
+                                  DUA RadioListTile MENJADI SATU SAKELAR.
+
+                                  Terima atau tolak adalah dua pilihan yang
+                                  tidak akan pernah bertambah, dan keduanya
+                                  saling meniadakan. Radio selebar kartu untuk
+                                  itu menghabiskan seratus piksel lebih dan
+                                  menyatakan bahwa daftarnya bisa memanjang.
+
+                                  Komponennya sama dengan yang dipakai pemilih
+                                  tema dan bahasa struk — lihat components/ui.
+                                */
+                                PilihanSegmen<bool>(
+                                  terpilih: isConfirm,
+                                  aktif: !isLoadingStockTransfer,
+                                  opsi: const [
+                                    OpsiSegmen(
+                                      nilai: true,
+                                      label: "Confirm",
+                                      ikon: Icons.check_rounded,
                                     ),
-                                    groupValue: isConfirm,
-                                    value: true,
-                                    activeColor: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .color,
-                                    onChanged: isLoadingStockTransfer
-                                        ? null
-                                        : (value) {
-                                            setState(() {
-                                              isConfirm = true;
-                                            });
-                                          }),
-                                RadioListTile<bool>(
-                                    title: Text(
-                                      "Reject",
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
+                                    OpsiSegmen(
+                                      nilai: false,
+                                      label: "Reject",
+                                      ikon: Icons.close_rounded,
                                     ),
-                                    groupValue: isConfirm,
-                                    value: false,
-                                    activeColor: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .color,
-                                    onChanged: isLoadingStockTransfer
-                                        ? null
-                                        : (value) {
-                                            setState(() {
-                                              isConfirm = false;
-                                            });
-                                          }),
+                                  ],
+                                  onPilih: (nilai) =>
+                                      setState(() => isConfirm = nilai),
+                                ),
                                 const SizedBox(
                                   height: 15,
                                 ),

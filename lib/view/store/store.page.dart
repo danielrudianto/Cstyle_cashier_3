@@ -17,6 +17,7 @@ import 'package:flag/flag.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
+import 'package:cstyle_cashier_3/components/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -394,7 +395,7 @@ class _StorePageState extends State<StorePage> {
                               Judul bagiannya memakai perlakuan yang sama
                               dengan kepala kolom tabel dan menu kelola.
                             */
-                                _JudulBagian("MEMBER", atas: 0),
+                                JudulBagian("MEMBER", atas: 0),
                                 TextFormField(
                                   controller: codeEditingController,
                                   decoration: InputDecoration(
@@ -657,7 +658,7 @@ class _StorePageState extends State<StorePage> {
                                 const SizedBox(
                                   height: 5,
                                 ),
-                                _JudulBagian("CONTACT", atas: 22),
+                                JudulBagian("CONTACT", atas: 22),
                                 TextFormField(
                                   controller: memberPhoneNumberController,
                                   decoration: InputDecoration(
@@ -757,7 +758,7 @@ class _StorePageState extends State<StorePage> {
                                 const SizedBox(
                                   height: 15,
                                 ),
-                                _JudulBagian("DETAILS", atas: 22),
+                                JudulBagian("DETAILS", atas: 22),
                                 TextFormField(
                                   decoration: InputDecoration(
                                     label: Text(
@@ -866,52 +867,17 @@ class _StorePageState extends State<StorePage> {
                               Bentuknya disamakan dengan pemilih tema di halaman
                               setelan: dua pilihan tetap, muat dalam satu baris.
                             */
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 16,
-                                    bottom: 8,
-                                  ),
-                                  child: Text(
-                                    "RECEIPT LANGUAGE",
-                                    style: gayaLabelKolom(context),
-                                  ),
-                                ),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(3),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withValues(alpha: 0.06),
-                                      borderRadius: BorderRadius.circular(9),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        _SegmenBahasa(
-                                          label: "English",
-                                          aktif:
-                                              selectedLanguage == language.EN,
-                                          onTekan: () => setState(
-                                            () =>
-                                                selectedLanguage = language.EN,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 3),
-                                        _SegmenBahasa(
-                                          label: "Bahasa",
-                                          aktif:
-                                              selectedLanguage == language.ID,
-                                          onTekan: () => setState(
-                                            () =>
-                                                selectedLanguage = language.ID,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                JudulBagian("RECEIPT LANGUAGE", atas: 18),
+                                PilihanSegmen<language>(
+                                  terpilih: selectedLanguage ?? language.EN,
+                                  opsi: const [
+                                    OpsiSegmen(
+                                        nilai: language.EN, label: "English"),
+                                    OpsiSegmen(
+                                        nilai: language.ID, label: "Bahasa"),
+                                  ],
+                                  onPilih: (nilai) =>
+                                      setState(() => selectedLanguage = nilai),
                                 ),
                                 const SizedBox(
                                   height: 15,
@@ -1544,110 +1510,6 @@ class _ButirMenuState extends State<_ButirMenu> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Satu pilihan bahasa struk pada formulir anggota.
-///
-/// Bentuknya sengaja sama dengan pemilih tema di halaman setelan: dua atau tiga
-/// pilihan tetap yang saling meniadakan, muat dalam satu baris. Radio selebar
-/// dialog untuk dua pilihan menghabiskan seratus piksel dan menyatakan bahwa
-/// daftarnya bisa bertambah panjang, padahal tidak.
-class _SegmenBahasa extends StatefulWidget {
-  final String label;
-  final bool aktif;
-  final VoidCallback onTekan;
-
-  const _SegmenBahasa({
-    required this.label,
-    required this.aktif,
-    required this.onTekan,
-  });
-
-  @override
-  State<_SegmenBahasa> createState() => _SegmenBahasaState();
-}
-
-class _SegmenBahasaState extends State<_SegmenBahasa> {
-  bool _disorot = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final warna = tema.colorScheme;
-
-    final Color latar = widget.aktif
-        ? warna.primary
-        : (_disorot
-            ? warna.onSurface.withValues(alpha: 0.07)
-            : Colors.transparent);
-
-    final Color depan = widget.aktif
-        ? warna.onPrimary
-        : warna.onSurface.withValues(alpha: _disorot ? 0.92 : 0.62);
-
-    return MouseRegion(
-      cursor: widget.aktif ? MouseCursor.defer : SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _disorot = true),
-      onExit: (_) => setState(() => _disorot = false),
-      child: GestureDetector(
-        onTap: widget.aktif ? null : widget.onTekan,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: Gerak.kilat,
-          curve: Gerak.masuk,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-          decoration: BoxDecoration(
-            color: latar,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Text(
-            widget.label,
-            style: tema.textTheme.bodyMedium?.copyWith(
-              color: depan,
-              fontSize: 13,
-              fontWeight: widget.aktif ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Judul satu bagian di dalam formulir, dengan garis rambut yang menyambung.
-///
-/// Label kecil yang berdiri sendirian di antara kolom-kolom isian mudah
-/// terbaca sebagai keterangan salah satu kolom, bukan sebagai pembuka
-/// kelompok. Garis yang menjulur ke kanan sampai tepi itulah yang membuatnya
-/// terbaca sebagai batas — dan karena garisnya yang bekerja, labelnya sendiri
-/// tidak perlu diperbesar sampai bersaing dengan isi formulirnya.
-class _JudulBagian extends StatelessWidget {
-  final String teks;
-  final double atas;
-
-  const _JudulBagian(this.teks, {this.atas = 22});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: atas, bottom: 12),
-      child: Row(
-        children: [
-          Text(
-            teks,
-            style: gayaLabelKolom(context)?.copyWith(fontSize: 12),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Divider(
-              height: 1,
-              color: Theme.of(context).dividerColor,
-            ),
-          ),
-        ],
       ),
     );
   }
