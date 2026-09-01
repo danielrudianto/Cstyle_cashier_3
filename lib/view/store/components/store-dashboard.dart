@@ -5,6 +5,8 @@ import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/responsive.utils.dart';
 import 'package:cstyle_cashier_3/view/store/components/stat-card.component.dart';
 import 'package:cstyle_cashier_3/viewmodel/theme.viewmodel.dart';
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
+import 'package:cstyle_cashier_3/utils/waktu.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
@@ -192,10 +194,13 @@ class _StoreDashboardState extends State<StoreDashboard> {
           color: Theme.of(context).cardColor,
           elevation: 2,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 35,
-              horizontal: 15,
-            ),
+            /*
+              Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
+              pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
+              dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
+              justru harus menggulir jauh untuk menemukannya.
+            */
+            padding: const EdgeInsets.all(20),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -295,7 +300,9 @@ class _StoreDashboardState extends State<StoreDashboard> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            "Last synced at ${lastUpdated == null ? "Never" : DateFormat("dd/MM/yyyy HH:mm").format(lastUpdated!)}",
+                            lastUpdated == null
+                                ? "Never synced"
+                                : "Last synced ${waktuManusiawi(lastUpdated!)}",
                             style:
                                 Theme.of(context).textTheme.bodySmall!.copyWith(
                                       color: Theme.of(context)
@@ -461,10 +468,13 @@ class _StoreDashboardState extends State<StoreDashboard> {
           color: Theme.of(context).cardColor,
           elevation: 2,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 35,
-              horizontal: 15,
-            ),
+            /*
+              Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
+              pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
+              dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
+              justru harus menggulir jauh untuk menemukannya.
+            */
+            padding: const EdgeInsets.all(20),
             child: Consumer<ThemeNotifier>(builder: (_, value, __) {
               return Center(
                 child: Column(
@@ -490,39 +500,19 @@ class _StoreDashboardState extends State<StoreDashboard> {
                       bisa dicapai sama sekali — penjelasannya di
                       viewmodel/theme.viewmodel.dart.
                     */
-                    RadioListTile<ThemeMode>(
-                      title: Text(
-                        'Follow system',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      groupValue: value.themeMode,
-                      value: ThemeMode.system,
-                      onChanged: (_) =>
-                          Provider.of<ThemeNotifier>(context, listen: false)
-                              .setSystemScheme(),
-                    ),
-                    RadioListTile<ThemeMode>(
-                      title: Text(
-                        'Light',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      groupValue: value.themeMode,
-                      value: ThemeMode.light,
-                      onChanged: (_) =>
-                          Provider.of<ThemeNotifier>(context, listen: false)
-                              .setLightScheme(),
-                    ),
-                    RadioListTile<ThemeMode>(
-                      title: Text(
-                        'Dark',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      groupValue: value.themeMode,
-                      value: ThemeMode.dark,
-                      onChanged: (_) =>
-                          Provider.of<ThemeNotifier>(context, listen: false)
-                              .setDarkScheme(),
-                    ),
+                    /*
+                      TIGA RadioListTile MENJADI SATU BARIS BERSEGMEN.
+
+                      Masing-masing tile setinggi lima puluh piksel dan selebar
+                      kartu, jadi tiga pilihan yang saling meniadakan memakan
+                      seratus lima puluh piksel dan tampak seperti daftar yang
+                      bisa panjang. Padahal jumlahnya tetap tiga, selamanya, dan
+                      ketiganya muat berdampingan dalam satu baris.
+
+                      Bentuk bersegmen juga menyatakan hubungannya dengan lebih
+                      jujur: memilih salah satu berarti melepas dua lainnya.
+                    */
+                    _PilihanTema(terpilih: value.themeMode),
                   ],
                 ),
               );
@@ -536,10 +526,13 @@ class _StoreDashboardState extends State<StoreDashboard> {
           color: Theme.of(context).cardColor,
           elevation: 2,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 35,
-              horizontal: 15,
-            ),
+            /*
+              Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
+              pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
+              dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
+              justru harus menggulir jauh untuk menemukannya.
+            */
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -564,8 +557,20 @@ class _StoreDashboardState extends State<StoreDashboard> {
                   const SizedBox(
                     height: 15,
                   ),
-                  InkWell(
-                    onTap: () async {
+                  /*
+                    Bergaris, bukan terisi: memilih pencetak adalah persiapan
+                    sekali pasang, bukan tindakan utama halaman ini.
+                  */
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.print_outlined, size: 17),
+                    label: const Text("Set printer"),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(150, 42),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () async {
                       Printing.pickPrinter(context: context)
                           .then((selectedPrinter) {
                         if (selectedPrinter == null) {
@@ -589,24 +594,6 @@ class _StoreDashboardState extends State<StoreDashboard> {
                         }
                       });
                     },
-                    child: Container(
-                      // width fit
-                      width: 150,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 25),
-                      // border 1 px solid #ccc
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Theme.of(context).dividerColor,
-                        ),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        "Set printer",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
                   ),
                 ] else ...[
                   Text(
@@ -701,19 +688,170 @@ class _StoreDashboardState extends State<StoreDashboard> {
               );
             }
           },
+          /*
+            Dulu tulisan biasa di dalam Container berwarna canvas — tidak
+            terlihat seperti tombol, dan tidak terlihat seperti tindakan yang
+            menutup aplikasi. Keluar dari sini menjalankan exit(0): apa pun
+            yang belum tersinkron ditinggalkan begitu saja.
+
+            Sekarang bergaris warna galat. Bukan terisi penuh — itu akan
+            membuatnya menjadi hal paling mencolok di halaman setelan,
+            padahal ia yang paling jarang ditekan.
+          */
           child: Container(
             padding: const EdgeInsets.symmetric(
-              vertical: 10,
-              horizontal: 35,
+              vertical: 11,
+              horizontal: 22,
             ),
-            color: Theme.of(context).canvasColor,
-            child: Text(
-              "Logout",
-              style: Theme.of(context).textTheme.bodyLarge,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color:
+                    Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.logout,
+                  size: 17,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(width: 9),
+                Text(
+                  "Log out of this store",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Pilihan tema sebagai satu baris bersegmen.
+///
+/// Menggantikan tiga RadioListTile yang masing-masing selebar kartu. Jumlah
+/// pilihannya tetap tiga selamanya, jadi tidak ada alasan memberinya bentuk
+/// daftar yang bisa bertambah panjang.
+class _PilihanTema extends StatelessWidget {
+  final ThemeMode terpilih;
+
+  const _PilihanTema({required this.terpilih});
+
+  @override
+  Widget build(BuildContext context) {
+    final warna = Theme.of(context).colorScheme;
+    final notifier = Provider.of<ThemeNotifier>(context, listen: false);
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: warna.onSurface.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _SegmenTema(
+            ikon: Icons.brightness_auto_outlined,
+            label: "Follow system",
+            aktif: terpilih == ThemeMode.system,
+            onTekan: notifier.setSystemScheme,
+          ),
+          const SizedBox(width: 3),
+          _SegmenTema(
+            ikon: Icons.light_mode_outlined,
+            label: "Light",
+            aktif: terpilih == ThemeMode.light,
+            onTekan: notifier.setLightScheme,
+          ),
+          const SizedBox(width: 3),
+          _SegmenTema(
+            ikon: Icons.dark_mode_outlined,
+            label: "Dark",
+            aktif: terpilih == ThemeMode.dark,
+            onTekan: notifier.setDarkScheme,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SegmenTema extends StatefulWidget {
+  final IconData ikon;
+  final String label;
+  final bool aktif;
+  final VoidCallback onTekan;
+
+  const _SegmenTema({
+    required this.ikon,
+    required this.label,
+    required this.aktif,
+    required this.onTekan,
+  });
+
+  @override
+  State<_SegmenTema> createState() => _SegmenTemaState();
+}
+
+class _SegmenTemaState extends State<_SegmenTema> {
+  bool _disorot = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final warna = tema.colorScheme;
+
+    final Color latar = widget.aktif
+        ? warna.primary
+        : (_disorot
+            ? warna.onSurface.withValues(alpha: 0.07)
+            : Colors.transparent);
+
+    final Color depan = widget.aktif
+        ? warna.onPrimary
+        : warna.onSurface.withValues(alpha: _disorot ? 0.92 : 0.62);
+
+    return MouseRegion(
+      cursor: widget.aktif ? MouseCursor.defer : SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _disorot = true),
+      onExit: (_) => setState(() => _disorot = false),
+      child: GestureDetector(
+        onTap: widget.aktif ? null : widget.onTekan,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: Gerak.kilat,
+          curve: Gerak.masuk,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: latar,
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(widget.ikon, size: 16, color: depan),
+              const SizedBox(width: 7),
+              Text(
+                widget.label,
+                style: tema.textTheme.bodyMedium?.copyWith(
+                  color: depan,
+                  fontSize: 13,
+                  fontWeight: widget.aktif ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
