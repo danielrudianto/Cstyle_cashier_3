@@ -276,191 +276,137 @@ class _StoreDashboardState extends State<StoreDashboard> {
           harian, karena ia satu-satunya yang menghasilkan sesuatu untuk
           dibawa keluar. Perbedaan yang tersisa jadi berarti.
         */
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            /*
-              Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
-              pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
-              dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
-              justru harus menggulir jauh untuk menemukannya.
-            */
-            padding: const EdgeInsets.all(20),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Your store stats",
-                    style: Theme.of(context).textTheme.headlineMedium,
+        /*
+          KALIMAT PENJELASAN DAN "Last synced" DIBUANG.
+
+          Yang pertama menerangkan sebuah dropdown yang sudah berlabel
+          "Assessment period" — ia hanya mengisi ruang di sebelahnya, dan
+          salah eja pula. Yang kedua kini ada di baris keterangan terminal di
+          kepala halaman, jadi menuliskannya lagi di sini berarti dua tempat
+          yang harus sama-sama diperbarui.
+
+          Pemilih periodenya naik ke kanan barisan judul, tempat yang sama
+          dengan tombol pada dua kartu lainnya.
+        */
+        KartuBagian(
+          judul: "Store stats",
+          aksi: SizedBox(
+            width: 210,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                dropdownMenuTheme: DropdownMenuThemeData(
+                  menuStyle: MenuStyle(
+                    elevation: WidgetStateProperty.all(8.0),
+                    backgroundColor: WidgetStateProperty.all(
+                      Theme.of(context).cardColor,
+                    ),
                   ),
-                  const SizedBox(
-                    height: 25,
+                ),
+              ),
+              child: DropdownMenu<int>(
+                // menu background color
+                initialSelection: 1,
+                onSelected: (value) {
+                  if (value != null) {
+                    _preUpdateStats(value);
+                  }
+                },
+                // white background
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: false,
+                  contentPadding: const EdgeInsets.all(10.0),
+                  // borer
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                    ),
                   ),
-                  // select
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Theme(
-                            data: Theme.of(context).copyWith(
-                              dropdownMenuTheme: DropdownMenuThemeData(
-                                menuStyle: MenuStyle(
-                                  elevation: WidgetStateProperty.all(8.0),
-                                  backgroundColor: WidgetStateProperty.all(
-                                    Theme.of(context).cardColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            child: DropdownMenu<int>(
-                              // menu background color
-                              initialSelection: 1,
-                              onSelected: (value) {
-                                if (value != null) {
-                                  _preUpdateStats(value);
-                                }
-                              },
-                              // white background
-                              inputDecorationTheme: InputDecorationTheme(
-                                filled: false,
-                                contentPadding: const EdgeInsets.all(10.0),
-                                // borer
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  // color
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  // color
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                  ),
-                                ),
-                                labelStyle:
-                                    Theme.of(context).textTheme.bodySmall,
-                              ),
-                              width: 0.4 *
-                                  ResponsiveUtils.getContainerSize(context),
-                              label: const Text("Assessment period"),
-                              dropdownMenuEntries: [
-                                {"label": "Today", "value": 1},
-                                {"label": "Last 7 days", "value": 7},
-                                {"label": "Last 30 days", "value": 30},
-                                {"label": "Overall", "value": -1}
-                              ].map((e) {
-                                return DropdownMenuEntry(
-                                  label: e["label"] as String,
-                                  value: e["value"] as int,
-                                  style: ButtonStyle(
-                                    padding: WidgetStateProperty.all(
-                                      const EdgeInsets.symmetric(
-                                        vertical: 15,
-                                        horizontal: 15,
-                                      ),
-                                    ),
-                                    textStyle: WidgetStateProperty.all(
-                                      Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                    foregroundColor: WidgetStateProperty.all(
-                                      Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.color,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            lastUpdated == null
-                                ? "Never synced"
-                                : "Last synced ${waktuManusiawi(lastUpdated!)}",
-                            style:
-                                Theme.of(context).textTheme.bodySmall!.copyWith(
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall!
-                                          .color!
-                                          .withValues(alpha: 0.5),
-                                    ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      Expanded(
-                        child: Text(
-                          "You can change the periode of your assessment here. By default it will be the today's assessment.",
-                          style: Theme.of(context).textTheme.bodyMedium,
+                  focusedBorder: OutlineInputBorder(
+                    // color
+                    borderSide: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    // color
+                    borderSide: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                    ),
+                  ),
+                  labelStyle: Theme.of(context).textTheme.bodySmall,
+                ),
+                width: 0.4 * ResponsiveUtils.getContainerSize(context),
+                label: const Text("Assessment period"),
+                dropdownMenuEntries: [
+                  {"label": "Today", "value": 1},
+                  {"label": "Last 7 days", "value": 7},
+                  {"label": "Last 30 days", "value": 30},
+                  {"label": "Overall", "value": -1}
+                ].map((e) {
+                  return DropdownMenuEntry(
+                    label: e["label"] as String,
+                    value: e["value"] as int,
+                    style: ButtonStyle(
+                      padding: WidgetStateProperty.all(
+                        const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 15,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 28),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      StatCard(
-                        /* Kolom pertama: tidak ada yang perlu dipisahkan di kirinya. */
-                        pemisah: false,
-                        number: NumberFormat.compact().format(newMemberCount),
-                        title: "New member count",
-                        description: "New members registered in your store",
-                        onPressed: () {
-                          _showHelpDialog("New member count.",
-                              "Here are the members registered in your store for the last 30 days.");
-                        },
+                      textStyle: WidgetStateProperty.all(
+                        Theme.of(context).textTheme.bodyLarge,
                       ),
-                      StatCard(
-                        number: NumberFormat.compact().format(memberCount),
-                        title: "Member count",
-                        description: "Members registered in your store",
-                        onPressed: () {
-                          _showHelpDialog("Total member count.",
-                              "Here are the total registered members in your store overall.");
-                        },
+                      foregroundColor: WidgetStateProperty.all(
+                        Theme.of(context).textTheme.bodyLarge?.color,
                       ),
-                      StatCard(
-                        number: NumberFormat.compact().format(billCount),
-                        title: "Bills count",
-                        description: "Bills created and uploaded to the server",
-                        onPressed: () {
-                          _showHelpDialog("Bills count",
-                              "Sales invoice / bill generated from this store that has been synchronized to CSTYLE private server. This sync process is done every certain amount of minutes from the application.");
-                        },
-                      ),
-                      StatCard(
-                        number: NumberFormat.compact().format(billValue),
-                        title: "Bills value",
-                        description: "Bills created and uploaded to the server",
-                        onPressed: () {
-                          _showHelpDialog("Bills value",
-                              "Sales invoice / bill value generated from this store that has been synchronized to CSTYLE private server. This sync process is done every certain amount of minutes from the application.");
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  );
+                }).toList(),
               ),
             ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              StatCard(
+                /* Kolom pertama: tidak ada yang perlu dipisahkan di kirinya. */
+                pemisah: false,
+                number: NumberFormat.compact().format(newMemberCount),
+                title: "New member count",
+                description: "New members registered in your store",
+                onPressed: () {
+                  _showHelpDialog("New member count.",
+                      "Here are the members registered in your store for the last 30 days.");
+                },
+              ),
+              StatCard(
+                number: NumberFormat.compact().format(memberCount),
+                title: "Member count",
+                description: "Members registered in your store",
+                onPressed: () {
+                  _showHelpDialog("Total member count.",
+                      "Here are the total registered members in your store overall.");
+                },
+              ),
+              StatCard(
+                number: NumberFormat.compact().format(billCount),
+                title: "Bills count",
+                description: "Bills created and uploaded to the server",
+                onPressed: () {
+                  _showHelpDialog("Bills count",
+                      "Sales invoice / bill generated from this store that has been synchronized to CSTYLE private server. This sync process is done every certain amount of minutes from the application.");
+                },
+              ),
+              StatCard(
+                number: NumberFormat.compact().format(billValue),
+                title: "Bills value",
+                description: "Bills created and uploaded to the server",
+                onPressed: () {
+                  _showHelpDialog("Bills value",
+                      "Sales invoice / bill value generated from this store that has been synchronized to CSTYLE private server. This sync process is done every certain amount of minutes from the application.");
+                },
+              ),
+            ],
           ),
         ),
         const SizedBox(
@@ -475,54 +421,27 @@ class _StoreDashboardState extends State<StoreDashboard> {
           tepi kiri menandainya sebagai satu-satunya hal di halaman ini yang
           menghasilkan sesuatu untuk dibawa keluar.
         */
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color:
-                Theme.of(context).secondaryHeaderColor.withValues(alpha: 0.07),
-            borderRadius: BorderRadius.circular(12),
-            border: Border(
-              left: BorderSide(
-                color: Theme.of(context).secondaryHeaderColor,
-                width: 3,
+        /*
+          SATU-SATUNYA kartu beraksen di halaman ini, dan itu disengaja:
+          hanya ini yang menghasilkan sesuatu untuk dibawa keluar. Begitu ada
+          dua yang beraksen, keduanya berhenti berarti.
+        */
+        KartuBagian(
+          aksen: true,
+          judul: "Daily report",
+          keterangan: "Everything sold today from this terminal, ready to "
+              "read or send on.",
+          aksi: FilledButton.icon(
+            onPressed: widget.onLaporanHarian,
+            icon: const Icon(Icons.summarize_outlined, size: 18),
+            label: const Text("Open report"),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 44),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Daily report",
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      "Everything sold today from this terminal, ready to "
-                      "read or send on.",
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 20),
-              FilledButton.icon(
-                onPressed: widget.onLaporanHarian,
-                icon: const Icon(Icons.summarize_outlined, size: 18),
-                label: const Text("Open report"),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(0, 44),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
         const SizedBox(
@@ -542,75 +461,40 @@ class _StoreDashboardState extends State<StoreDashboard> {
           satu-satunya warna di sini tinggal tombolnya, yang memang tempat
           tindakannya berada.
         */
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Sync stock",
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Pulls the latest stock figures from the server. Needs an "
-                  "internet connection.",
-                  /* Penjelasan, bukan isi: diredupkan dan dikecilkan. */
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(
-                  height: 25,
-                ),
-                /*
-                  Dulu InkWell membungkus sebuah Container bergaris yang
-                  KELIHATAN seperti tombol tanpa berperilaku seperti tombol:
-                  tanpa keadaan sorot, tanpa umpan balik tekan, tanpa kursor
-                  tangan. Sekarang tombol sungguhan, dan temanya yang memberi
-                  keempatnya sekaligus.
-                */
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(150, 44),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+        KartuBagian(
+          judul: "Sync stock",
+          keterangan: "Pulls the latest stock figures from the server. "
+              "Needs an internet connection.",
+          aksi: FilledButton(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(150, 44),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              try {
+                var storeModel = await StoreModel.getCurrentProfile();
+                String storeCode = storeModel!.code!;
+                await ProductStockModel.fetchServerStock(storeCode);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      "Stock overridden successfully",
                     ),
                   ),
-                  onPressed: () async {
-                    try {
-                      var storeModel = await StoreModel.getCurrentProfile();
-                      String storeCode = storeModel!.code!;
-                      await ProductStockModel.fetchServerStock(storeCode);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            "Stock overridden successfully",
-                          ),
-                        ),
-                      );
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            "Failed to override stock",
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  child: const Text("Sync now"),
-                ),
-              ],
-            ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      "Failed to override stock",
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text("Sync now"),
           ),
         ),
         const SizedBox(

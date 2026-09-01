@@ -81,6 +81,85 @@ class Kartu extends StatelessWidget {
   }
 }
 
+/// Kartu satu bagian: judul, keterangan sebaris, tindakan di kanan, lalu isi.
+///
+/// SATU BENTUK UNTUK SEMUA KARTU BAGIAN.
+///
+/// Sebelum ini ketiganya di halaman kelola disusun berbeda-beda: yang satu
+/// memakai judul besar dengan kalimat penjelasan di sampingnya, yang lain judul
+/// lebih kecil dengan tombol di kanan, yang ketiga tombolnya justru di bawah
+/// keterangan. Tiga susunan untuk tiga hal yang sederajat, jadi mata harus
+/// mencari letak tombol setiap kali berpindah kartu.
+///
+/// Tindakannya SELALU di kanan barisan judul. Itu tempat yang sama untuk
+/// semuanya, dan ia tidak ikut menggeser ke bawah ketika keterangannya panjang.
+class KartuBagian extends StatelessWidget {
+  final String judul;
+
+  /// Satu kalimat, diredupkan. Kalau butuh lebih dari satu, yang perlu
+  /// diperbaiki biasanya kalimatnya, bukan tempatnya.
+  final String? keterangan;
+
+  /// Tombol atau kendali, di kanan barisan judul.
+  final Widget? aksi;
+
+  final Widget? child;
+
+  /// Menyalakan batang aksen di tepi kiri. Dipakai HEMAT.
+  final bool aksen;
+
+  const KartuBagian({
+    super.key,
+    required this.judul,
+    this.keterangan,
+    this.aksi,
+    this.child,
+    this.aksen = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+
+    return Kartu(
+      aksen: aksen,
+      padding: const EdgeInsets.all(22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(judul, style: tema.textTheme.headlineMedium),
+                    if (keterangan != null) ...[
+                      const SizedBox(height: 5),
+                      Text(keterangan!, style: tema.textTheme.bodySmall),
+                    ],
+                  ],
+                ),
+              ),
+              if (aksi != null) ...[
+                const SizedBox(width: 20),
+                aksi!,
+              ],
+            ],
+          ),
+          if (child != null) ...[
+            const SizedBox(height: 22),
+            child!,
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 /// Judul satu bagian, dengan garis rambut yang menyambung ke tepi.
 ///
 /// Label kecil yang berdiri sendirian di antara kolom isian mudah terbaca
