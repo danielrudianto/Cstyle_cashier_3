@@ -142,6 +142,22 @@ class SQLCartCodeModel {
     }
   }
 
+  /// Apakah sebuah nama sudah dipakai keranjang mana pun.
+  ///
+  /// Ada karena [fetchByName] MELEMPAR saat tidak ketemu — tepat untuk
+  /// mengambil, canggung untuk sekadar bertanya ada atau tidak.
+  static Future<bool> adaDenganNama(String name) async {
+    final db = await DatabaseUtils().database;
+    var result = await db.query(
+      "cart_code",
+      columns: ["id"],
+      where: "name = ?",
+      whereArgs: [name],
+      limit: 1,
+    );
+    return result.isNotEmpty;
+  }
+
   static Future<SQLCartCodeModel> fetchByName(String name) async {
     final db = await DatabaseUtils().database;
     var result = await db.query(

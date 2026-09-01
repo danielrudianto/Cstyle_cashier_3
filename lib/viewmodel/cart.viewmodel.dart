@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:cstyle_cashier_3/db/db.bill_code.model.dart';
+import 'package:cstyle_cashier_3/db/db.cart_code.model.dart';
 import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
 import 'package:cstyle_cashier_3/model/model.bill-payment.model.dart';
 import 'package:cstyle_cashier_3/model/model.bill.model.dart';
@@ -55,7 +57,19 @@ class CartNotifier extends ChangeNotifier {
   /// menyesuaikan.
   static const int _panjangAcakNomorNota = 12;
 
-  Future<int?> createNewCart() async {
+  /// Nomor nota baru yang dijamin belum dipakai PERANGKAT INI.
+  ///
+  /// Kedua tabel diperiksa — cart_code dan bill_code — karena nomornya lahir
+  /// di keranjang lalu pindah ke nota saat dibayar; kembar dengan salah satu
+  /// saja sudah membuat insert-nya gagal. Keduanya UNIQUE di SQLite, jadi
+  /// tanpa pemeriksaan ini nomor kembar tidak lolos — ia MELEDAK: insert-nya
+  /// dilempar, tertangkap catch di bawah, dan kasir menekan tombol transaksi
+  /// baru tanpa terjadi apa-apa dan tanpa penjelasan.
+  ///
+  /// Kembar antar perangkat tidak bisa diperiksa dari sini (tidak ada
+  /// jaminan jaringan); itu urusan panjang acaknya di atas, dan sisanya
+  /// ditangkap pembeda tabrakan di sisi server saat sinkronisasi.
+  Future<String> _namaNotaBaru() async {
     /*
       Random.secure(), bukan Random(). Random() biasa disemai dari waktu, dan
       beberapa perangkat yang menyala bersamaan setiap pagi bisa mulai dari
@@ -64,12 +78,31 @@ class CartNotifier extends ChangeNotifier {
     */
     final random = Random.secure();
     final sekarang = DateTime.now();
-
-    var name =
+    final awalan =
         "B-CS-${sekarang.year}-${sekarang.month.toString().padLeft(2, "0")}-";
-    for (var i = 0; i < _panjangAcakNomorNota; i++) {
-      name += random.nextInt(10).toString();
+
+    /*
+      Tiga kali percobaan, bukan while(true): kalau tiga nomor acak dari ruang
+      10^12 kembar semua, yang rusak bukan keberuntungan melainkan basis
+      datanya, dan berputar selamanya hanya menyembunyikan itu. Percobaan
+      terakhir dipakai apa adanya — paling buruk kembali ke perilaku lama,
+      insert yang gagal dengan tercatat.
+    */
+    var name = "";
+    for (var percobaan = 0; percobaan < 3; percobaan++) {
+      name = awalan;
+      for (var i = 0; i < _panjangAcakNomorNota; i++) {
+        name += random.nextInt(10).toString();
+      }
+      final dipakai = await SQLCartCodeModel.adaDenganNama(name) ||
+          await SQLBillCodeModel.adaDenganNama(name);
+      if (!dipakai) return name;
     }
+    return name;
+  }
+
+  Future<int?> createNewCart() async {
+    final name = await _namaNotaBaru();
 
     try {
       var cart = await CartModel(

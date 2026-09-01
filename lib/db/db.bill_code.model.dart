@@ -116,6 +116,19 @@ class SQLBillCodeModel {
     return SQLBillCodeModel.fromMap(result.first);
   }
 
+  /// Apakah sebuah nama sudah dipakai nota mana pun di perangkat ini.
+  static Future<bool> adaDenganNama(String name) async {
+    final db = await DatabaseUtils().database;
+    var result = await db.query(
+      "bill_code",
+      columns: ["id"],
+      where: "name = ?",
+      whereArgs: [name],
+      limit: 1,
+    );
+    return result.isNotEmpty;
+  }
+
   static Future<SQLBillCodeModel> fetchByName(String name) async {
     final db = await DatabaseUtils().database;
     var result =
