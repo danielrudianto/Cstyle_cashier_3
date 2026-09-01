@@ -321,44 +321,34 @@ class _StorePageState extends State<StorePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 400,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).secondaryHeaderColor,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(25),
-                            topRight: Radius.circular(25),
-                          ),
-                          // border color
-                          border: Border.all(
-                            color: Colors.transparent,
-                            width: 0,
-                          ),
-                        ),
+                      /*
+                        BILAH JUDUL UNGU SETINGGI 100 PIKSEL DIBUANG.
+
+                        Seperempat tinggi dialog dipakai satu baris judul, dan
+                        warnanya penuh — jadi hal paling mencolok pada formulir
+                        pendaftaran anggota adalah kata "Create new member",
+                        yang justru satu-satunya bagian yang tidak perlu
+                        dikerjakan siapa pun.
+
+                        Kepala dialog sekarang duduk di permukaan yang sama
+                        dengan isinya, dan satu-satunya warna di sini tinggal
+                        tombol kirimnya.
+                      */
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 20, 12, 4),
                         child: Row(
                           children: [
-                            const Expanded(
-                              child: Center(
-                                child: Text(
-                                  "Create new member",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
+                            Expanded(
+                              child: Text(
+                                "New member",
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
                               ),
                             ),
                             IconButton(
                               tooltip: "Close",
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                              ),
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(Icons.close, size: 20),
                             ),
                           ],
                         ),
@@ -375,14 +365,31 @@ class _StorePageState extends State<StorePage> {
                                   "Code",
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
+                                /*
+                                  Dulu keduanya dividerColor. Sejak pemisah
+                                  diturunkan menjadi 7% supaya garis antarbaris
+                                  tidak berteriak, nilai itu terlalu samar untuk
+                                  menandai TEPI kolom isian — dan garis fokusnya
+                                  sama persis dengan yang tidak fokus, jadi tidak
+                                  ada tanda kolom mana yang sedang diketik.
+                                */
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    width: 1.6,
                                   ),
                                 ),
                               ),
@@ -397,14 +404,31 @@ class _StorePageState extends State<StorePage> {
                                   "Name",
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
+                                /*
+                                  Dulu keduanya dividerColor. Sejak pemisah
+                                  diturunkan menjadi 7% supaya garis antarbaris
+                                  tidak berteriak, nilai itu terlalu samar untuk
+                                  menandai TEPI kolom isian — dan garis fokusnya
+                                  sama persis dengan yang tidak fokus, jadi tidak
+                                  ada tanda kolom mana yang sedang diketik.
+                                */
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    width: 1.6,
                                   ),
                                 ),
                               ),
@@ -579,14 +603,31 @@ class _StorePageState extends State<StorePage> {
                                   "Phone number",
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
+                                /*
+                                  Dulu keduanya dividerColor. Sejak pemisah
+                                  diturunkan menjadi 7% supaya garis antarbaris
+                                  tidak berteriak, nilai itu terlalu samar untuk
+                                  menandai TEPI kolom isian — dan garis fokusnya
+                                  sama persis dengan yang tidak fokus, jadi tidak
+                                  ada tanda kolom mana yang sedang diketik.
+                                */
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    width: 1.6,
                                   ),
                                 ),
                               ),
@@ -601,14 +642,31 @@ class _StorePageState extends State<StorePage> {
                                   "Email",
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
+                                /*
+                                  Dulu keduanya dividerColor. Sejak pemisah
+                                  diturunkan menjadi 7% supaya garis antarbaris
+                                  tidak berteriak, nilai itu terlalu samar untuk
+                                  menandai TEPI kolom isian — dan garis fokusnya
+                                  sama persis dengan yang tidak fokus, jadi tidak
+                                  ada tanda kolom mana yang sedang diketik.
+                                */
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    width: 1.6,
                                   ),
                                 ),
                               ),
@@ -616,9 +674,15 @@ class _StorePageState extends State<StorePage> {
                             const SizedBox(
                               height: 15,
                             ),
+                            /*
+                              Ini keterangan pendamping dua kolom di atasnya,
+                              bukan kalimat tersendiri — dulu ditulis sebesar
+                              isian yang dijelaskannya.
+                            */
                             Text(
-                              "Please insert either phone number or email, or both.",
-                              style: Theme.of(context).textTheme.bodyLarge,
+                              "Fill in a phone number or an email — either one "
+                              "is enough.",
+                              style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(
                               height: 15,
@@ -629,14 +693,31 @@ class _StorePageState extends State<StorePage> {
                                   "Birthday",
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
+                                /*
+                                  Dulu keduanya dividerColor. Sejak pemisah
+                                  diturunkan menjadi 7% supaya garis antarbaris
+                                  tidak berteriak, nilai itu terlalu samar untuk
+                                  menandai TEPI kolom isian — dan garis fokusnya
+                                  sama persis dengan yang tidak fokus, jadi tidak
+                                  ada tanda kolom mana yang sedang diketik.
+                                */
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Theme.of(context).dividerColor,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    width: 1.6,
                                   ),
                                 ),
                               ),
@@ -732,23 +813,37 @@ class _StorePageState extends State<StorePage> {
                                       addMember();
                                     },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                  horizontal: 25,
-                                ),
+                                padding: EdgeInsets.zero,
                                 width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: isSubmitting
-                                      ? Theme.of(context).disabledColor
-                                      : Theme.of(context).secondaryHeaderColor,
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: const Text(
-                                  "Submit",
-                                  style: TextStyle(
-                                    color: Colors.white,
+                                /*
+                                  Dulu Container berwarna aksen yang menyerupai
+                                  tombol: tanpa sorot, tanpa umpan balik tekan,
+                                  tanpa kursor tangan — dan saat sedang mengirim
+                                  ia hanya berubah abu-abu tanpa memberi tahu
+                                  bahwa sesuatu sedang berjalan.
+
+                                  "Submit" juga tidak menyebutkan apa pun.
+                                  Tombol sebaiknya menamai hasilnya.
+                                */
+                                child: IgnorePointer(
+                                  child: FilledButton(
+                                    onPressed: isSubmitting ? null : () {},
+                                    style: FilledButton.styleFrom(
+                                      minimumSize: const Size.fromHeight(46),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(9),
+                                      ),
+                                    ),
+                                    child: isSubmitting
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.2,
+                                            ),
+                                          )
+                                        : const Text("Create member"),
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
