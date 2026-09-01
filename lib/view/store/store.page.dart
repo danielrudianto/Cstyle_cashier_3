@@ -307,22 +307,42 @@ class _StorePageState extends State<StorePage> {
     }
 
     showDialog(
-        barrierDismissible: false,
+        /*
+          DULU false, JADI ESCAPE TIDAK MELAKUKAN APA-APA.
+
+          barrierDismissible mengatur dua hal sekaligus: klik di luar dialog
+          DAN tombol Escape — ModalRoute hanya melayani DismissIntent kalau
+          nilainya benar. Dengan false, satu-satunya jalan keluar adalah
+          tanda silang di pojok, dan tidak ada apa pun di layar yang
+          memberitahukan itu.
+
+          Pengikatan Escape di bawah dipasang juga, bukan karena yang ini
+          kurang, melainkan supaya tetap bekerja bila dialognya kelak dibuka
+          lewat jalur lain yang tidak melewati barrier.
+        */
+        barrierDismissible: true,
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: (context, setState) {
-            return Dialog(
-              surfaceTintColor: Theme.of(context).cardColor,
-              backgroundColor: Theme.of(context).cardColor,
-              child: SizedBox(
-                width: 400,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      /*
+            return CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.escape): () =>
+                    Navigator.of(context).pop(),
+              },
+              child: Focus(
+                autofocus: true,
+                child: Dialog(
+                  surfaceTintColor: Theme.of(context).cardColor,
+                  backgroundColor: Theme.of(context).cardColor,
+                  child: SizedBox(
+                    width: 400,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          /*
                         BILAH JUDUL UNGU SETINGGI 100 PIKSEL DIBUANG.
 
                         Seperempat tinggi dialog dipakai satu baris judul, dan
@@ -335,276 +355,338 @@ class _StorePageState extends State<StorePage> {
                         dengan isinya, dan satu-satunya warna di sini tinggal
                         tombol kirimnya.
                       */
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 20, 12, 4),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                "New member",
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall,
-                              ),
-                            ),
-                            IconButton(
-                              tooltip: "Close",
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.close, size: 20),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(15),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextFormField(
-                              controller: codeEditingController,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Code",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 20, 12, 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    "New member",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall,
+                                  ),
                                 ),
+                                IconButton(
+                                  tooltip: "Close",
+                                  onPressed: () => Navigator.pop(context),
+                                  icon: const Icon(Icons.close, size: 20),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 /*
-                                  Dulu keduanya dividerColor. Sejak pemisah
-                                  diturunkan menjadi 7% supaya garis antarbaris
-                                  tidak berteriak, nilai itu terlalu samar untuk
-                                  menandai TEPI kolom isian — dan garis fokusnya
-                                  sama persis dengan yang tidak fokus, jadi tidak
-                                  ada tanda kolom mana yang sedang diketik.
-                                */
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
+                              DELAPAN MEDAN BERDERET RATA MENJADI TIGA BAGIAN.
+
+                              Sebelumnya kode, nama, kebangsaan, telepon,
+                              surel, ulang tahun, dan bahasa struk berdiri
+                              berurutan dengan jarak yang sama persis — jadi
+                              yang wajib diisi terlihat sama pentingnya dengan
+                              yang boleh dilewati, dan tidak ada yang
+                              menyatakan bahwa telepon dan surel saling
+                              menggantikan.
+
+                              Judul bagiannya memakai perlakuan yang sama
+                              dengan kepala kolom tabel dan menu kelola.
+                            */
+                                /* Judul bagian; lihat catatan di bawah. */
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 0,
+                                    bottom: 10,
+                                  ),
+                                  child: Text(
+                                    "MEMBER",
+                                    style: gayaLabelKolom(context),
                                   ),
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    width: 1.6,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            TextFormField(
-                              controller: nameEditingController,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Name",
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                /*
-                                  Dulu keduanya dividerColor. Sejak pemisah
-                                  diturunkan menjadi 7% supaya garis antarbaris
-                                  tidak berteriak, nilai itu terlalu samar untuk
-                                  menandai TEPI kolom isian — dan garis fokusnya
-                                  sama persis dengan yang tidak fokus, jadi tidak
-                                  ada tanda kolom mana yang sedang diketik.
-                                */
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    width: 1.6,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Autocomplete<CountryModel>(
-                              displayStringForOption: (CountryModel option) =>
-                                  "${option.name} (${option.code})",
-                              initialValue: TextEditingValue(
-                                  text: (nationality != null)
-                                      ? "${nationality!.name} (${nationality!.code})"
-                                      : ""),
-                              fieldViewBuilder: (BuildContext context,
-                                  TextEditingController
-                                      fieldTextEditingController,
-                                  FocusNode fieldFocusNode,
-                                  VoidCallback onFieldSubmitted) {
-                                memberNationalityController =
-                                    fieldTextEditingController;
-                                return TextField(
-                                  controller: fieldTextEditingController,
-                                  focusNode: fieldFocusNode,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                  enabled: (nationality == null),
+                                TextFormField(
+                                  controller: codeEditingController,
                                   decoration: InputDecoration(
                                     label: Text(
-                                      "Nationality",
+                                      "Code",
                                       style:
                                           Theme.of(context).textTheme.bodySmall,
                                     ),
+                                    /*
+                                  Dulu keduanya dividerColor. Sejak pemisah
+                                  diturunkan menjadi 7% supaya garis antarbaris
+                                  tidak berteriak, nilai itu terlalu samar untuk
+                                  menandai TEPI kolom isian — dan garis fokusnya
+                                  sama persis dengan yang tidak fokus, jadi tidak
+                                  ada tanda kolom mana yang sedang diketik.
+                                */
                                     border: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Theme.of(context).dividerColor,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
                                       ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Theme.of(context).dividerColor,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        width: 1.6,
                                       ),
                                     ),
                                   ),
-                                );
-                              },
-                              optionsBuilder:
-                                  (TextEditingValue textEditingValue) {
-                                if (textEditingValue.text == '') {
-                                  return const Iterable<CountryModel>.empty();
-                                }
+                                ),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                TextFormField(
+                                  controller: nameEditingController,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      "Name",
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    /*
+                                  Dulu keduanya dividerColor. Sejak pemisah
+                                  diturunkan menjadi 7% supaya garis antarbaris
+                                  tidak berteriak, nilai itu terlalu samar untuk
+                                  menandai TEPI kolom isian — dan garis fokusnya
+                                  sama persis dengan yang tidak fokus, jadi tidak
+                                  ada tanda kolom mana yang sedang diketik.
+                                */
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        width: 1.6,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                Autocomplete<CountryModel>(
+                                  displayStringForOption:
+                                      (CountryModel option) =>
+                                          "${option.name} (${option.code})",
+                                  initialValue: TextEditingValue(
+                                      text: (nationality != null)
+                                          ? "${nationality!.name} (${nationality!.code})"
+                                          : ""),
+                                  fieldViewBuilder: (BuildContext context,
+                                      TextEditingController
+                                          fieldTextEditingController,
+                                      FocusNode fieldFocusNode,
+                                      VoidCallback onFieldSubmitted) {
+                                    memberNationalityController =
+                                        fieldTextEditingController;
+                                    return TextField(
+                                      controller: fieldTextEditingController,
+                                      focusNode: fieldFocusNode,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                      enabled: (nationality == null),
+                                      decoration: InputDecoration(
+                                        label: Text(
+                                          "Nationality",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color:
+                                                Theme.of(context).dividerColor,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color:
+                                                Theme.of(context).dividerColor,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  optionsBuilder:
+                                      (TextEditingValue textEditingValue) {
+                                    if (textEditingValue.text == '') {
+                                      return const Iterable<
+                                          CountryModel>.empty();
+                                    }
 
-                                return availableCountries
-                                    .where((CountryModel option) {
-                                  return option.name.toLowerCase().contains(
-                                          textEditingValue.text
-                                              .toLowerCase()) ||
-                                      option.name.toLowerCase().startsWith(
-                                          textEditingValue.text.toLowerCase());
-                                });
-                              },
-                              optionsViewBuilder: (BuildContext context,
-                                  AutocompleteOnSelected<CountryModel>
-                                      onSelected,
-                                  Iterable<CountryModel> options) {
-                                return Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Material(
-                                    child: Container(
-                                      width: 370,
-                                      color: Theme.of(context).canvasColor,
-                                      child: ListView.builder(
-                                        shrinkWrap: true,
-                                        padding: const EdgeInsets.all(10.0),
-                                        itemCount: options.length >= 5
-                                            ? 5
-                                            : options.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          final CountryModel option =
-                                              options.elementAt(index);
-                                          return GestureDetector(
-                                            onTap: () {
-                                              onSelected(option);
-                                            },
-                                            child: MouseRegion(
-                                              cursor: SystemMouseCursors.click,
-                                              child: ListTile(
-                                                title: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        "${option.name} (${option.code})",
-                                                        style: TextStyle(
-                                                          color:
-                                                              Theme.of(context)
+                                    return availableCountries
+                                        .where((CountryModel option) {
+                                      return option.name.toLowerCase().contains(
+                                              textEditingValue.text
+                                                  .toLowerCase()) ||
+                                          option.name.toLowerCase().startsWith(
+                                              textEditingValue.text
+                                                  .toLowerCase());
+                                    });
+                                  },
+                                  optionsViewBuilder: (BuildContext context,
+                                      AutocompleteOnSelected<CountryModel>
+                                          onSelected,
+                                      Iterable<CountryModel> options) {
+                                    return Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Material(
+                                        child: Container(
+                                          width: 370,
+                                          color: Theme.of(context).canvasColor,
+                                          child: ListView.builder(
+                                            shrinkWrap: true,
+                                            padding: const EdgeInsets.all(10.0),
+                                            itemCount: options.length >= 5
+                                                ? 5
+                                                : options.length,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              final CountryModel option =
+                                                  options.elementAt(index);
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  onSelected(option);
+                                                },
+                                                child: MouseRegion(
+                                                  cursor:
+                                                      SystemMouseCursors.click,
+                                                  child: ListTile(
+                                                    title: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            "${option.name} (${option.code})",
+                                                            style: TextStyle(
+                                                              color: Theme.of(
+                                                                      context)
                                                                   .textTheme
                                                                   .bodyLarge!
                                                                   .color,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
                                                         ),
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
+                                                        const SizedBox(
+                                                          width: 20,
+                                                        ),
+                                                        Flag.fromString(
+                                                          option.code,
+                                                          height: 20,
+                                                          width: 30,
+                                                          fit: BoxFit.fill,
+                                                          replacement:
+                                                              const SizedBox(
+                                                            height: 0,
+                                                            width: 0,
+                                                          ),
+                                                        )
+                                                      ],
                                                     ),
-                                                    const SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    Flag.fromString(
-                                                      option.code,
-                                                      height: 20,
-                                                      width: 30,
-                                                      fit: BoxFit.fill,
-                                                      replacement:
-                                                          const SizedBox(
-                                                        height: 0,
-                                                        width: 0,
-                                                      ),
-                                                    )
-                                                  ],
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  onSelected: (value) {
+                                    setState(() {
+                                      nationality = value;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                /*
+                              Hanya muncul ketika ada yang bisa dihapus. Dulu
+                              ia selalu ada — tombol mati seukuran tulisan biasa
+                              menggantung di bawah kolom kebangsaan, yang lebih
+                              sering terbaca sebagai bagian dari formulir
+                              daripada sebagai tindakan.
+                            */
+                                if (nationality != null)
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: TextButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          nationality = null;
+                                          memberNationalityController.text = "";
+                                        });
+                                      },
+                                      icon: const Icon(Icons.close, size: 15),
+                                      label: const Text("Clear nationality"),
+                                      style: TextButton.styleFrom(
+                                        visualDensity: VisualDensity.compact,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                        ),
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
                                       ),
                                     ),
                                   ),
-                                );
-                              },
-                              onSelected: (value) {
-                                setState(() {
-                                  nationality = value;
-                                });
-                              },
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            TextButton(
-                              onPressed: nationality == null
-                                  ? null
-                                  : () {
-                                      setState(() {
-                                        nationality = null;
-                                        memberNationalityController.text = "";
-                                      });
-                                    },
-                              child: Text(
-                                "Remove nationality",
-                                style: TextStyle(
-                                  color: nationality == null
-                                      ? Theme.of(context).disabledColor
-                                      : Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge!
-                                          .color,
-                                  fontWeight: FontWeight.normal,
+                                const SizedBox(
+                                  height: 5,
                                 ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            TextFormField(
-                              controller: memberPhoneNumberController,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Phone number",
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                /* Judul bagian; lihat catatan di bawah. */
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 22,
+                                    bottom: 10,
+                                  ),
+                                  child: Text(
+                                    "CONTACT",
+                                    style: gayaLabelKolom(context),
+                                  ),
                                 ),
-                                /*
+                                TextFormField(
+                                  controller: memberPhoneNumberController,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      "Phone number",
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    /*
                                   Dulu keduanya dividerColor. Sejak pemisah
                                   diturunkan menjadi 7% supaya garis antarbaris
                                   tidak berteriak, nilai itu terlalu samar untuk
@@ -612,38 +694,42 @@ class _StorePageState extends State<StorePage> {
                                   sama persis dengan yang tidak fokus, jadi tidak
                                   ada tanda kolom mana yang sedang diketik.
                                 */
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        width: 1.6,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
+                                const SizedBox(
+                                  height: 15,
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    width: 1.6,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            TextFormField(
-                              controller: memberEmailController,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Email",
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                /*
+                                TextFormField(
+                                  controller: memberEmailController,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      "Email",
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    /*
                                   Dulu keduanya dividerColor. Sejak pemisah
                                   diturunkan menjadi 7% supaya garis antarbaris
                                   tidak berteriak, nilai itu terlalu samar untuk
@@ -651,50 +737,65 @@ class _StorePageState extends State<StorePage> {
                                   sama persis dengan yang tidak fokus, jadi tidak
                                   ada tanda kolom mana yang sedang diketik.
                                 */
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        width: 1.6,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
+                                const SizedBox(
+                                  height: 15,
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    width: 1.6,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            /*
+                                /*
                               Ini keterangan pendamping dua kolom di atasnya,
                               bukan kalimat tersendiri — dulu ditulis sebesar
                               isian yang dijelaskannya.
                             */
-                            Text(
-                              "Fill in a phone number or an email — either one "
-                              "is enough.",
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            TextFormField(
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Birthday",
+                                Text(
+                                  "Fill in a phone number or an email — either one "
+                                  "is enough.",
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
-                                /*
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                /* Judul bagian ketiga; semuanya boleh dilewati. */
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 22,
+                                    bottom: 10,
+                                  ),
+                                  child: Text(
+                                    "DETAILS",
+                                    style: gayaLabelKolom(context),
+                                  ),
+                                ),
+                                TextFormField(
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      "Birthday",
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    /*
                                   Dulu keduanya dividerColor. Sejak pemisah
                                   diturunkan menjadi 7% supaya garis antarbaris
                                   tidak berteriak, nilai itu terlalu samar untuk
@@ -702,121 +803,174 @@ class _StorePageState extends State<StorePage> {
                                   sama persis dengan yang tidak fokus, jadi tidak
                                   ada tanda kolom mana yang sedang diketik.
                                 */
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        width: 1.6,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    width: 1.6,
-                                  ),
-                                ),
-                              ),
-                              onTap: () {
-                                var firstDate = DateTime.now();
-                                var lastDate = DateTime.now();
+                                  onTap: () {
+                                    var firstDate = DateTime.now();
+                                    var lastDate = DateTime.now();
 
-                                firstDate = DateTime(firstDate.year - 100);
-                                lastDate = DateTime(lastDate.year - 18);
-                                showDatePicker(
-                                        // container color
-                                        builder: (context, child) {
-                                          return Theme(
-                                            data: Theme.of(context).copyWith(
-                                              colorScheme: Theme.of(context)
-                                                          .brightness ==
-                                                      Brightness.dark
-                                                  ? ColorScheme.dark(
-                                                      surface: Theme.of(context)
-                                                          .canvasColor,
-                                                    )
-                                                  : ColorScheme.light(
-                                                      surface: Theme.of(context)
-                                                          .canvasColor,
-                                                    ),
-                                              textButtonTheme:
-                                                  TextButtonThemeData(
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor:
-                                                      Theme.of(context)
+                                    firstDate = DateTime(firstDate.year - 100);
+                                    lastDate = DateTime(lastDate.year - 18);
+                                    showDatePicker(
+                                            // container color
+                                            builder: (context, child) {
+                                              return Theme(
+                                                data:
+                                                    Theme.of(context).copyWith(
+                                                  colorScheme: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.dark
+                                                      ? ColorScheme.dark(
+                                                          surface:
+                                                              Theme.of(context)
+                                                                  .canvasColor,
+                                                        )
+                                                      : ColorScheme.light(
+                                                          surface:
+                                                              Theme.of(context)
+                                                                  .canvasColor,
+                                                        ),
+                                                  textButtonTheme:
+                                                      TextButtonThemeData(
+                                                    style: TextButton.styleFrom(
+                                                      foregroundColor: Theme.of(
+                                                              context)
                                                           .secondaryHeaderColor,
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
-                                            child: child!,
-                                          );
-                                        },
-                                        context: context,
-                                        firstDate: firstDate,
-                                        lastDate: lastDate)
-                                    .then((value) {
-                                  if (value == null) {
-                                    return;
-                                  } else {
-                                    memberBirthdayController.text =
-                                        DateFormat("dd/MM/yyyy").format(value);
-                                  }
-                                }).catchError((error) {
-                                  LoggerUtils()
-                                      .log(error.toString(), LogType.error);
-                                });
-                              },
-                              controller: memberBirthdayController,
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            RadioListTile<language>(
-                                title: Text(
-                                  "English",
-                                  style: Theme.of(context).textTheme.bodyLarge,
+                                                child: child!,
+                                              );
+                                            },
+                                            context: context,
+                                            firstDate: firstDate,
+                                            lastDate: lastDate)
+                                        .then((value) {
+                                      if (value == null) {
+                                        return;
+                                      } else {
+                                        memberBirthdayController.text =
+                                            DateFormat("dd/MM/yyyy")
+                                                .format(value);
+                                      }
+                                    }).catchError((error) {
+                                      LoggerUtils()
+                                          .log(error.toString(), LogType.error);
+                                    });
+                                  },
+                                  controller: memberBirthdayController,
                                 ),
-                                groupValue: selectedLanguage,
-                                value: language.EN,
-                                activeColor:
-                                    Theme.of(context).secondaryHeaderColor,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedLanguage = value;
-                                  });
-                                }),
-                            RadioListTile<language>(
-                                title: Text(
-                                  "Bahasa",
-                                  style: Theme.of(context).textTheme.bodyLarge,
+                                const SizedBox(
+                                  height: 15,
                                 ),
-                                groupValue: selectedLanguage,
-                                value: language.ID,
-                                activeColor:
-                                    Theme.of(context).secondaryHeaderColor,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedLanguage = value;
-                                  });
-                                }),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            InkWell(
-                              onTap: isSubmitting
-                                  ? null
-                                  : () {
-                                      addMember();
-                                    },
-                              child: Container(
-                                padding: EdgeInsets.zero,
-                                width: double.infinity,
                                 /*
+                              DUA RadioListTile MENJADI SATU BARIS BERLABEL.
+
+                              Keduanya dulu berdiri tanpa judul apa pun, jadi
+                              "English" dan "Bahasa" muncul di ujung formulir
+                              tanpa menyebutkan bahasa APA yang sedang dipilih —
+                              bahasa aplikasinya, atau bahasa struknya. Yang
+                              benar yang kedua, dan sekarang tertulis.
+
+                              Bentuknya disamakan dengan pemilih tema di halaman
+                              setelan: dua pilihan tetap, muat dalam satu baris.
+                            */
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 16,
+                                    bottom: 8,
+                                  ),
+                                  child: Text(
+                                    "RECEIPT LANGUAGE",
+                                    style: gayaLabelKolom(context),
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.06),
+                                      borderRadius: BorderRadius.circular(9),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _SegmenBahasa(
+                                          label: "English",
+                                          aktif:
+                                              selectedLanguage == language.EN,
+                                          onTekan: () => setState(
+                                            () =>
+                                                selectedLanguage = language.EN,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 3),
+                                        _SegmenBahasa(
+                                          label: "Bahasa",
+                                          aktif:
+                                              selectedLanguage == language.ID,
+                                          onTekan: () => setState(
+                                            () =>
+                                                selectedLanguage = language.ID,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                RadioListTile<language>(
+                                    title: Text(
+                                      "Bahasa",
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                    groupValue: selectedLanguage,
+                                    value: language.ID,
+                                    activeColor:
+                                        Theme.of(context).secondaryHeaderColor,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedLanguage = value;
+                                      });
+                                    }),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                InkWell(
+                                  onTap: isSubmitting
+                                      ? null
+                                      : () {
+                                          addMember();
+                                        },
+                                  child: Container(
+                                    padding: EdgeInsets.zero,
+                                    width: double.infinity,
+                                    /*
                                   Dulu Container berwarna aksen yang menyerupai
                                   tombol: tanpa sorot, tanpa umpan balik tekan,
                                   tanpa kursor tangan — dan saat sedang mengirim
@@ -826,32 +980,37 @@ class _StorePageState extends State<StorePage> {
                                   "Submit" juga tidak menyebutkan apa pun.
                                   Tombol sebaiknya menamai hasilnya.
                                 */
-                                child: IgnorePointer(
-                                  child: FilledButton(
-                                    onPressed: isSubmitting ? null : () {},
-                                    style: FilledButton.styleFrom(
-                                      minimumSize: const Size.fromHeight(46),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(9),
+                                    child: IgnorePointer(
+                                      child: FilledButton(
+                                        onPressed: isSubmitting ? null : () {},
+                                        style: FilledButton.styleFrom(
+                                          minimumSize:
+                                              const Size.fromHeight(46),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(9),
+                                          ),
+                                        ),
+                                        child: isSubmitting
+                                            ? const SizedBox(
+                                                height: 20,
+                                                width: 20,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2.2,
+                                                ),
+                                              )
+                                            : const Text("Create member"),
                                       ),
                                     ),
-                                    child: isSubmitting
-                                        ? const SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2.2,
-                                            ),
-                                          )
-                                        : const Text("Create member"),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -1397,6 +1556,74 @@ class _ButirMenuState extends State<_ButirMenu> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Satu pilihan bahasa struk pada formulir anggota.
+///
+/// Bentuknya sengaja sama dengan pemilih tema di halaman setelan: dua atau tiga
+/// pilihan tetap yang saling meniadakan, muat dalam satu baris. Radio selebar
+/// dialog untuk dua pilihan menghabiskan seratus piksel dan menyatakan bahwa
+/// daftarnya bisa bertambah panjang, padahal tidak.
+class _SegmenBahasa extends StatefulWidget {
+  final String label;
+  final bool aktif;
+  final VoidCallback onTekan;
+
+  const _SegmenBahasa({
+    required this.label,
+    required this.aktif,
+    required this.onTekan,
+  });
+
+  @override
+  State<_SegmenBahasa> createState() => _SegmenBahasaState();
+}
+
+class _SegmenBahasaState extends State<_SegmenBahasa> {
+  bool _disorot = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final warna = tema.colorScheme;
+
+    final Color latar = widget.aktif
+        ? warna.primary
+        : (_disorot
+            ? warna.onSurface.withValues(alpha: 0.07)
+            : Colors.transparent);
+
+    final Color depan = widget.aktif
+        ? warna.onPrimary
+        : warna.onSurface.withValues(alpha: _disorot ? 0.92 : 0.62);
+
+    return MouseRegion(
+      cursor: widget.aktif ? MouseCursor.defer : SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _disorot = true),
+      onExit: (_) => setState(() => _disorot = false),
+      child: GestureDetector(
+        onTap: widget.aktif ? null : widget.onTekan,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: Gerak.kilat,
+          curve: Gerak.masuk,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+          decoration: BoxDecoration(
+            color: latar,
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Text(
+            widget.label,
+            style: tema.textTheme.bodyMedium?.copyWith(
+              color: depan,
+              fontSize: 13,
+              fontWeight: widget.aktif ? FontWeight.w700 : FontWeight.w500,
+            ),
           ),
         ),
       ),
