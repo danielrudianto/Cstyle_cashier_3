@@ -7,6 +7,8 @@ import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
+import 'dart:ui' show FontFeature;
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -270,11 +272,18 @@ class DashboardGridList extends StatelessWidget {
                               e.description,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
+                              /*
+                                Nama barang adalah yang dibaca paling sering di
+                                layar ini, jadi ia yang memimpin barisnya —
+                                setengah tingkat di atas angka, dan lebih tebal.
+                                Ukurannya sengaja tidak dinaikkan lebih jauh
+                                supaya tinggi barisnya tidak bertambah.
+                              */
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium!
                                   .copyWith(
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                             ),
                           ],
@@ -285,7 +294,15 @@ class DashboardGridList extends StatelessWidget {
                         child: Text(
                           NumberFormat.decimalPattern("en-US").format(e.price),
                           textAlign: TextAlign.end,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          /*
+                            Angka selebar sama. Ini kolom angka bersusun; pada
+                            huruf biasa "1" jauh lebih sempit daripada "8", jadi
+                            satuan dan ribuannya tidak pernah berbaris lurus.
+                          */
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                         ),
                       ),
                       Expanded(

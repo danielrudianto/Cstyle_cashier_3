@@ -69,6 +69,21 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
     return null;
   }
 
+  /// Gaya label penyaring; yang belum terpilih diredupkan.
+  ///
+  /// Tinggi barisnya disebut karena beberapa nama tipe membungkus ke dua baris
+  /// ("CLEARO / CARTRIDGES"), dan tanpa itu keduanya menempel terlalu rapat.
+  TextStyle? _gayaPenyaring(BuildContext context, bool terpilih) {
+    final dasar = Theme.of(context).textTheme.bodyMedium;
+    if (dasar == null) return null;
+
+    return dasar.copyWith(
+      height: 1.25,
+      fontWeight: terpilih ? FontWeight.w600 : FontWeight.w400,
+      color: terpilih ? dasar.color : dasar.color?.withValues(alpha: 0.66),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -146,8 +161,8 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                     side: BorderSide(
                       color: Colors.grey.shade300,
                     ),
-                    checkColor: Colors.white,
-                    activeColor: const Color.fromARGB(255, 109, 78, 137),
+                    checkColor: Theme.of(context).colorScheme.onPrimary,
+                    activeColor: Theme.of(context).colorScheme.primary,
                     value: widget.selectedTypes.isEmpty,
                     onChanged: (value) {
                       if (value != null && value == true) {
@@ -159,9 +174,29 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                       }
                     },
                   ),
+                  /*
+                    HIERARKINYA DULU TERBALIK.
+
+                    Daftar penyaring ini memakai bodyLarge (18) sementara nama
+                    barang di tabel tengah memakai bodyMedium (16) — jadi yang
+                    jarang disentuh tampil LEBIH BESAR daripada yang dipelototi
+                    kasir sepanjang hari. Mata jatuh ke kolom kiri lebih dulu,
+                    setiap kali.
+
+                    Yang diturunkan chrome-nya, bukan dinaikkan isinya:
+                    membesarkan nama barang akan menaikkan tinggi baris dan
+                    mengurangi jumlah barang yang muat di layar.
+
+                    Yang belum terpilih juga diredupkan. Sebelumnya kelima
+                    belas penyaring sama nyaringnya, sehingga yang sedang aktif
+                    tidak terbaca sebagai aktif.
+                  */
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
                   title: Text(
                     "All",
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style:
+                        _gayaPenyaring(context, widget.selectedTypes.isEmpty),
                   ),
                 ),
                 ...widget.productTypes.map((e) {
@@ -170,8 +205,8 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                       side: BorderSide(
                         color: Colors.grey.shade300,
                       ),
-                      checkColor: Colors.white,
-                      activeColor: const Color.fromARGB(255, 109, 78, 137),
+                      checkColor: Theme.of(context).colorScheme.onPrimary,
+                      activeColor: Theme.of(context).colorScheme.primary,
                       value: widget.selectedTypes.contains(e),
                       onChanged: (checkBoxValue) {
                         if (checkBoxValue != null && checkBoxValue == false) {
@@ -185,9 +220,14 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
                         widget.onUpdateSelectedTypes(widget.selectedTypes);
                       },
                     ),
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
                     title: Text(
                       e,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: _gayaPenyaring(
+                        context,
+                        widget.selectedTypes.contains(e),
+                      ),
                     ),
                   );
                 })
