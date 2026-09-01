@@ -615,7 +615,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       "CHECKOUT",
                       // all caps
                       // size it 1.5 times
-                      textScaleFactor: 1.5,
+                      textScaler: const TextScaler.linear(1.5),
                       style: Theme.of(context)
                           .textTheme
                           .headlineLarge!
@@ -972,7 +972,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                         borderRadius: BorderRadius.circular(0),
                                         color: Theme.of(context)
                                             .secondaryHeaderColor
-                                            .withOpacity(0.8),
+                                            .withValues(alpha: 0.8),
                                       ),
                                       child: Text(
                                         "IN YOUR BAG",

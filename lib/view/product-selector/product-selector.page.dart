@@ -57,7 +57,7 @@ class _ProductSelectorPageState extends State<ProductSelectorPage> {
       } else {
         // Handle case where value is null or doesn't contain data
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No products found')),
+          const SnackBar(content: Text('No products found')),
         );
       }
     }).catchError((error) {

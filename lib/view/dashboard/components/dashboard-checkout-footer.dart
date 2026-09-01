@@ -3,7 +3,6 @@ import 'package:cstyle_cashier_3/components/dashed-line/dashed-line.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DashboardCheckoutFooter extends StatelessWidget {
@@ -23,7 +22,7 @@ class DashboardCheckoutFooter extends StatelessWidget {
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).shadowColor.withOpacity(0.1),
+                color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
                 blurRadius: 10,
                 spreadRadius: 5,
                 offset: const Offset(0, -5),
@@ -111,7 +110,7 @@ class DashboardCheckoutFooter extends StatelessWidget {
               height: 25,
               decoration: BoxDecoration(color: Colors.transparent, boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).shadowColor.withOpacity(0.1),
+                  color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
                   blurRadius: 10,
                   spreadRadius: 0,
                   offset: const Offset(0, 5),
@@ -141,7 +140,7 @@ class DashboardCheckoutFooter extends StatelessWidget {
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).shadowColor.withOpacity(0.1),
+                color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
                 blurRadius: 10,
                 spreadRadius: 0,
                 offset: const Offset(0, 5),

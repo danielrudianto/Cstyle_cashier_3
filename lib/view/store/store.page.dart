@@ -831,12 +831,12 @@ class _StorePageState extends State<StorePage> {
                               Text(
                                 "Date",
                                 style: Theme.of(context).textTheme.labelSmall,
-                                textScaleFactor: 1.1,
+                                textScaler: const TextScaler.linear(1.1),
                               ),
                               Text(
                                 DateFormat("dd/MM/yyyy").format(DateTime.now()),
                                 style: Theme.of(context).textTheme.bodyLarge,
-                                textScaleFactor: 1.1,
+                                textScaler: const TextScaler.linear(1.1),
                               ),
                               const SizedBox(
                                 height: 15,
@@ -848,7 +848,7 @@ class _StorePageState extends State<StorePage> {
                                       previousValue + element['value'],
                                 ))}",
                                 style: Theme.of(context).textTheme.bodyLarge,
-                                textScaleFactor: 1.1,
+                                textScaler: const TextScaler.linear(1.1),
                               ),
                               const SizedBox(
                                 height: 15,
@@ -865,14 +865,14 @@ class _StorePageState extends State<StorePage> {
                                       style: Theme.of(context)
                                           .textTheme
                                           .headlineSmall,
-                                      textScaleFactor: 1.1,
+                                      textScaler: const TextScaler.linear(1.1),
                                     ),
                                     subtitle: Text(
                                       NumberFormat("#,##0.00").format(
                                           value['payments'][index]['value']),
                                       style:
                                           Theme.of(context).textTheme.bodyLarge,
-                                      textScaleFactor: 1.1,
+                                      textScaler: const TextScaler.linear(1.1),
                                     ),
                                   );
                                 },

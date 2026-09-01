@@ -6,7 +6,9 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 3.0.9
 
 environment:
-  sdk: ">=3.3.4 <4.0.0"
+  # Dinaikkan dari ">=3.3.4": withValues() butuh Dart 3.6 (Flutter 3.27).
+  # Yang terpasang saat ini Dart 3.12.2 / Flutter 3.44.4.
+  sdk: ">=3.6.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions

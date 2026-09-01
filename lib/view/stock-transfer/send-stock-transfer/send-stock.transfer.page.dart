@@ -138,8 +138,8 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                   stockTransferModel = null;
                 });
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Failed to send stock transfer.")));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text("Failed to send stock transfer.")));
               }
 
               _fetchStockTransfers(1);
@@ -419,7 +419,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                             borderRadius: BorderRadius.circular(0),
                             color: Theme.of(context)
                                 .secondaryHeaderColor
-                                .withOpacity(0.8),
+                                .withValues(alpha: 0.8),
                           ),
                           child: Text(
                             "YOUR REQUEST",
@@ -553,7 +553,9 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
                       decoration: BoxDecoration(
                         color: isValid
                             ? Theme.of(context).secondaryHeaderColor
-                            : Theme.of(context).disabledColor.withOpacity(0.2),
+                            : Theme.of(context)
+                                .disabledColor
+                                .withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
@@ -644,7 +646,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
     //                       boxShadow: [
     //                         BoxShadow(
     //                           color:
-    //                               const Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+    //                               const Color.fromARGB(0, 0, 0, 0).withValues(alpha: 0.1),
     //                           spreadRadius: 5,
     //                           blurRadius: 7,
     //                           offset: const Offset(0, 3),
@@ -717,7 +719,7 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
     //                       boxShadow: [
     //                         BoxShadow(
     //                           color:
-    //                               const Color.fromARGB(0, 0, 0, 0).withOpacity(0.1),
+    //                               const Color.fromARGB(0, 0, 0, 0).withValues(alpha: 0.1),
     //                           spreadRadius: 5,
     //                           blurRadius: 7,
     //                           offset: const Offset(0, 3),

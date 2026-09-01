@@ -1,17 +1,14 @@
 import 'dart:typed_data';
-import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/model/model.cart.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
-import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
 import 'package:printing/printing.dart';
-import 'package:provider/provider.dart';
 
 class PrintingUtils {
   static Future<Uint8List> generateCartPDF(
@@ -685,7 +682,6 @@ class PrintingUtils {
       StockTransferFetchmodel transfer, UserModel user) async {
     try {
       final doc = pw.Document();
-      var store = await StoreModel.getCurrentProfile();
 
       final boldFont = await PdfGoogleFonts.nunitoBold();
       final regularFont = await PdfGoogleFonts.nunitoRegular();

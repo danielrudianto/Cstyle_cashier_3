@@ -179,9 +179,13 @@ class _SorotMembesarState extends State<SorotMembesar> {
 /// Warnanya diambil dari aksen tema dengan opasitas sangat rendah, jadi ia ikut
 /// benar di terang maupun gelap tanpa perlu nilai terpisah.
 ///
-/// Memakai withOpacity, bukan withValues. withValues baru ada sejak Flutter
-/// 3.27, sedangkan pubspec.lock proyek ini menyebut flutter >=3.22.0 dan
-/// seluruh kode yang ada memakai withOpacity di 17 tempat.
+/// Memakai withValues, bukan withOpacity. Yang terpasang Flutter 3.44.4 /
+/// Dart 3.12.2; withOpacity sudah usang di situ dan menghasilkan peringatan.
+/// Angka >=3.22.0 di pubspec.lock adalah batas MINIMUM dari dependensinya,
+/// bukan versi yang dipakai membangun — keduanya sempat tertukar.
+///
+/// Tujuh belas withOpacity lain yang sudah ada di kode belum diikutkan;
+/// itu penyapuan tersendiri.
 class SorotBerlatar extends StatefulWidget {
   final Widget child;
   final BorderRadius? lengkung;
@@ -208,7 +212,7 @@ class _SorotBerlatarState extends State<SorotBerlatar> {
         decoration: BoxDecoration(
           borderRadius: widget.lengkung,
           color: _disorot
-              ? Theme.of(context).secondaryHeaderColor.withOpacity(0.08)
+              ? Theme.of(context).secondaryHeaderColor.withValues(alpha: 0.08)
               : Colors.transparent,
         ),
         child: widget.child,

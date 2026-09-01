@@ -421,7 +421,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                             borderRadius: BorderRadius.circular(0),
                             color: Theme.of(context)
                                 .secondaryHeaderColor
-                                .withOpacity(0.8),
+                                .withValues(alpha: 0.8),
                           ),
                           child: Row(
                             children: [
@@ -625,7 +625,9 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                       decoration: BoxDecoration(
                         color: isValid
                             ? Theme.of(context).secondaryHeaderColor
-                            : Theme.of(context).disabledColor.withOpacity(0.2),
+                            : Theme.of(context)
+                                .disabledColor
+                                .withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text(

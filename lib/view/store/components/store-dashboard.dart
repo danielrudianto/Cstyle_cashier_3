@@ -302,7 +302,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
                                           .textTheme
                                           .bodySmall!
                                           .color!
-                                          .withOpacity(0.5),
+                                          .withValues(alpha: 0.5),
                                     ),
                           ),
                         ],
@@ -681,16 +681,28 @@ class _StoreDashboardState extends State<StoreDashboard> {
         // button to logout from application
         InkWell(
           onTap: () async {
-            StoreModel.removeCurrentProfile().then((_) {
-              // Go to main page
+            /*
+              Dulu then().catchError(). Penangkap galatnya tidak pernah
+              mengembalikan nilai, sementara rantainya bertipe Never karena
+              exit(0) tidak pernah kembali — analyzer menandainya, dan pesan
+              "Failed to logout" pun tidak pernah benar-benar tampil.
+
+              Bentuk try/catch juga membuat penjagaan mounted mungkin: tanpa
+              itu, context dipakai sesudah await pada widget yang bisa saja
+              sudah dilepas.
+            */
+            final messenger = ScaffoldMessenger.of(context);
+
+            try {
+              await StoreModel.removeCurrentProfile();
               exit(0);
-            }).catchError((error) {
-              ScaffoldMessenger.of(context).showSnackBar(
+            } catch (error) {
+              messenger.showSnackBar(
                 const SnackBar(
                   content: Text("Failed to logout"),
                 ),
               );
-            });
+            }
           },
           child: Container(
             padding: const EdgeInsets.symmetric(

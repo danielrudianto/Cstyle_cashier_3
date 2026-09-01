@@ -92,21 +92,21 @@ final GoRouter router = GoRouter(
     GoRoute(
         path: "/inventory/stock-transfer/receive",
         pageBuilder: (context, state) => halamanBergerak(
-        kunci: state.pageKey,
-        anak: const ReceiveStockTransferPage(),
-      )),
+              kunci: state.pageKey,
+              anak: const ReceiveStockTransferPage(),
+            )),
     GoRoute(
         path: "/inventory/check-stock",
         pageBuilder: (context, state) => halamanBergerak(
-        kunci: state.pageKey,
-        anak: const CheckStockPage(),
-      )),
+              kunci: state.pageKey,
+              anak: const CheckStockPage(),
+            )),
     GoRoute(
         path: "/settings",
         pageBuilder: (context, state) => halamanBergerak(
-        kunci: state.pageKey,
-        anak: const SettingPage(),
-      )),
+              kunci: state.pageKey,
+              anak: const SettingPage(),
+            )),
     GoRoute(
       path: "/local",
       pageBuilder: (context, state) => halamanBergerak(

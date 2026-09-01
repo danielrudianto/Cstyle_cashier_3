@@ -161,10 +161,8 @@ class SQLBillPaymentModelSync {
         }
       }
       final db = await DatabaseUtils().database;
-      print(placeholders);
       var result = await db.rawQuery(
           'SELECT * FROM bill_payment WHERE billCodeID IN ($placeholders)', []);
-      print(result);
       return result.map((e) => SQLBillPaymentModelSync.fromMap(e)).toList();
     } catch (error) {
       throw Exception(error);

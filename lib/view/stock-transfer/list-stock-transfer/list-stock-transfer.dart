@@ -54,7 +54,8 @@ class _ListStockTransferState extends State<ListStockTransfer> {
                 // border color only horizontal
                 border: TableBorder(
                   horizontalInside: BorderSide(
-                    color: Theme.of(context).dividerColor.withOpacity(0.1),
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.1),
                   ),
                   verticalInside: BorderSide.none,
                 ),

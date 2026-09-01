@@ -266,7 +266,6 @@ ThemeData _bangunTema(_PaletTema palet) {
       tidak terbaca begitu temanya gelap. Sekarang mengikuti temanya.
     */
     secondaryHeaderColor: palet.aksen,
-
     scaffoldBackgroundColor: palet.latar,
     cardColor: palet.kartu,
     dividerColor: pemisah,

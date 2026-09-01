@@ -528,7 +528,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                             borderRadius: BorderRadius.circular(0),
                             color: Theme.of(context)
                                 .secondaryHeaderColor
-                                .withOpacity(0.8),
+                                .withValues(alpha: 0.8),
                           ),
                           child: Text(
                             "YOUR REQUEST",
@@ -666,7 +666,9 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
                       decoration: BoxDecoration(
                         color: isValid
                             ? Theme.of(context).secondaryHeaderColor
-                            : Theme.of(context).disabledColor.withOpacity(0.2),
+                            : Theme.of(context)
+                                .disabledColor
+                                .withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(

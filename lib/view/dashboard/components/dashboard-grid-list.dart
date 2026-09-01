@@ -93,7 +93,8 @@ class DashboardGridList extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     color: stock == 0
                                         ? Theme.of(context).disabledColor
-                                        : Theme.of(context).secondaryHeaderColor,
+                                        : Theme.of(context)
+                                            .secondaryHeaderColor,
                                     borderRadius: BorderRadius.circular(5),
                                   ),
                                   padding: const EdgeInsets.symmetric(
@@ -114,8 +115,8 @@ class DashboardGridList extends StatelessWidget {
                                         stock == 0
                                             ? "Not Available"
                                             : "Available",
-                                        style:
-                                            const TextStyle(color: Colors.white),
+                                        style: const TextStyle(
+                                            color: Colors.white),
                                       ),
                                     ],
                                   ),
@@ -184,29 +185,29 @@ class DashboardGridList extends StatelessWidget {
           children: products.mapIndexed((index, e) {
             return SorotBerlatar(
               child: InkWell(
-                onTap:
-                    ((e.stock ?? 0) - cartNotifier.checkProductQuantity(e.id)) <=
-                            0
-                        ? () {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
-                                ),
-                                action: SnackBarAction(
-                                  label: "OK",
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context)
-                                        .hideCurrentSnackBar();
-                                  },
-                                ),
-                              ),
-                            );
-                          }
-                        : () {
-                            onAddProduct(e);
-                          },
+                onTap: ((e.stock ?? 0) -
+                            cartNotifier.checkProductQuantity(e.id)) <=
+                        0
+                    ? () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                              "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
+                            ),
+                            action: SnackBarAction(
+                              label: "OK",
+                              onPressed: () {
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
+                              },
+                            ),
+                          ),
+                        );
+                      }
+                    : () {
+                        onAddProduct(e);
+                      },
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border(
@@ -239,10 +240,12 @@ class DashboardGridList extends StatelessWidget {
                                 LogType.info);
 
                             if (value != null && value == false) {
-                              Provider.of<CompareNotifier>(context, listen: false)
+                              Provider.of<CompareNotifier>(context,
+                                      listen: false)
                                   .deselectProduct(e.id);
                             } else if (value != null && value == true) {
-                              Provider.of<CompareNotifier>(context, listen: false)
+                              Provider.of<CompareNotifier>(context,
+                                      listen: false)
                                   .selectProduct(e);
                             }
                           },
