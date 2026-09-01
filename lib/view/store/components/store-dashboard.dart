@@ -431,17 +431,15 @@ class _StoreDashboardState extends State<StoreDashboard> {
           label: "DAILY REPORT",
           keterangan: "Everything sold today from this terminal, ready to "
               "read or send on.",
-          aksi: FilledButton.icon(
-            onPressed: widget.onLaporanHarian,
-            icon: const Icon(Icons.summarize_outlined, size: 18),
-            label: const Text("Open report"),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(0, 44),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+          /*
+            Tenang, bukan terisi. Sesudah kotaknya dibuang, tombol berisi
+            penuh menjadi satu-satunya bidang berwarna yang tersisa di
+            halaman ini — lihat TombolBagian di components/ui.
+          */
+          aksi: TombolBagian(
+            label: "Open report",
+            ikon: Icons.summarize_outlined,
+            onTekan: widget.onLaporanHarian,
           ),
         ),
         const SizedBox(
@@ -465,14 +463,15 @@ class _StoreDashboardState extends State<StoreDashboard> {
           label: "SYNC STOCK",
           keterangan: "Pulls the latest stock figures from the server. "
               "Needs an internet connection.",
-          aksi: FilledButton(
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(150, 44),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () async {
+          /*
+            Tenang, bukan terisi. Sesudah kotaknya dibuang, tombol berisi
+            penuh menjadi satu-satunya bidang berwarna yang tersisa di
+            halaman ini — lihat TombolBagian di components/ui.
+          */
+          aksi: TombolBagian(
+            label: "Sync now",
+            ikon: Icons.sync_rounded,
+            onTekan: () async {
               try {
                 var storeModel = await StoreModel.getCurrentProfile();
                 String storeCode = storeModel!.code!;
@@ -494,7 +493,6 @@ class _StoreDashboardState extends State<StoreDashboard> {
                 );
               }
             },
-            child: const Text("Sync now"),
           ),
         ),
         const SizedBox(
@@ -580,16 +578,10 @@ class _StoreDashboardState extends State<StoreDashboard> {
                                       Bergaris, bukan terisi: memilih pencetak adalah persiapan
                                       sekali pasang, bukan tindakan utama halaman ini.
                                     */
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.print_outlined, size: 17),
-                  label: const Text("Set printer"),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(150, 42),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () async {
+                TombolBagian(
+                  label: "Set printer",
+                  ikon: Icons.print_outlined,
+                  onTekan: () async {
                     Printing.pickPrinter(context: context)
                         .then((selectedPrinter) {
                       if (selectedPrinter == null) {

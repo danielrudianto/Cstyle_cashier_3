@@ -177,6 +177,102 @@ class JudulBagian extends StatelessWidget {
   }
 }
 
+/// Tindakan pada barisan label sebuah [Bagian].
+///
+/// TENANG, BUKAN TERISI.
+///
+/// Selama halamannya tersusun dari kartu, tombol berisi penuh masuk akal: ia
+/// bersaing dengan dinding kotaknya. Begitu kotaknya dibuang, tombol itulah
+/// satu-satunya bidang berwarna yang tersisa di seluruh halaman — dan tiga di
+/// antaranya bertumpuk membuat halaman yang seharusnya dibaca sebagai dokumen
+/// tampak seperti daftar promosi.
+///
+/// Jadi ia diam sampai didekati: tulisan beraksen tanpa latar, lalu latar samar
+/// beraksen ketika disorot. Perbedaan keadaannya tetap ada — yang hilang hanya
+/// bidang warnanya.
+class TombolBagian extends StatefulWidget {
+  final String label;
+  final IconData? ikon;
+  final VoidCallback? onTekan;
+
+  /// Menampilkan pemintal dan mematikan ketukan.
+  final bool memuat;
+
+  const TombolBagian({
+    super.key,
+    required this.label,
+    this.ikon,
+    this.onTekan,
+    this.memuat = false,
+  });
+
+  @override
+  State<TombolBagian> createState() => _TombolBagianState();
+}
+
+class _TombolBagianState extends State<TombolBagian> {
+  bool _disorot = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final aksen = tema.secondaryHeaderColor;
+
+    final bisa = widget.onTekan != null && !widget.memuat;
+    final depan = bisa
+        ? aksen.withValues(alpha: _disorot ? 1 : 0.9)
+        : tema.colorScheme.onSurface.withValues(alpha: 0.3);
+
+    return MouseRegion(
+      cursor: bisa ? SystemMouseCursors.click : MouseCursor.defer,
+      onEnter: (_) => setState(() => _disorot = true),
+      onExit: (_) => setState(() => _disorot = false),
+      child: GestureDetector(
+        onTap: bisa ? widget.onTekan : null,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: Gerak.kilat,
+          curve: Gerak.masuk,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: _disorot && bisa
+                ? aksen.withValues(alpha: 0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.memuat)
+                SizedBox(
+                  height: 14,
+                  width: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: depan,
+                  ),
+                )
+              else if (widget.ikon != null)
+                Icon(widget.ikon, size: 16, color: depan),
+              if (widget.memuat || widget.ikon != null)
+                const SizedBox(width: 9),
+              Text(
+                widget.label,
+                style: tema.textTheme.bodyMedium?.copyWith(
+                  color: depan,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Satu pilihan pada [PilihanSegmen].
 class OpsiSegmen<T> {
   final T nilai;
