@@ -5,6 +5,8 @@ import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:cstyle_cashier_3/view/member-list/components/member-detail.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/view/member-list/components/member-actions.dart';
+import 'package:cstyle_cashier_3/components/ui/ui.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 class MemberListPage extends StatefulWidget {
@@ -54,19 +56,22 @@ class _MemberListPageState extends State<MemberListPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(
-          height: 25,
-        ),
         /*
-          Disamakan dengan pencarian barang di layar jual: terisi samar,
-          bersudut, lebarnya dibatasi. Bentuk lama memakai label melayang
-          seukuran isian dan garis tepi dividerColor — yang sejak pemisah
-          diturunkan ke 7% menjadi hampir tak terlihat.
+          BAHASA YANG SAMA DENGAN HALAMAN KELOLA.
+
+          Label monospace di kiri, pencarian di kanan barisan yang sama,
+          garis rambut di bawah keduanya. Dulu kolom pencariannya berdiri
+          sendiri di atas tabel tanpa apa pun yang menyebutkan daftar ini
+          daftar apa — dan jumlah anggotanya tidak tertulis di mana pun,
+          padahal itu angka pertama yang ingin diketahui saat membukanya.
         */
-        Align(
-          alignment: Alignment.centerLeft,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
+        Bagian(
+          atas: 24,
+          label: members.isEmpty
+              ? "MEMBERS"
+              : "MEMBERS · ${NumberFormat.decimalPattern("en-US").format(memberCount)}",
+          aksi: SizedBox(
+            width: 300,
             child: TextField(
               controller: controller,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -121,9 +126,6 @@ class _MemberListPageState extends State<MemberListPage> {
             ),
           ),
         ),
-        const SizedBox(
-          height: 15,
-        ),
         SizedBox(
           height: MediaQuery.of(context).size.height - 286,
           child: SingleChildScrollView(
@@ -139,35 +141,37 @@ class _MemberListPageState extends State<MemberListPage> {
                 */
                 dividerThickness: 0,
                 border: const TableBorder(),
-                headingRowColor: WidgetStatePropertyAll(
-                  Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.03),
+                /*
+                  Tanpa latar pada baris kepala. Bagian di atasnya sudah
+                  menutup dengan garis rambut, dan menambahkan bidang abu di
+                  bawahnya membuat tabelnya kembali terlihat berkotak.
+                */
+                headingRowColor: const WidgetStatePropertyAll(
+                  Colors.transparent,
                 ),
                 columns: [
                   DataColumn(
                     label: Text(
                       "NAME",
-                      style: gayaLabelKolom(context),
+                      style: gayaKode(context),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "CODE",
-                      style: gayaLabelKolom(context),
+                      style: gayaKode(context),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "EMAIL",
-                      style: gayaLabelKolom(context),
+                      style: gayaKode(context),
                     ),
                   ),
                   DataColumn(
                     label: Text(
                       "PHONE",
-                      style: gayaLabelKolom(context),
+                      style: gayaKode(context),
                     ),
                   ),
                 ],
@@ -273,7 +277,7 @@ class _MemberListPageState extends State<MemberListPage> {
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.start,
                                       /* Penanda, bukan isi: diperlakukan sebagai label. */
-                                      style: gayaLabelKolom(context),
+                                      style: gayaKode(context),
                                     ),
                                   ),
                                 ),
