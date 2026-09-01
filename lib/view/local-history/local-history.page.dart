@@ -75,98 +75,108 @@ class _LocalHistoryPageState extends State<LocalHistoryPage> {
               scrollDirection: Axis.vertical,
               child: SizedBox(
                 width: double.infinity,
-                child: DataTable(
-                    showCheckboxColumn: false,
-                    dividerThickness: 0.25,
-                    // border color only horizontal
-                    border: TableBorder(
-                      horizontalInside: BorderSide(
-                        color: Theme.of(context)
-                            .dividerColor
-                            .withValues(alpha: 0.1),
-                      ),
-                      verticalInside: BorderSide.none,
-                    ),
-                    columns: [
-                      DataColumn(
-                        label: Text(
-                          "Date",
-                          style: Theme.of(context).textTheme.labelLarge,
+                /*
+                  Garisnya dulu DOBEL: TableBorder di bawah ini plus garis
+                  baris bawaan DataTable dari Theme.dividerColor — dua garis
+                  bertumpuk yang terbaca sebagai satu garis tebal. Garis
+                  bawaannya dimatikan lewat tema, dan yang tinggal satu
+                  memakai token pemisah apa adanya.
+                */
+                child: Theme(
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: Colors.transparent),
+                  child: DataTable(
+                      showCheckboxColumn: false,
+                      dividerThickness: 0,
+                      // border color only horizontal
+                      border: TableBorder(
+                        horizontalInside: BorderSide(
+                          color: Theme.of(context).dividerColor,
                         ),
+                        verticalInside: BorderSide.none,
                       ),
-                      DataColumn(
-                        label: Text(
-                          "Name",
-                          style: Theme.of(context).textTheme.labelLarge,
+                      columns: [
+                        DataColumn(
+                          label: Text(
+                            "Date",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
-                      ),
-                      DataColumn(
-                        label: Text(
-                          "Member ID",
-                          style: Theme.of(context).textTheme.labelLarge,
+                        DataColumn(
+                          label: Text(
+                            "Name",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
-                      ),
-                      DataColumn(
-                        label: Text(
-                          "ID",
-                          style: Theme.of(context).textTheme.labelLarge,
+                        DataColumn(
+                          label: Text(
+                            "Member ID",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
-                      ),
-                      DataColumn(
-                        label: Text(
-                          "Created at",
-                          style: Theme.of(context).textTheme.labelLarge,
+                        DataColumn(
+                          label: Text(
+                            "ID",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
                         ),
-                      ),
-                    ],
-                    rows: bills.isEmpty
-                        ? []
-                        : bills.map((bill) {
-                            return DataRow(
-                              cells: [
-                                DataCell(
-                                  Text(
-                                    DateFormat("dd MMM yyyy").format(bill.date),
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                        DataColumn(
+                          label: Text(
+                            "Created at",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                        ),
+                      ],
+                      rows: bills.isEmpty
+                          ? []
+                          : bills.map((bill) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    Text(
+                                      DateFormat("dd MMM yyyy")
+                                          .format(bill.date),
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
                                   ),
-                                ),
-                                DataCell(
-                                  Text(
-                                    bill.name,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                                  DataCell(
+                                    Text(
+                                      bill.name,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
                                   ),
-                                ),
-                                DataCell(
-                                  Text(
-                                    bill.memberID == null
-                                        ? "NO"
-                                        : bill.memberID!,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                                  DataCell(
+                                    Text(
+                                      bill.memberID == null
+                                          ? "NO"
+                                          : bill.memberID!,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
                                   ),
-                                ),
-                                DataCell(
-                                  Text(
-                                    bill.mongoID == null
-                                        ? "Not synced"
-                                        : bill.mongoID!,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                                  DataCell(
+                                    Text(
+                                      bill.mongoID == null
+                                          ? "Not synced"
+                                          : bill.mongoID!,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
                                   ),
-                                ),
-                                DataCell(
-                                  Text(
-                                    DateFormat("dd MMM yyyy HH:mm")
-                                        .format(bill.date),
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                                  DataCell(
+                                    Text(
+                                      DateFormat("dd MMM yyyy HH:mm")
+                                          .format(bill.date),
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            );
-                          }).toList()),
+                                ],
+                              );
+                            }).toList()),
+                ),
               ),
             ),
           ),

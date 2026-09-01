@@ -117,31 +117,31 @@ class _BillViewPageState extends State<BillViewPage> {
             ),
             Table(
               // only want horizontal borders without vertical ones
-              border: const TableBorder(
+              border: TableBorder(
                 horizontalInside: BorderSide(
-                  color: Colors.black54,
+                  color: Theme.of(context).dividerColor,
                   style: BorderStyle.solid,
                   width: 1.0,
                 ),
-                verticalInside: BorderSide(
+                verticalInside: const BorderSide(
                   color: Colors.transparent,
                 ),
                 top: BorderSide(
-                  color: Colors.black54,
+                  color: Theme.of(context).dividerColor,
                   style: BorderStyle.solid,
                   width: 1.0,
                 ),
                 bottom: BorderSide(
-                  color: Colors.black54,
+                  color: Theme.of(context).dividerColor,
                   style: BorderStyle.solid,
                   width: 1.0,
                 ),
-                left: BorderSide(
+                left: const BorderSide(
                   color: Colors.transparent,
                   style: BorderStyle.solid,
                   width: 1.0,
                 ),
-                right: BorderSide(
+                right: const BorderSide(
                   color: Colors.transparent,
                   style: BorderStyle.solid,
                   width: 1.0,
@@ -318,31 +318,31 @@ class _BillViewPageState extends State<BillViewPage> {
             ),
             Table(
               // only want horizontal borders without vertical ones
-              border: const TableBorder(
+              border: TableBorder(
                 horizontalInside: BorderSide(
-                  color: Colors.black54,
+                  color: Theme.of(context).dividerColor,
                   style: BorderStyle.solid,
                   width: 1.0,
                 ),
-                verticalInside: BorderSide(
+                verticalInside: const BorderSide(
                   color: Colors.transparent,
                 ),
                 top: BorderSide(
-                  color: Colors.black54,
+                  color: Theme.of(context).dividerColor,
                   style: BorderStyle.solid,
                   width: 1.0,
                 ),
                 bottom: BorderSide(
-                  color: Colors.black54,
+                  color: Theme.of(context).dividerColor,
                   style: BorderStyle.solid,
                   width: 1.0,
                 ),
-                left: BorderSide(
+                left: const BorderSide(
                   color: Colors.transparent,
                   style: BorderStyle.solid,
                   width: 1.0,
                 ),
-                right: BorderSide(
+                right: const BorderSide(
                   color: Colors.transparent,
                   style: BorderStyle.solid,
                   width: 1.0,

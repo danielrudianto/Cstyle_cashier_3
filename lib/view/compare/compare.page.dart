@@ -100,21 +100,21 @@ class _ComparePageState extends State<ComparePage> {
                   SizedBox(
                     width: ResponsiveUtils.getContainerSize(context) - 40,
                     child: Table(
-                      // Border horizontal only black12
-                      border: const TableBorder(
+                      // Garis antar baris dari token pemisah tema.
+                      border: TableBorder(
                         horizontalInside: BorderSide(
-                          color: Colors.black12,
+                          color: Theme.of(context).dividerColor,
                           width: 1,
                         ),
-                        verticalInside: BorderSide(
+                        verticalInside: const BorderSide(
                           color: Colors.transparent,
                           width: 1,
                         ),
-                        top: BorderSide(
+                        top: const BorderSide(
                           color: Colors.transparent,
                           width: 1,
                         ),
-                        bottom: BorderSide(
+                        bottom: const BorderSide(
                           color: Colors.transparent,
                           width: 1,
                         ),
@@ -587,21 +587,21 @@ class _ComparePageState extends State<ComparePage> {
                               width: ResponsiveUtils.getContainerSize(context) -
                                   40,
                               child: Table(
-                                // Border horizontal only black12
-                                border: const TableBorder(
+                                // Garis antar baris dari token pemisah tema.
+                                border: TableBorder(
                                   horizontalInside: BorderSide(
-                                    color: Colors.black12,
+                                    color: Theme.of(context).dividerColor,
                                     width: 1,
                                   ),
-                                  verticalInside: BorderSide(
+                                  verticalInside: const BorderSide(
                                     color: Colors.transparent,
                                     width: 1,
                                   ),
-                                  top: BorderSide(
+                                  top: const BorderSide(
                                     color: Colors.transparent,
                                     width: 1,
                                   ),
-                                  bottom: BorderSide(
+                                  bottom: const BorderSide(
                                     color: Colors.transparent,
                                     width: 1,
                                   ),
