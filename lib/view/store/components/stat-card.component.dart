@@ -103,7 +103,8 @@ class StatCard extends StatelessWidget {
               title.toUpperCase(),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: gayaLabelKolom(context),
+              /* Monospace, sekeluarga dengan baris keterangan di atasnya. */
+              style: gayaKode(context),
             ),
           ],
         ),

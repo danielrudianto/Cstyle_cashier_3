@@ -546,6 +546,28 @@ Color warnaPeringatan(BuildContext context) {
       : const Color(0xFF9A6212);
 }
 
+/// Huruf monospace untuk KODE dan ANGKA yang dibaca sebagai data.
+///
+/// Kode barang, kode toko, nomor versi, jam sinkronisasi — semuanya nilai yang
+/// dibaca huruf per huruf, bukan kata yang dibaca sekaligus. Monospace menyatakan
+/// itu: lebarnya seragam sehingga kolomnya berbaris, dan bentuknya sendiri sudah
+/// memberi tahu bahwa isinya bukan kalimat.
+///
+/// TIDAK dibundel. Consolas ada di setiap pemasangan Windows sejak Vista, dan
+/// daftar cadangannya menangani sisanya. Berbeda dengan Montserrat dulu, yang
+/// disebut dua puluh satu kali tanpa pernah ada — di sini kegagalannya paling
+/// buruk berarti jatuh ke Courier New, yang tetap monospace.
+TextStyle gayaKode(BuildContext context, {double ukuran = 11}) {
+  return TextStyle(
+    fontFamily: "Consolas",
+    fontFamilyFallback: const ["Cascadia Mono", "Courier New", "monospace"],
+    fontSize: ukuran,
+    letterSpacing: 0.6,
+    fontWeight: FontWeight.w600,
+    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
+  );
+}
+
 /// Gaya kepala kolom dan label kecil lain.
 ///
 /// Sengaja sekeluarga dengan label penyaring di kolom kiri dan kode referensi

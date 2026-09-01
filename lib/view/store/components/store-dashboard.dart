@@ -9,6 +9,7 @@ import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/waktu.utils.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/components/ui/ui.dart';
+import 'package:cstyle_cashier_3/components/brand-backdrop/brand-backdrop.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
@@ -171,6 +172,36 @@ class _StoreDashboardState extends State<StoreDashboard> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 22),
+        /*
+          BARIS KETERANGAN TERMINAL.
+
+          Empat hal yang ditanyakan sekali lalu tidak perlu ditanyakan lagi:
+          versi berapa yang jalan, toko mana yang terpasang, kapan terakhir
+          disinkronkan, dan pencetak mana yang aktif. Sebelum ini tidak satu pun
+          terjawab di layar — versi hanya ada di layar pembuka yang lewat dalam
+          dua detik, kode toko tidak pernah ditampilkan sama sekali, dan
+          pencetak baru terlihat kalau menggulir sampai bawah.
+
+          Bentuknya baris, bukan kartu: keterangan yang jarang berubah tidak
+          perlu wadah, cukup dua garis rambut yang memisahkannya dari isi.
+        */
+        BarisMeta(
+          isi: [
+            const Meta("VERSION", BrandBackdrop.versiAplikasi),
+            Meta(
+              "STORE",
+              storeModel?.code == null
+                  ? "—"
+                  : storeModel!.code!.replaceAll("-", "").substring(0, 8),
+            ),
+            Meta(
+              "LAST SYNC",
+              lastUpdated == null ? "never" : waktuManusiawi(lastUpdated!),
+            ),
+            Meta("PRINTER", printer?.name ?? "not set"),
+          ],
+        ),
         const SizedBox(
           height: 25,
         ),
@@ -189,9 +220,14 @@ class _StoreDashboardState extends State<StoreDashboard> {
           atas, judul besar di tengah, penjelasan yang diredupkan di bawah.
           Mata membacanya sebagai satu blok, bukan tiga.
         */
+        /*
+          Monospace, seperti penanda di kepala dokumen. Ia menyebut TEMPAT —
+          data, bukan kalimat — dan huruf yang lebarnya seragam menyatakan itu
+          sebelum isinya dibaca.
+        */
         Text(
           storeModel == null ? "" : storeModel!.name.toUpperCase(),
-          style: gayaLabelKolom(context)?.copyWith(
+          style: gayaKode(context, ukuran: 12).copyWith(
             color: Theme.of(context).secondaryHeaderColor,
           ),
         ),

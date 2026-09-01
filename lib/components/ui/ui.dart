@@ -295,3 +295,61 @@ InputDecoration dekorasiIsian(
     focusedBorder: garis(galat ? warna.error : warna.primary, 1.6),
   );
 }
+
+/// Satu pasang keterangan pada [BarisMeta].
+class Meta {
+  final String label;
+  final String nilai;
+
+  const Meta(this.label, this.nilai);
+}
+
+/// Deret keterangan mendatar di antara dua garis rambut.
+///
+/// Bentuk yang dipakai halaman yang ingin terbaca sebagai DOKUMEN: label kecil
+/// beserta nilainya, berjajar, dipisah jarak dan bukan kotak. Ia menjawab
+/// pertanyaan yang muncul sekali dan tidak perlu ditanyakan lagi — versi berapa,
+/// toko mana, terakhir disinkronkan kapan — tanpa memakan tempat sebesar kartu.
+///
+/// Nilainya memakai huruf monospace karena semuanya kode dan angka; lihat
+/// gayaKode di utils/theme.utils.dart.
+class BarisMeta extends StatelessWidget {
+  final List<Meta> isi;
+
+  const BarisMeta({super.key, required this.isi});
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: tema.dividerColor),
+          bottom: BorderSide(color: tema.dividerColor),
+        ),
+      ),
+      child: Wrap(
+        spacing: 36,
+        runSpacing: 12,
+        children: [
+          for (final m in isi)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(m.label, style: gayaLabelKolom(context)),
+                const SizedBox(width: 10),
+                Text(
+                  m.nilai,
+                  style: gayaKode(context, ukuran: 12).copyWith(
+                    color: tema.colorScheme.onSurface.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
