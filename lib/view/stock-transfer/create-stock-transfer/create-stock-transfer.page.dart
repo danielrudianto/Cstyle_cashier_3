@@ -288,110 +288,116 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
             Meta("DATE", DateFormat("d MMM yyyy").format(DateTime.now())),
           ],
         ),
-        const SizedBox(height: 10),
+        /*
+          Jarak di atas panel dipegang DI SINI, bukan oleh masing-masing judul.
+          Selama keduanya menyisipkan jaraknya sendiri-sendiri, keduanya harus
+          disetel ke angka yang sama supaya sejajar — dan angka yang sama di dua
+          tempat adalah dua tempat yang bisa berbeda.
+        */
+        const SizedBox(height: 26),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Container(
-                /*
-                  Kotak bergaris DIBUANG. Warnanya Colors.grey.shade300 —
-                  nilai untuk latar terang — sehingga di tema gelap dua
-                  panel inilah bidang paling terang di halaman. Yang
-                  memisahkan bagiannya sekarang garis rambut di bawah
-                  labelnya, sama seperti halaman lain.
-                */
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /*
-                      Bilah judul hitam pekat DIBUANG. Ia memenuhi lebar
-                      panel dengan warna solid untuk memuat dua kata, dan
-                      penomorannya menjanjikan urutan langkah yang tidak
-                      pernah ada — tidak ada langkah 2 di halaman ini.
-                    */
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(15, 4, 15, 0),
-                      child: JudulBagian("DESTINATION", atas: 0),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(
-                        15,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          /*
-                            Tanggalnya DIBUANG dari sini. Ia sudah tertulis
-                            di baris keterangan di kepala halaman, dan dua
-                            tempat yang menampilkan hal yang sama berarti dua
-                            tempat yang harus ikut berubah.
-                          */
-                          /*
-                            Dulu label kecil dengan ikon TAMBAH di ujung
-                            kanan. Tanda tambah berarti menambahkan sesuatu
-                            ke sebuah daftar; yang dikerjakan di sini memilih
-                            satu tujuan, dan memilih lagi menggantikan yang
-                            sebelumnya. Sekarang tombolnya menyebut itu.
-                          */
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  store == null
-                                      ? "No destination chosen"
-                                      : "Sending to",
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
+              /*
+                Kotak bergaris DIBUANG. Warnanya Colors.grey.shade300 —
+                nilai untuk latar terang — sehingga di tema gelap dua
+                panel inilah bidang paling terang di halaman. Yang
+                memisahkan bagiannya sekarang garis rambut di bawah
+                labelnya, sama seperti halaman lain.
+              */
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /*
+                    Bilah judul hitam pekat DIBUANG. Ia memenuhi lebar
+                    panel dengan warna solid untuk memuat dua kata, dan
+                    penomorannya menjanjikan urutan langkah yang tidak
+                    pernah ada — tidak ada langkah 2 di halaman ini.
+                  */
+                  const JudulBagian("DESTINATION", atas: 0),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /*
+                          Tanggalnya DIBUANG dari sini. Ia sudah tertulis
+                          di baris keterangan di kepala halaman, dan dua
+                          tempat yang menampilkan hal yang sama berarti dua
+                          tempat yang harus ikut berubah.
+                        */
+                        /*
+                          Dulu label kecil dengan ikon TAMBAH di ujung
+                          kanan. Tanda tambah berarti menambahkan sesuatu
+                          ke sebuah daftar; yang dikerjakan di sini memilih
+                          satu tujuan, dan memilih lagi menggantikan yang
+                          sebelumnya. Sekarang tombolnya menyebut itu.
+                        */
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                store == null
+                                    ? "No destination chosen"
+                                    : "Sending to",
+                                style: Theme.of(context).textTheme.bodySmall,
                               ),
-                              TombolBagian(
-                                label: store == null
-                                    ? "Choose store"
-                                    : "Change store",
-                                ikon: Icons.storefront_outlined,
-                                onTekan: _openStoreSelector,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          store == null
-                              ? const SizedBox.shrink()
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      store!.name,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                    Text(
-                                      store!.address,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                    ),
-                                  ],
-                                ),
-                          const SizedBox(
-                            height: 35,
-                          ),
-                          // text field for note
-                          TextField(
-                            controller: noteController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: "Note",
                             ),
-                            maxLines: 3,
+                            TombolBagian(
+                              label: store == null
+                                  ? "Choose store"
+                                  : "Change store",
+                              ikon: Icons.storefront_outlined,
+                              onTekan: _openStoreSelector,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        store == null
+                            ? const SizedBox.shrink()
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    store!.name,
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                  Text(
+                                    store!.address,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium,
+                                  ),
+                                ],
+                              ),
+                        /*
+                          Catatannya dulu muncul begitu saja: satu kotak
+                          bergaris di bawah tujuan, tanpa judul, sementara
+                          semua yang lain di halaman ini diperkenalkan oleh
+                          label bergaris rambut. Judulnya sekarang ada, dan
+                          karena judul itu sudah menyebut namanya, nama yang
+                          mengambang di dalam kolomnya dibuang — diganti
+                          petunjuk yang menyebutkan apa yang layak ditulis.
+                        */
+                        const JudulBagian("NOTE", atas: 26),
+                        TextField(
+                          controller: noteController,
+                          decoration: dekorasiIsian(
+                            context,
+                            petunjuk:
+                                "Anything the sending store should know",
                           ),
-                        ],
-                      ),
+                          maxLines: 3,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(
@@ -403,254 +409,243 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   /*
-                    Kotak bergaris kedua. Yang kiri sudah dibuang kemarin,
-                    yang ini terlewat — dan berdiri sendirian ia justru jadi
-                    satu-satunya bidang bergaris terang di halaman.
+                    Bilah ungu 80% DIBUANG, sama alasannya dengan
+                    bilah hitam di panel sebelah. Tombol tambahnya
+                    pindah ke kanan barisan label — tempat yang sama
+                    dengan tindakan di seluruh aplikasi.
                   */
-                  Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /*
-                          Bilah ungu 80% DIBUANG, sama alasannya dengan
-                          bilah hitam di panel sebelah. Tombol tambahnya
-                          pindah ke kanan barisan label — tempat yang sama
-                          dengan tindakan di seluruh aplikasi.
-                        */
-                        JudulBagian(
-                          "PRODUCTS",
-                          aksi: TombolBagian(
-                            label: "Add product",
-                            ikon: Icons.add_rounded,
-                            onTekan: _openProductSelector,
+                  JudulBagian(
+                    "PRODUCTS",
+                    atas: 0,
+                    aksi: TombolBagian(
+                      label: "Add product",
+                      ikon: Icons.add_rounded,
+                      onTekan: _openProductSelector,
+                    ),
+                  ),
+                  products.isEmpty
+                      ? Container(
+                          padding: const EdgeInsets.all(
+                            20,
                           ),
-                        ),
-                        products.isEmpty
-                            ? Container(
-                                padding: const EdgeInsets.all(
-                                  20,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "You have not selected any products",
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                          child: Center(
+                            child: Text(
+                              "You have not selected any products",
+                              style:
+                                  Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          /*
+                            Pemisah samar antarbarang. Tanpa itu, dua
+                            barang dengan nama panjang menyatu menjadi
+                            satu blok tulisan.
+                          */
+                          separatorBuilder: (_, __) => Divider(
+                            height: 1,
+                            indent: 16,
+                            endIndent: 16,
+                            color: Theme.of(context).dividerColor,
+                          ),
+                          shrinkWrap: true,
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              /*
+                                Bantalan disebut sendiri. Bawaan ListTile
+                                dirancang untuk baris satu tulisan; di
+                                sini isinya kode, nama, dan sebaris
+                                kendali jumlah, dan tanpa bantalan
+                                ketiganya menempel ke tepi panel.
+                              */
+                              contentPadding: const EdgeInsets.fromLTRB(
+                                16,
+                                12,
+                                12,
+                                12,
+                              ),
+                              title: Text(
+                                products[index].reference,
+                                style: gayaKode(context),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    products[index].description,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium,
                                   ),
-                                ),
-                              )
-                            : ListView.separated(
-                                /*
-                                  Pemisah samar antarbarang. Tanpa itu, dua
-                                  barang dengan nama panjang menyatu menjadi
-                                  satu blok tulisan.
-                                */
-                                separatorBuilder: (_, __) => Divider(
-                                  height: 1,
-                                  indent: 16,
-                                  endIndent: 16,
-                                  color: Theme.of(context).dividerColor,
-                                ),
-                                shrinkWrap: true,
-                                itemCount: products.length,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    /*
-                                      Bantalan disebut sendiri. Bawaan ListTile
-                                      dirancang untuk baris satu tulisan; di
-                                      sini isinya kode, nama, dan sebaris
-                                      kendali jumlah, dan tanpa bantalan
-                                      ketiganya menempel ke tepi panel.
-                                    */
-                                    contentPadding: const EdgeInsets.fromLTRB(
-                                      16,
-                                      12,
-                                      12,
-                                      12,
-                                    ),
-                                    title: Text(
-                                      products[index].reference,
-                                      style: gayaKode(context),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          products[index].description,
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        /* 200 memenuhi separuh panel. */
+                                        width: 150,
+                                        child: TextField(
+                                          onTap: () {
+                                            _openQuantitySelector(
+                                              products[index].quantity,
+                                              index,
+                                            );
+                                          },
+                                          readOnly: true,
+                                          controller:
+                                              TextEditingController(
+                                            text: NumberFormat("#,##0")
+                                                .format(products[index]
+                                                    .quantity),
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              products[index].quantity =
+                                                  value.isEmpty
+                                                      ? 0
+                                                      : int.parse(
+                                                          value
+                                                              .replaceAll(
+                                                                  ",",
+                                                                  ""),
+                                                        );
+                                            });
+                                          },
+                                          // only allow positive integer
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .allow(RegExp(r'[0-9.]')),
+                                            DecimalFormatter(
+                                                decimalDigits: 0),
+                                          ],
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodyMedium,
-                                        ),
-                                        const SizedBox(
-                                          height: 15,
-                                        ),
-                                        Row(
-                                          children: [
-                                            SizedBox(
-                                              /* 200 memenuhi separuh panel. */
-                                              width: 150,
-                                              child: TextField(
-                                                onTap: () {
-                                                  _openQuantitySelector(
-                                                    products[index].quantity,
-                                                    index,
-                                                  );
-                                                },
-                                                readOnly: true,
-                                                controller:
-                                                    TextEditingController(
-                                                  text: NumberFormat("#,##0")
-                                                      .format(products[index]
-                                                          .quantity),
-                                                ),
-                                                textAlign: TextAlign.center,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    products[index].quantity =
-                                                        value.isEmpty
-                                                            ? 0
-                                                            : int.parse(
-                                                                value
-                                                                    .replaceAll(
-                                                                        ",",
-                                                                        ""),
-                                                              );
-                                                  });
-                                                },
-                                                // only allow positive integer
-                                                inputFormatters: [
-                                                  FilteringTextInputFormatter
-                                                      .allow(RegExp(r'[0-9.]')),
-                                                  DecimalFormatter(
-                                                      decimalDigits: 0),
-                                                ],
-                                                style: Theme.of(context)
+                                          maxLines: 1,
+                                          // decoration
+                                          decoration: InputDecoration(
+                                            prefix:
+                                                products[index]
+                                                            .quantity ==
+                                                        1
+                                                    ? IconButton(
+                                                        tooltip: "Close",
+                                                        icon: Icon(
+                                                          Icons.close,
+                                                          size: Theme.of(
+                                                                  context)
+                                                              .textTheme
+                                                              .bodyMedium!
+                                                              .fontSize,
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .iconTheme
+                                                              .color,
+                                                        ),
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            products
+                                                                .removeAt(
+                                                                    index);
+                                                          });
+                                                        },
+                                                      )
+                                                    : IconButton(
+                                                        tooltip:
+                                                            "Decrease quantity",
+                                                        icon: Icon(
+                                                          Icons
+                                                              .exposure_minus_1,
+                                                          size: Theme.of(
+                                                                  context)
+                                                              .textTheme
+                                                              .bodyMedium!
+                                                              .fontSize,
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .iconTheme
+                                                              .color,
+                                                        ),
+                                                        onPressed:
+                                                            products[index]
+                                                                        .quantity ==
+                                                                    1
+                                                                ? null
+                                                                : () {
+                                                                    setState(
+                                                                        () {
+                                                                      products[index].quantity--;
+                                                                    });
+                                                                  },
+                                                      ),
+                                            suffix: IconButton(
+                                              tooltip:
+                                                  "Increase quantity",
+                                              icon: Icon(
+                                                Icons.exposure_plus_1,
+                                                size: Theme.of(context)
                                                     .textTheme
-                                                    .bodyMedium,
-                                                maxLines: 1,
-                                                // decoration
-                                                decoration: InputDecoration(
-                                                  prefix:
-                                                      products[index]
-                                                                  .quantity ==
-                                                              1
-                                                          ? IconButton(
-                                                              tooltip: "Close",
-                                                              icon: Icon(
-                                                                Icons.close,
-                                                                size: Theme.of(
-                                                                        context)
-                                                                    .textTheme
-                                                                    .bodyMedium!
-                                                                    .fontSize,
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .iconTheme
-                                                                    .color,
-                                                              ),
-                                                              onPressed: () {
-                                                                setState(() {
-                                                                  products
-                                                                      .removeAt(
-                                                                          index);
-                                                                });
-                                                              },
-                                                            )
-                                                          : IconButton(
-                                                              tooltip:
-                                                                  "Decrease quantity",
-                                                              icon: Icon(
-                                                                Icons
-                                                                    .exposure_minus_1,
-                                                                size: Theme.of(
-                                                                        context)
-                                                                    .textTheme
-                                                                    .bodyMedium!
-                                                                    .fontSize,
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .iconTheme
-                                                                    .color,
-                                                              ),
-                                                              onPressed:
-                                                                  products[index]
-                                                                              .quantity ==
-                                                                          1
-                                                                      ? null
-                                                                      : () {
-                                                                          setState(
-                                                                              () {
-                                                                            products[index].quantity--;
-                                                                          });
-                                                                        },
-                                                            ),
-                                                  suffix: IconButton(
-                                                    tooltip:
-                                                        "Increase quantity",
-                                                    icon: Icon(
-                                                      Icons.exposure_plus_1,
-                                                      size: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyMedium!
-                                                          .fontSize,
-                                                      color: Theme.of(context)
-                                                          .iconTheme
-                                                          .color,
-                                                    ),
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        products[index]
-                                                            .quantity++;
-                                                      });
-                                                    },
-                                                  ),
-                                                  border: InputBorder.none,
-                                                ),
-                                                keyboardType:
-                                                    TextInputType.number,
+                                                    .bodyMedium!
+                                                    .fontSize,
+                                                color: Theme.of(context)
+                                                    .iconTheme
+                                                    .color,
                                               ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  products[index]
+                                                      .quantity++;
+                                                });
+                                              },
                                             ),
-                                          ],
+                                            border: InputBorder.none,
+                                          ),
+                                          keyboardType:
+                                              TextInputType.number,
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                      ],
+                            );
+                          },
+                        ),
+                const SizedBox(
+                  height: 15,
+                ),
+                InkWell(
+                  onTap: isValid ? _createStockTransfer : null,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 15,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isValid
+                          ? Theme.of(context).secondaryHeaderColor
+                          : Theme.of(context)
+                              .disabledColor
+                              .withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text(
+                      "Submit",
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: isValid
+                                ? Colors.white
+                                : Theme.of(context).disabledColor,
+                          ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  InkWell(
-                    onTap: isValid ? _createStockTransfer : null,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 15,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isValid
-                            ? Theme.of(context).secondaryHeaderColor
-                            : Theme.of(context)
-                                .disabledColor
-                                .withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        "Submit",
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                              color: isValid
-                                  ? Colors.white
-                                  : Theme.of(context).disabledColor,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+],
               ),
             ),
           ],
