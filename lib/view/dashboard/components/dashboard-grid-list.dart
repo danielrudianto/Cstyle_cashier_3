@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/model/model.product-image.model.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
@@ -28,7 +29,7 @@ class DashboardGridList extends StatelessWidget {
   Widget build(BuildContext context) {
     showProductDialog(
         ProductModel e, List<ProductImageModel> images, int stock) {
-      showDialog(
+      bukaDialog(
           context: context,
           builder: (context) {
             final tema = Theme.of(context);

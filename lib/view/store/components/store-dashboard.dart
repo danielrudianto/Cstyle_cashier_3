@@ -95,7 +95,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
   }
 
   _showHelpDialog(String title, String description) {
-    showDialog(
+    bukaDialog(
         context: context,
         builder: (context) {
           return Dialog(

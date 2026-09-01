@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/model/model.cart-item.model.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-checkout-footer.dart';
@@ -23,7 +24,7 @@ class DashboardCheckout extends StatefulWidget {
 class _DashboardCheckoutState extends State<DashboardCheckout> {
   _updatePriceDiscount(CartItemModel item, int index) {
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    showDialog(
+    bukaDialog(
       context: context,
       builder: (BuildContext context) {
         TextEditingController discountController = TextEditingController(

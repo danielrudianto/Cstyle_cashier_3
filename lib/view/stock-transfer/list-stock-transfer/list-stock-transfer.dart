@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/list-stock-transfer/components/list-stock-transfer-detail.dart';
@@ -171,7 +172,7 @@ class _ListStockTransferState extends State<ListStockTransfer> {
                           selected: false,
                           onSelectChanged: (value) {
                             // show dialog
-                            showDialog(
+                            bukaDialog(
                               context: context,
                               builder: (context) {
                                 return AlertDialog(

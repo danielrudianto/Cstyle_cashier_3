@@ -227,3 +227,49 @@ CustomTransitionPage<T> halamanBergerak<T>({
     },
   );
 }
+
+
+/// Membuka dialog dengan perpindahan yang sama di seluruh aplikasi.
+///
+/// showDialog bawaan memunculkan dialognya dengan kurva dan durasi bawaan
+/// Material yang tidak bisa disetel dari luar, jadi dialog adalah satu-satunya
+/// hal di aplikasi ini yang bergerak dengan aturan gerak orang lain. Pembuka
+/// ini memakai token Gerak yang sama dengan halaman: memudar sambil sedikit
+/// membesar dari 97% — cukup untuk terasa muncul MENDEKAT, terlalu kecil untuk
+/// terlihat sebagai lompatan.
+///
+/// Tanda tangannya sengaja meniru showDialog supaya berpindah ke sini hanya
+/// mengganti nama panggilannya.
+Future<T?> bukaDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+  Color? barrierColor,
+}) {
+  return showGeneralDialog<T>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierLabel:
+        MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: barrierColor ?? Colors.black54,
+    transitionDuration: Gerak.cepat,
+    pageBuilder: (context, animasi, animasiKedua) => builder(context),
+    transitionBuilder: (context, animasi, animasiKedua, anak) {
+      if (gerakDimatikan(context)) return anak;
+
+      final kurva = CurvedAnimation(
+        parent: animasi,
+        curve: Gerak.masuk,
+        reverseCurve: Gerak.keluar,
+      );
+
+      return FadeTransition(
+        opacity: kurva,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.97, end: 1).animate(kurva),
+          child: anak,
+        ),
+      );
+    },
+  );
+}

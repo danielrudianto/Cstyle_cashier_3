@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.bill-code.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
@@ -166,7 +167,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                     }).then((value) {
                                   if (value == 'view') {
                                     // open view bill page
-                                    showDialog(
+                                    bukaDialog(
                                       context: context,
                                       builder: (context) {
                                         return AlertDialog(

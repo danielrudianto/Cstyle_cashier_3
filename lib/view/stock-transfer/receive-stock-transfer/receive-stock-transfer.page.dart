@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/db/db.product.model.dart';
@@ -137,7 +138,7 @@ class _ReceiveStockTransferPageState extends State<ReceiveStockTransferPage> {
           return const SelectEmployee();
         }).then((user) {
       if (user != null) {
-        showDialog(
+        bukaDialog(
           context: context,
           builder: (context) {
             return StatefulBuilder(builder: (context, setState) {

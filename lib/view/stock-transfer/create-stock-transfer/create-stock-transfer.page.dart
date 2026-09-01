@@ -1,4 +1,5 @@
-import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
+ import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/components/store-selector/store-selector.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
@@ -31,7 +32,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
   }
 
   _openStoreSelector() {
-    showDialog(
+    bukaDialog(
         context: context,
         builder: (context) {
           return const Dialog(
@@ -48,7 +49,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
 
   _openProductSelector() {
     var isDialogOpened = true;
-    showDialog(
+    bukaDialog(
         context: context,
         builder: (context) {
           return Dialog(

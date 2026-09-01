@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:collection/collection.dart';
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/components/thousand-separator/thousand-separator.dart';
@@ -97,7 +98,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   _updatePriceDiscount(CartItemModel item, int index) {
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    showDialog(
+    bukaDialog(
       context: context,
       builder: (BuildContext context) {
         TextEditingController discountController = TextEditingController(
@@ -457,7 +458,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       var name = cart.name;
 
       // show print preview
-      showDialog(
+      bukaDialog(
         context: context,
         builder: (_) => Center(
           child: Container(
@@ -575,7 +576,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Future<dynamic> openMembershipSelector() {
-    return showDialog(
+    return bukaDialog(
         context: context,
         builder: (context) {
           return const Dialog(

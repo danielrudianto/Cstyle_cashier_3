@@ -196,7 +196,7 @@ class _PageViewPageState extends State<PageViewPage> {
       var selectedCart = cartNotifier.selectedCart;
       if (selectedCart != null) {
         LoggerUtils().log("Cart found", LogType.info);
-        showDialog(
+        bukaDialog(
           barrierColor: const Color.fromARGB(103, 148, 148, 148),
           context: context,
           builder: (context) {
@@ -558,7 +558,7 @@ class _PageViewPageState extends State<PageViewPage> {
     Future<void> openProductCartList() async {
       final cartNotifier = Provider.of<CartNotifier>(context, listen: false);
       var carts = await cartNotifier.getCarts();
-      showDialog(
+      bukaDialog(
         barrierColor: const Color.fromARGB(103, 148, 148, 148),
         context: context,
         builder: (context) {
