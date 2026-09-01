@@ -151,145 +151,166 @@ class _MemberListPageState extends State<MemberListPage> {
           menggulir, jadi tidak ada lagi angka yang harus ikut diperbarui
           setiap kali sesuatu ditambahkan di atasnya.
         */
-        DataTable(
-          showCheckboxColumn: false,
-          /*
+        /*
+          Melebar penuh. Pembungkus lebar ini sempat ikut terbuang bersama
+          tinggi tetapnya, dan tanpa batasan lebar DataTable menyusut ke lebar
+          isinya — tabel yang berhenti di tengah halaman.
+        */
+        /*
+          dividerThickness: 0 TIDAK meniadakan garisnya.
+
+          DataTable menyusun hiasan barisnya dengan BorderSide(width:
+          dividerThickness), dan di Flutter lebar nol berarti "setipis mungkin",
+          bukan "tidak ada". Jadi garis antarbarisnya tetap tergambar — itulah
+          garis yang masih terlihat meski ketebalannya sudah disetel nol.
+
+          Yang benar-benar meniadakannya adalah warnanya, dan warnanya diambil
+          DataTable dari Theme.dividerColor — jadi ditimpa di sini, hanya untuk
+          tabel ini.
+        */
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: SizedBox(
+            width: double.infinity,
+            child: DataTable(
+              showCheckboxColumn: false,
+              /*
                           Tanpa garis antarbaris, sama seperti tabel barang: dua
                           puluh baris berarti dua puluh garis sejajar, dan mata
                           membacanya sebagai kisi. Pemisahnya jarak antarbaris.
                         */
-          /*
+              /*
                           Baris dibuat lebih tinggi. Bawaan DataTable 48 piksel dirancang
                           untuk baris satu tulisan; dengan lingkaran inisial di depannya
                           dan tanpa garis pemisah, yang memisahkan satu baris dari yang
                           lain tinggal ruangnya — dan 48 tidak cukup untuk itu.
                         */
-          dataRowMinHeight: 60,
-          dataRowMaxHeight: 60,
-          headingRowHeight: 44,
-          dividerThickness: 0,
-          border: const TableBorder(),
-          /*
+              dataRowMinHeight: 60,
+              dataRowMaxHeight: 60,
+              headingRowHeight: 44,
+              dividerThickness: 0,
+              border: const TableBorder(),
+              /*
                           Tanpa latar pada baris kepala. Bagian di atasnya sudah
                           menutup dengan garis rambut, dan menambahkan bidang abu di
                           bawahnya membuat tabelnya kembali terlihat berkotak.
                         */
-          headingRowColor: const WidgetStatePropertyAll(
-            Colors.transparent,
-          ),
-          columns: [
-            DataColumn(
-              label: Text(
-                "NAME",
-                style: gayaKode(context),
+              headingRowColor: const WidgetStatePropertyAll(
+                Colors.transparent,
               ),
-            ),
-            DataColumn(
-              label: Text(
-                "CODE",
-                style: gayaKode(context),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                "EMAIL",
-                style: gayaKode(context),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                "PHONE",
-                style: gayaKode(context),
-              ),
-            ),
-          ],
-          rows: members.isEmpty
-              ? [
-                  DataRow(cells: [
-                    DataCell(
-                      Text(
-                        "Data not found.",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ),
-                    const DataCell(Text("")),
-                    const DataCell(Text("")),
-                    const DataCell(Text("")),
-                  ])
-                ]
-              : [
-                  ...members.map(
-                    (e) {
-                      return DataRow(
-                        selected: false,
-                        onSelectChanged: (value) {
-                          if (value == true) {
-                            // open bottom sheet
-                            showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  return MemberActions(anggota: e);
-                                }).then((value) {});
-                          }
-                        },
-                        cells: [
-                          DataCell(
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                              ),
-                              child: Row(
-                                children: [
-                                  /*
+              columns: [
+                DataColumn(
+                  label: Text(
+                    "NAME",
+                    style: gayaKode(context),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    "CODE",
+                    style: gayaKode(context),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    "EMAIL",
+                    style: gayaKode(context),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    "PHONE",
+                    style: gayaKode(context),
+                  ),
+                ),
+              ],
+              rows: members.isEmpty
+                  ? [
+                      DataRow(cells: [
+                        DataCell(
+                          Text(
+                            "Data not found.",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                        const DataCell(Text("")),
+                        const DataCell(Text("")),
+                        const DataCell(Text("")),
+                      ])
+                    ]
+                  : [
+                      ...members.map(
+                        (e) {
+                          return DataRow(
+                            selected: false,
+                            onSelectChanged: (value) {
+                              if (value == true) {
+                                // open bottom sheet
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) {
+                                      return MemberActions(anggota: e);
+                                    }).then((value) {});
+                              }
+                            },
+                            cells: [
+                              DataCell(
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      /*
                                                   Jangkar baris. Daftar tanpa garis
                                                   antarbaris mengandalkan jarak, dan
                                                   jarak saja membuat mata kehilangan
                                                   tempat ketika namanya mirip-mirip.
                                                 */
-                                  AvatarInisial(
-                                    nama: e.name,
-                                    kunci: e.code,
+                                      AvatarInisial(
+                                        nama: e.name,
+                                        kunci: e.code,
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Text(
+                                          e.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.start,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Text(
-                                      e.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.start,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
+                                ),
+                              ),
+                              DataCell(
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
                                   ),
-                                ],
+                                  child: Text(
+                                    e.code,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.start,
+                                    /* Penanda, bukan isi: diperlakukan sebagai label. */
+                                    style: gayaKode(context),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          DataCell(
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                              ),
-                              child: Text(
-                                e.code,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.start,
-                                /* Penanda, bukan isi: diperlakukan sebagai label. */
-                                style: gayaKode(context),
-                              ),
-                            ),
-                          ),
-                          DataCell(
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                              ),
-                              /*
+                              DataCell(
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  /*
                                               Dulu "N/A", ditulis sama tegasnya dengan
                                               alamat surel yang ada. Pada halaman berisi
                                               dua puluh anggota yang kebanyakan tidak
@@ -298,57 +319,59 @@ class _MemberListPageState extends State<MemberListPage> {
                                               data yang benar-benar ada. Ketiadaan
                                               sebaiknya terlihat sebagai ketiadaan.
                                             */
-                              child: Text(
-                                e.email == "" ? "—" : e.email,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.start,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: e.email == ""
+                                  child: Text(
+                                    e.email == "" ? "—" : e.email,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.start,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: e.email == ""
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withValues(alpha: 0.35)
+                                              : null,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  child: Text(
+                                    e.phoneNumber == "" ? "—" : e.phoneNumber,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.start,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures()
+                                      ],
+                                      color: e.phoneNumber == ""
                                           ? Theme.of(context)
                                               .colorScheme
                                               .onSurface
                                               .withValues(alpha: 0.35)
                                           : null,
                                     ),
-                              ),
-                            ),
-                          ),
-                          DataCell(
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                              ),
-                              child: Text(
-                                e.phoneNumber == "" ? "—" : e.phoneNumber,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.start,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures()
-                                  ],
-                                  color: e.phoneNumber == ""
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withValues(alpha: 0.35)
-                                      : null,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+            ),
+          ),
         ),
         const SizedBox(
           height: 15,
