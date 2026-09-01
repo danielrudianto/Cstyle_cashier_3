@@ -394,17 +394,7 @@ class _StorePageState extends State<StorePage> {
                               Judul bagiannya memakai perlakuan yang sama
                               dengan kepala kolom tabel dan menu kelola.
                             */
-                                /* Judul bagian; lihat catatan di bawah. */
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 0,
-                                    bottom: 10,
-                                  ),
-                                  child: Text(
-                                    "MEMBER",
-                                    style: gayaLabelKolom(context),
-                                  ),
-                                ),
+                                _JudulBagian("MEMBER", atas: 0),
                                 TextFormField(
                                   controller: codeEditingController,
                                   decoration: InputDecoration(
@@ -667,17 +657,7 @@ class _StorePageState extends State<StorePage> {
                                 const SizedBox(
                                   height: 5,
                                 ),
-                                /* Judul bagian; lihat catatan di bawah. */
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 22,
-                                    bottom: 10,
-                                  ),
-                                  child: Text(
-                                    "CONTACT",
-                                    style: gayaLabelKolom(context),
-                                  ),
-                                ),
+                                _JudulBagian("CONTACT", atas: 22),
                                 TextFormField(
                                   controller: memberPhoneNumberController,
                                   decoration: InputDecoration(
@@ -777,17 +757,7 @@ class _StorePageState extends State<StorePage> {
                                 const SizedBox(
                                   height: 15,
                                 ),
-                                /* Judul bagian ketiga; semuanya boleh dilewati. */
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 22,
-                                    bottom: 10,
-                                  ),
-                                  child: Text(
-                                    "DETAILS",
-                                    style: gayaLabelKolom(context),
-                                  ),
-                                ),
+                                _JudulBagian("DETAILS", atas: 22),
                                 TextFormField(
                                   decoration: InputDecoration(
                                     label: Text(
@@ -943,67 +913,83 @@ class _StorePageState extends State<StorePage> {
                                     ),
                                   ),
                                 ),
-                                RadioListTile<language>(
-                                    title: Text(
-                                      "Bahasa",
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                    groupValue: selectedLanguage,
-                                    value: language.ID,
-                                    activeColor:
-                                        Theme.of(context).secondaryHeaderColor,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedLanguage = value;
-                                      });
-                                    }),
                                 const SizedBox(
                                   height: 15,
                                 ),
-                                InkWell(
-                                  onTap: isSubmitting
-                                      ? null
-                                      : () {
-                                          addMember();
-                                        },
-                                  child: Container(
-                                    padding: EdgeInsets.zero,
-                                    width: double.infinity,
-                                    /*
-                                  Dulu Container berwarna aksen yang menyerupai
-                                  tombol: tanpa sorot, tanpa umpan balik tekan,
-                                  tanpa kursor tangan — dan saat sedang mengirim
-                                  ia hanya berubah abu-abu tanpa memberi tahu
-                                  bahwa sesuatu sedang berjalan.
+                                /*
+                                  TOMBOL YANG BENAR-BENAR TOMBOL.
 
-                                  "Submit" juga tidak menyebutkan apa pun.
-                                  Tombol sebaiknya menamai hasilnya.
+                                  Sebelumnya FilledButton-nya dibungkus
+                                  IgnorePointer supaya ketukan diteruskan ke
+                                  InkWell di luarnya. Itu memang membuat
+                                  ketukannya bekerja, tetapi IgnorePointer
+                                  menghalangi SELURUH kejadian penunjuk — jadi
+                                  tombolnya kehilangan keadaan sorot, umpan
+                                  balik tekan, dan kursor tangannya sekaligus.
+                                  Bentuknya tombol, perilakunya gambar.
+
+                                  Sekarang tombolnya yang memiliki ketukan itu,
+                                  dan tema yang memberi ketiganya.
+
+                                  Ia juga MATI selama formulirnya belum cukup.
+                                  Dulu ia selalu hidup: menekannya dengan kode
+                                  atau nama kosong menjalankan pengiriman, lalu
+                                  gagal di server, dan yang sampai ke layar
+                                  hanya pesan galat umum. Menonaktifkannya
+                                  menyatakan syaratnya sebelum ditekan, bukan
+                                  sesudah.
+
+                                  ListenableBuilder mendengarkan keempat
+                                  controller-nya. Tanpa itu, teks yang diketik
+                                  tidak memicu build dan tombolnya tidak pernah
+                                  berubah keadaan.
                                 */
-                                    child: IgnorePointer(
-                                      child: FilledButton(
-                                        onPressed: isSubmitting ? null : () {},
-                                        style: FilledButton.styleFrom(
-                                          minimumSize:
-                                              const Size.fromHeight(46),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(9),
-                                          ),
+                                ListenableBuilder(
+                                  listenable: Listenable.merge([
+                                    codeEditingController,
+                                    nameEditingController,
+                                    memberPhoneNumberController,
+                                    memberEmailController,
+                                  ]),
+                                  builder: (context, _) {
+                                    final adaKontak =
+                                        memberPhoneNumberController.text
+                                                .trim()
+                                                .isNotEmpty ||
+                                            memberEmailController.text
+                                                .trim()
+                                                .isNotEmpty;
+
+                                    final lengkap = codeEditingController.text
+                                            .trim()
+                                            .isNotEmpty &&
+                                        nameEditingController.text
+                                            .trim()
+                                            .isNotEmpty &&
+                                        adaKontak;
+
+                                    return FilledButton(
+                                      onPressed: (isSubmitting || !lengkap)
+                                          ? null
+                                          : () => addMember(),
+                                      style: FilledButton.styleFrom(
+                                        minimumSize: const Size.fromHeight(46),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(9),
                                         ),
-                                        child: isSubmitting
-                                            ? const SizedBox(
-                                                height: 20,
-                                                width: 20,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  strokeWidth: 2.2,
-                                                ),
-                                              )
-                                            : const Text("Create member"),
                                       ),
-                                    ),
-                                  ),
+                                      child: isSubmitting
+                                          ? const SizedBox(
+                                              height: 20,
+                                              width: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.2,
+                                              ),
+                                            )
+                                          : const Text("Create member"),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
@@ -1626,6 +1612,42 @@ class _SegmenBahasaState extends State<_SegmenBahasa> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Judul satu bagian di dalam formulir, dengan garis rambut yang menyambung.
+///
+/// Label kecil yang berdiri sendirian di antara kolom-kolom isian mudah
+/// terbaca sebagai keterangan salah satu kolom, bukan sebagai pembuka
+/// kelompok. Garis yang menjulur ke kanan sampai tepi itulah yang membuatnya
+/// terbaca sebagai batas — dan karena garisnya yang bekerja, labelnya sendiri
+/// tidak perlu diperbesar sampai bersaing dengan isi formulirnya.
+class _JudulBagian extends StatelessWidget {
+  final String teks;
+  final double atas;
+
+  const _JudulBagian(this.teks, {this.atas = 22});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: atas, bottom: 12),
+      child: Row(
+        children: [
+          Text(
+            teks,
+            style: gayaLabelKolom(context)?.copyWith(fontSize: 12),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Divider(
+              height: 1,
+              color: Theme.of(context).dividerColor,
+            ),
+          ),
+        ],
       ),
     );
   }
