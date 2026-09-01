@@ -1,6 +1,5 @@
 import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/components/store-selector/store-selector.dart';
-import 'package:cstyle_cashier_3/components/thousand-separator/thousand-separator.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
@@ -9,7 +8,6 @@ import 'package:cstyle_cashier_3/view/product-selector/product-selector.page.dar
 import 'package:cstyle_cashier_3/components/ui/ui.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class CreateStockTransferPage extends StatefulWidget {
@@ -97,82 +95,6 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
           );
         }).then((value) {}).whenComplete(() {
       isDialogOpened = false;
-    });
-  }
-
-  _openQuantitySelector(int quantity, int index) {
-    TextEditingController controller =
-        TextEditingController(text: NumberFormat("#,##0").format(quantity));
-    showModalBottomSheet(
-      showDragHandle: true,
-      context: context,
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(
-            10,
-          ),
-          width: 400,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  label: Text("Quantity"),
-                ),
-                // input formatters
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                  DecimalFormatter(decimalDigits: 0),
-                ],
-                // keyboard
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              InkWell(
-                onTap: () {
-                  var quantity = controller.text.isEmpty
-                      ? 0
-                      : int.parse(
-                          controller.text.replaceAll(",", ""),
-                        );
-                  Navigator.of(context).pop(quantity);
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 5,
-                    horizontal: 25,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).secondaryHeaderColor,
-                    // radius
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Text(
-                    "Save",
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: Colors.white,
-                        ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    ).then((value) {
-      // if integer
-      if (value is int) {
-        setState(() {
-          products[index].quantity = value;
-        });
-      }
     });
   }
 
@@ -451,164 +373,56 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                           shrinkWrap: true,
                           itemCount: products.length,
                           itemBuilder: (context, index) {
-                            return ListTile(
-                              /*
-                                Bantalan disebut sendiri. Bawaan ListTile
-                                dirancang untuk baris satu tulisan; di
-                                sini isinya kode, nama, dan sebaris
-                                kendali jumlah, dan tanpa bantalan
-                                ketiganya menempel ke tepi panel.
-                              */
-                              contentPadding: const EdgeInsets.fromLTRB(
+                            final produk = products[index];
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(
                                 16,
                                 12,
-                                12,
+                                8,
                                 12,
                               ),
-                              title: Text(
-                                products[index].reference,
-                                style: gayaKode(context),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                              child: Row(
                                 children: [
-                                  Text(
-                                    products[index].description,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium,
-                                  ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        /* 200 memenuhi separuh panel. */
-                                        width: 150,
-                                        child: TextField(
-                                          onTap: () {
-                                            _openQuantitySelector(
-                                              products[index].quantity,
-                                              index,
-                                            );
-                                          },
-                                          readOnly: true,
-                                          controller:
-                                              TextEditingController(
-                                            text: NumberFormat("#,##0")
-                                                .format(products[index]
-                                                    .quantity),
-                                          ),
-                                          textAlign: TextAlign.center,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              products[index].quantity =
-                                                  value.isEmpty
-                                                      ? 0
-                                                      : int.parse(
-                                                          value
-                                                              .replaceAll(
-                                                                  ",",
-                                                                  ""),
-                                                        );
-                                            });
-                                          },
-                                          // only allow positive integer
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .allow(RegExp(r'[0-9.]')),
-                                            DecimalFormatter(
-                                                decimalDigits: 0),
-                                          ],
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          produk.reference,
+                                          style: gayaKode(context),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          produk.description,
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodyMedium,
-                                          maxLines: 1,
-                                          // decoration
-                                          decoration: InputDecoration(
-                                            prefix:
-                                                products[index]
-                                                            .quantity ==
-                                                        1
-                                                    ? IconButton(
-                                                        tooltip: "Close",
-                                                        icon: Icon(
-                                                          Icons.close,
-                                                          size: Theme.of(
-                                                                  context)
-                                                              .textTheme
-                                                              .bodyMedium!
-                                                              .fontSize,
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .iconTheme
-                                                              .color,
-                                                        ),
-                                                        onPressed: () {
-                                                          setState(() {
-                                                            products
-                                                                .removeAt(
-                                                                    index);
-                                                          });
-                                                        },
-                                                      )
-                                                    : IconButton(
-                                                        tooltip:
-                                                            "Decrease quantity",
-                                                        icon: Icon(
-                                                          Icons
-                                                              .exposure_minus_1,
-                                                          size: Theme.of(
-                                                                  context)
-                                                              .textTheme
-                                                              .bodyMedium!
-                                                              .fontSize,
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .iconTheme
-                                                              .color,
-                                                        ),
-                                                        onPressed:
-                                                            products[index]
-                                                                        .quantity ==
-                                                                    1
-                                                                ? null
-                                                                : () {
-                                                                    setState(
-                                                                        () {
-                                                                      products[index].quantity--;
-                                                                    });
-                                                                  },
-                                                      ),
-                                            suffix: IconButton(
-                                              tooltip:
-                                                  "Increase quantity",
-                                              icon: Icon(
-                                                Icons.exposure_plus_1,
-                                                size: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyMedium!
-                                                    .fontSize,
-                                                color: Theme.of(context)
-                                                    .iconTheme
-                                                    .color,
-                                              ),
-                                              onPressed: () {
-                                                setState(() {
-                                                  products[index]
-                                                      .quantity++;
-                                                });
-                                              },
-                                            ),
-                                            border: InputBorder.none,
-                                          ),
-                                          keyboardType:
-                                              TextInputType.number,
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  KendaliJumlah(
+                                    jumlah: produk.quantity,
+                                    onUbah: (n) {
+                                      setState(() {
+                                        produk.quantity = n;
+                                      });
+                                    },
+                                  ),
+                                  const SizedBox(width: 2),
+                                  IconButton(
+                                    tooltip: "Remove from request",
+                                    onPressed: () {
+                                      setState(() {
+                                        products.removeAt(index);
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.close_rounded,
+                                      size: 17,
+                                    ),
                                   ),
                                 ],
                               ),

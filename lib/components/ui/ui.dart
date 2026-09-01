@@ -1,6 +1,7 @@
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /*
   Lapisan komponen bersama.
@@ -166,20 +167,32 @@ class JudulBagian extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /*
+      Tinggi barisannya DIPATOK, ada tindakan maupun tidak.
+
+      Tanpa ini, judul yang membawa tombol menjadi setinggi tombolnya dan
+      labelnya ditengahkan di ruang itu, sementara judul polos hanya setinggi
+      teksnya — sehingga dua judul berdampingan, DESTINATION dan PRODUCTS,
+      jatuh di dua ketinggian berbeda padahal garisnya dibaca sebagai satu
+      garis yang menerus.
+    */
     return Padding(
-      padding: EdgeInsets.only(top: atas, bottom: 12),
-      child: Row(
-        children: [
-          Text(teks, style: gayaLabelKolom(context)?.copyWith(fontSize: 12)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Divider(height: 1, color: Theme.of(context).dividerColor),
-          ),
-          if (aksi != null) ...[
+      padding: EdgeInsets.only(top: atas, bottom: 8),
+      child: SizedBox(
+        height: 32,
+        child: Row(
+          children: [
+            Text(teks, style: gayaLabelKolom(context)?.copyWith(fontSize: 12)),
             const SizedBox(width: 12),
-            aksi!,
+            Expanded(
+              child: Divider(height: 1, color: Theme.of(context).dividerColor),
+            ),
+            if (aksi != null) ...[
+              const SizedBox(width: 12),
+              aksi!,
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -676,6 +689,188 @@ class BarisMeta extends StatelessWidget {
               ],
             ),
         ],
+      ),
+    );
+  }
+}
+
+
+/// Kendali jumlah: kurang, angka yang bisa diketik, tambah.
+///
+/// MENGGANTIKAN TIGA HAL SEKALIGUS.
+///
+/// Bentuk sebelumnya adalah TextField hanya-baca yang awalannya berganti-ganti
+/// antara ikon silang dan ikon "-1" tergantung nilainya, akhirannya ikon "+1",
+/// dan mengetuk angkanya membuka lembar bawah berisi formulir satu kolom.
+/// Jadi satu tombol yang sama bisa berarti "kurangi" atau "hapus barang ini"
+/// tergantung keadaan yang tidak ditunjukkannya, dan mengetik jumlah — hal
+/// yang paling sering dilakukan untuk transfer besar — butuh tiga ketukan dan
+/// sebuah dialog.
+///
+/// Di sini ketiganya dipisah: minus mengurangi (dan mati di satu, bukan
+/// berubah wujud), plus menambah, dan angkanya kolom ketik biasa. Menghapus
+/// barang adalah keputusan yang berbeda dari mengurangi jumlahnya, jadi ia
+/// tombol lain di luar kendali ini.
+class KendaliJumlah extends StatefulWidget {
+  final int jumlah;
+  final ValueChanged<int> onUbah;
+
+  const KendaliJumlah({
+    super.key,
+    required this.jumlah,
+    required this.onUbah,
+  });
+
+  @override
+  State<KendaliJumlah> createState() => _KendaliJumlahState();
+}
+
+class _KendaliJumlahState extends State<KendaliJumlah> {
+  late final TextEditingController _kolom;
+  final FocusNode _fokus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _kolom = TextEditingController(text: widget.jumlah.toString());
+    /*
+      Saat fokus pergi, kolomnya dirapikan: kosong atau nol kembali menjadi
+      satu. Nol barang bukan jumlah yang bisa diminta — barang yang tidak
+      diinginkan dihapus, bukan diminta sebanyak nol.
+    */
+    _fokus.addListener(() {
+      if (!_fokus.hasFocus) {
+        final n = int.tryParse(_kolom.text.replaceAll(",", "")) ?? 0;
+        final rapi = n < 1 ? 1 : n;
+        _kolom.text = rapi.toString();
+        if (rapi != widget.jumlah) widget.onUbah(rapi);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant KendaliJumlah lama) {
+    super.didUpdateWidget(lama);
+    /*
+      Nilainya bisa berubah dari luar — tombol minus/plus lewat induknya.
+      Kolomnya mengikuti, kecuali sedang diketik: menimpa teks di bawah kursor
+      orang adalah cara membuat angka yang diketiknya hilang.
+    */
+    if (!_fokus.hasFocus && widget.jumlah.toString() != _kolom.text) {
+      _kolom.text = widget.jumlah.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    _kolom.dispose();
+    _fokus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final warna = tema.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: warna.outline.withValues(alpha: 0.6)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _TombolLangkah(
+            ikon: Icons.remove_rounded,
+            keterangan: "Decrease quantity",
+            onTekan: widget.jumlah > 1
+                ? () => widget.onUbah(widget.jumlah - 1)
+                : null,
+          ),
+          SizedBox(
+            width: 52,
+            child: TextField(
+              controller: _kolom,
+              focusNode: _fokus,
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(5),
+              ],
+              onChanged: (nilai) {
+                final n = int.tryParse(nilai);
+                if (n != null && n >= 1) widget.onUbah(n);
+              },
+              onSubmitted: (_) => _fokus.unfocus(),
+              style: gayaKode(context, ukuran: 13),
+              decoration: const InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 9),
+              ),
+            ),
+          ),
+          _TombolLangkah(
+            ikon: Icons.add_rounded,
+            keterangan: "Increase quantity",
+            onTekan: () => widget.onUbah(widget.jumlah + 1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tombol minus atau plus pada [KendaliJumlah].
+class _TombolLangkah extends StatefulWidget {
+  final IconData ikon;
+  final String keterangan;
+  final VoidCallback? onTekan;
+
+  const _TombolLangkah({
+    required this.ikon,
+    required this.keterangan,
+    this.onTekan,
+  });
+
+  @override
+  State<_TombolLangkah> createState() => _TombolLangkahState();
+}
+
+class _TombolLangkahState extends State<_TombolLangkah> {
+  bool _disorot = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final warna = Theme.of(context).colorScheme;
+    final bisa = widget.onTekan != null;
+
+    return Tooltip(
+      message: widget.keterangan,
+      waitDuration: const Duration(milliseconds: 600),
+      child: MouseRegion(
+        cursor: bisa ? SystemMouseCursors.click : MouseCursor.defer,
+        onEnter: (_) => setState(() => _disorot = true),
+        onExit: (_) => setState(() => _disorot = false),
+        child: GestureDetector(
+          onTap: widget.onTekan,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: Gerak.kilat,
+            curve: Gerak.masuk,
+            padding: const EdgeInsets.all(8),
+            color: _disorot && bisa
+                ? warna.onSurface.withValues(alpha: 0.06)
+                : Colors.transparent,
+            child: Icon(
+              widget.ikon,
+              size: 16,
+              color: warna.onSurface.withValues(alpha: bisa ? 0.8 : 0.25),
+            ),
+          ),
+        ),
       ),
     );
   }
