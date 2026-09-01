@@ -6,7 +6,6 @@ import 'package:cstyle_cashier_3/view/page-view/components/appbar-pageview.dart'
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/utils/waktu.utils.dart';
-import 'dart:ui' show FontFeature;
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

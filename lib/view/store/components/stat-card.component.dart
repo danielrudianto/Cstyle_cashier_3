@@ -1,5 +1,3 @@
-import 'dart:ui' show FontFeature;
-
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 

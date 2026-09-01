@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:cstyle_cashier_3/view/member-list/components/member-detail.dart';
-import 'dart:ui' show FontFeature;
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
