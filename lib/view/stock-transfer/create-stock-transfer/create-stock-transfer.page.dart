@@ -7,6 +7,7 @@ import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/view/product-selector/product-selector.page.dart';
 import 'package:cstyle_cashier_3/components/ui/ui.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -321,32 +322,35 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Date",
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                          Text(
-                            DateFormat("dd MMMM yyyy").format(DateTime.now()),
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
+                          /*
+                            Tanggalnya DIBUANG dari sini. Ia sudah tertulis
+                            di baris keterangan di kepala halaman, dan dua
+                            tempat yang menampilkan hal yang sama berarti dua
+                            tempat yang harus ikut berubah.
+                          */
+                          /*
+                            Dulu label kecil dengan ikon TAMBAH di ujung
+                            kanan. Tanda tambah berarti menambahkan sesuatu
+                            ke sebuah daftar; yang dikerjakan di sini memilih
+                            satu tujuan, dan memilih lagi menggantikan yang
+                            sebelumnya. Sekarang tombolnya menyebut itu.
+                          */
                           Row(
                             children: [
-                              Text(
-                                "Store",
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                              const Spacer(),
-                              IconButton(
-                                tooltip: "Choose destination store",
-                                onPressed: () {
-                                  _openStoreSelector();
-                                },
-                                icon: const Icon(
-                                  Icons.add,
+                              Expanded(
+                                child: Text(
+                                  store == null
+                                      ? "No destination chosen"
+                                      : "Sending to",
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
+                              ),
+                              TombolBagian(
+                                label: store == null
+                                    ? "Choose store"
+                                    : "Change store",
+                                ikon: Icons.storefront_outlined,
+                                onTekan: _openStoreSelector,
                               ),
                             ],
                           ),
@@ -354,7 +358,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                             height: 15,
                           ),
                           store == null
-                              ? const Text("Store not selected")
+                              ? const SizedBox.shrink()
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -398,16 +402,12 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  /*
+                    Kotak bergaris kedua. Yang kiri sudah dibuang kemarin,
+                    yang ini terlewat — dan berdiri sendirian ia justru jadi
+                    satu-satunya bidang bergaris terang di halaman.
+                  */
                   Container(
-                    padding: const EdgeInsets.all(0),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(0),
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                        width: 1,
-                      ),
-                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -438,15 +438,38 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                   ),
                                 ),
                               )
-                            : ListView.builder(
+                            : ListView.separated(
+                                /*
+                                  Pemisah samar antarbarang. Tanpa itu, dua
+                                  barang dengan nama panjang menyatu menjadi
+                                  satu blok tulisan.
+                                */
+                                separatorBuilder: (_, __) => Divider(
+                                  height: 1,
+                                  indent: 16,
+                                  endIndent: 16,
+                                  color: Theme.of(context).dividerColor,
+                                ),
                                 shrinkWrap: true,
                                 itemCount: products.length,
                                 itemBuilder: (context, index) {
                                   return ListTile(
+                                    /*
+                                      Bantalan disebut sendiri. Bawaan ListTile
+                                      dirancang untuk baris satu tulisan; di
+                                      sini isinya kode, nama, dan sebaris
+                                      kendali jumlah, dan tanpa bantalan
+                                      ketiganya menempel ke tepi panel.
+                                    */
+                                    contentPadding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      12,
+                                      12,
+                                      12,
+                                    ),
                                     title: Text(
                                       products[index].reference,
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
+                                      style: gayaKode(context),
                                     ),
                                     subtitle: Column(
                                       crossAxisAlignment:
@@ -464,7 +487,8 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                                         Row(
                                           children: [
                                             SizedBox(
-                                              width: 200,
+                                              /* 200 memenuhi separuh panel. */
+                                              width: 150,
                                               child: TextField(
                                                 onTap: () {
                                                   _openQuantitySelector(

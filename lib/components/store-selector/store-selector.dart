@@ -42,56 +42,53 @@ class _StoreSelectorState extends State<StoreSelector> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 300,
-      width: 480,
+      width: 420,
+      constraints: const BoxConstraints(maxHeight: 420),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(15),
-            height: 80,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Theme.of(context).secondaryHeaderColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-              // border width 0
-              border: Border.all(
-                width: 0,
-                color: Colors.transparent,
-              ),
-            ),
+          /*
+            Bilah ungu setinggi 80 piksel DIBUANG — sama seperti dialog lain di
+            aplikasi ini. Pada dialog setinggi 300 piksel, sepertiganya dipakai
+            satu baris judul yang diberi warna paling menonjol di layar,
+            padahal ia satu-satunya bagian yang tidak perlu dikerjakan siapa
+            pun.
+
+            Tingginya juga tidak lagi dipatok. Dulu 300 piksel apa pun isinya:
+            empat toko menyisakan ruang kosong, dan kalau tokonya bertambah,
+            daftarnya menggulir di dalam kotak yang tidak perlu sempit.
+          */
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 18, 10, 2),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
-                    "Select store",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                    "Send from",
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
                 IconButton(
                   tooltip: "Close",
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                  ),
-                )
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close, size: 20),
+                ),
               ],
             ),
           ),
-          Expanded(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 0, 22, 10),
+            child: Text(
+              "Which store, or the office, should send the stock.",
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+          Divider(height: 1, color: Theme.of(context).dividerColor),
+          Flexible(
             child: Container(
               padding: const EdgeInsets.all(20),
               child: isLoading
