@@ -171,6 +171,19 @@ class AngkaBergerak extends StatelessWidget {
 ///
 /// Pembesarannya 2%. Pada sesuatu yang dilewati kursor ratusan kali sehari,
 /// gerakan besar berubah menjadi ribut.
+///
+/// JANGAN DIPAKAI PER BARIS PADA DAFTAR PANJANG.
+///
+/// Widget ini memasang MouseRegion dan AnimatedScale masing-masing satu, dan
+/// memanggil setState saat kursor masuk dan keluar. Satu tombol tidak apa-apa;
+/// lima puluh baris berarti lima puluh pasang, dan menggeser kursor
+/// menyeberanginya memicu serentetan rebuild yang benar-benar terasa. Versi
+/// sebelumnya berkas ini memuat SorotBerlatar untuk keperluan itu dan sudah
+/// dibuang justru karena itu.
+///
+/// Untuk baris daftar, pakai `hoverColor` pada InkWell yang biasanya sudah ada
+/// di sana: keadaan sorotnya ditangani satu lapisan Material untuk seluruh
+/// daftar, tanpa widget tambahan.
 class SorotMembesar extends StatefulWidget {
   final Widget child;
   final double skala;
@@ -201,65 +214,6 @@ class _SorotMembesarState extends State<SorotMembesar> {
   }
 }
 
-/// Latar yang menyala tipis saat kursor berada di atasnya. Untuk baris daftar.
-///
-/// Baris daftar TIDAK boleh diperbesar seperti kartu — membesar berarti
-/// menimpa baris tetangganya, dan pada daftar barang yang rapat hasilnya
-/// terlihat seperti kesalahan tata letak, bukan seperti sambutan.
-///
-/// Warnanya diambil dari aksen tema dengan opasitas sangat rendah, jadi ia ikut
-/// benar di terang maupun gelap tanpa perlu nilai terpisah.
-///
-/// Memakai withValues, bukan withOpacity. Yang terpasang Flutter 3.44.4 /
-/// Dart 3.12.2; withOpacity sudah usang di situ dan menghasilkan peringatan.
-/// Angka >=3.22.0 di pubspec.lock adalah batas MINIMUM dari dependensinya,
-/// bukan versi yang dipakai membangun — keduanya sempat tertukar.
-///
-/// Tujuh belas withOpacity lain yang sudah ada di kode belum diikutkan;
-/// itu penyapuan tersendiri.
-class SorotBerlatar extends StatefulWidget {
-  final Widget child;
-  final BorderRadius? lengkung;
-
-  const SorotBerlatar({super.key, required this.child, this.lengkung});
-
-  @override
-  State<SorotBerlatar> createState() => _SorotBerlatarState();
-}
-
-class _SorotBerlatarState extends State<SorotBerlatar> {
-  bool _disorot = false;
-
-  @override
-  Widget build(BuildContext context) {
-    if (gerakDimatikan(context)) return widget.child;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _disorot = true),
-      onExit: (_) => setState(() => _disorot = false),
-      child: AnimatedContainer(
-        duration: Gerak.kilat,
-        curve: Gerak.masuk,
-        decoration: BoxDecoration(
-          borderRadius: widget.lengkung,
-          color: _disorot
-              ? Theme.of(context).secondaryHeaderColor.withValues(alpha: 0.08)
-              : Colors.transparent,
-        ),
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-/// Perpindahan halaman untuk go_router.
-///
-/// Halaman baru meredup masuk sambil naik sedikit. Naiknya cuma 12 piksel —
-/// cukup untuk memberi arah, tidak cukup untuk terasa sebagai perjalanan.
-///
-/// Sebelumnya seluruh route memakai `builder:`, yang berarti transisi bawaan
-/// dan berbeda-beda tergantung sistem operasinya. Sekarang keempat belas route
-/// bergerak dengan cara yang sama.
 /// Perpindahan yang HANYA memudar, tanpa pergeseran.
 ///
 /// Dipakai halaman yang dimasuki lewat tirai. Tirainya sudah menutupi seluruh

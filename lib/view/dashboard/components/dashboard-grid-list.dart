@@ -185,152 +185,169 @@ class DashboardGridList extends StatelessWidget {
           builder: (_, compareNotifier, cartNotifier, child) {
         return Column(
           children: products.mapIndexed((index, e) {
-            return SorotBerlatar(
-              child: InkWell(
-                onTap: ((e.stock ?? 0) -
-                            cartNotifier.checkProductQuantity(e.id)) <=
-                        0
-                    ? () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                              "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
+            /*
+              SorotBerlatar DIBUANG DARI SINI.
+
+              Ia memasang satu MouseRegion dan satu AnimatedContainer PER
+              BARIS, dan tiap baris memanggil setState saat kursor masuk dan
+              keluar. Daftar ini dibangun seluruhnya sekaligus di dalam sebuah
+              Column — bukan ListView yang mendaur ulang barisnya — jadi
+              biayanya bukan satu widget melainkan sebanyak barang yang sedang
+              ditampilkan, dan menggeser kursor menyeberangi daftar memicu
+              serentetan rebuild. Itu yang membuatnya terasa berat.
+
+              InkWell yang memang sudah ada di sini punya keadaan sorot sendiri
+              yang ditangani lapisan Material — satu lapisan lukis untuk seluruh
+              daftar, tanpa widget tambahan dan tanpa setState per baris.
+              Hasilnya sama, ongkosnya tidak.
+            */
+            return InkWell(
+              hoverColor: Theme.of(context)
+                  .secondaryHeaderColor
+                  .withValues(alpha: 0.07),
+              onTap:
+                  ((e.stock ?? 0) - cartNotifier.checkProductQuantity(e.id)) <=
+                          0
+                      ? () {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text(
+                                "Insufficient stock. If you have reported this issue and adjustment has been made, please go to setting and override manually.",
+                              ),
+                              action: SnackBarAction(
+                                label: "OK",
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                },
+                              ),
                             ),
-                            action: SnackBarAction(
-                              label: "OK",
-                              onPressed: () {
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-                              },
-                            ),
-                          ),
-                        );
-                      }
-                    : () {
-                        onAddProduct(e);
-                      },
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Theme.of(context).dividerColor,
-                        width: 1,
+                          );
+                        }
+                      : () {
+                          onAddProduct(e);
+                        },
+              child: Container(
+                /*
+                    Tidak ada lagi garis di bawah tiap baris.
+
+                    Seberapa pun tipisnya, dua belas baris berarti dua belas
+                    garis sejajar, dan mata membacanya sebagai kisi — bukan
+                    sebagai daftar. Pemisahnya sekarang jarak dan pengelompokan:
+                    kode referensi kecil menempel di atas nama barangnya, lalu
+                    ruang kosong di antara pasangan itu. Garis hanya dipertahankan
+                    di tempat yang memang menandai batas, yaitu di bawah kepala
+                    kolom.
+                  */
+                padding: const EdgeInsets.only(
+                  left: 15,
+                  right: 15,
+                  top: 16,
+                  bottom: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Checkbox(
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        checkColor: Theme.of(context).colorScheme.onPrimary,
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        value: compareNotifier.hasProduct(e.id),
+                        onChanged: (value) {
+                          LoggerUtils().log(
+                              "User has change ${e.id} to $value. Prepared to be compared.",
+                              LogType.info);
+
+                          if (value != null && value == false) {
+                            Provider.of<CompareNotifier>(context, listen: false)
+                                .deselectProduct(e.id);
+                          } else if (value != null && value == true) {
+                            Provider.of<CompareNotifier>(context, listen: false)
+                                .selectProduct(e);
+                          }
+                        },
                       ),
                     ),
-                  ),
-                  padding: const EdgeInsets.only(
-                    left: 15,
-                    right: 15,
-                    top: 16,
-                    bottom: 16,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Checkbox(
-                          side: BorderSide(
-                            color: Theme.of(context).dividerColor,
+                    Expanded(
+                      flex: 12,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            e.reference,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          checkColor: Colors.white,
-                          activeColor: const Color.fromARGB(255, 109, 78, 137),
-                          value: compareNotifier.hasProduct(e.id),
-                          onChanged: (value) {
-                            LoggerUtils().log(
-                                "User has change ${e.id} to $value. Prepared to be compared.",
-                                LogType.info);
-
-                            if (value != null && value == false) {
-                              Provider.of<CompareNotifier>(context,
-                                      listen: false)
-                                  .deselectProduct(e.id);
-                            } else if (value != null && value == true) {
-                              Provider.of<CompareNotifier>(context,
-                                      listen: false)
-                                  .selectProduct(e);
-                            }
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        flex: 12,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              e.reference,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(
-                              height: 2,
-                            ),
-                            Text(
-                              e.description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              /*
+                          const SizedBox(
+                            height: 2,
+                          ),
+                          Text(
+                            e.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            /*
                                 Nama barang adalah yang dibaca paling sering di
                                 layar ini, jadi ia yang memimpin barisnya —
                                 setengah tingkat di atas angka, dan lebih tebal.
                                 Ukurannya sengaja tidak dinaikkan lebih jauh
                                 supaya tinggi barisnya tidak bertambah.
                               */
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ],
-                        ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        flex: 5,
-                        child: Text(
-                          NumberFormat.decimalPattern("en-US").format(e.price),
-                          textAlign: TextAlign.end,
-                          /*
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        NumberFormat.decimalPattern("en-US").format(e.price),
+                        textAlign: TextAlign.end,
+                        /*
                             Angka selebar sama. Ini kolom angka bersusun; pada
                             huruf biasa "1" jauh lebih sempit daripada "8", jadi
                             satuan dan ribuannya tidak pernah berbaris lurus.
                           */
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
-                      Expanded(
-                        flex: 5,
-                        child: Text(
-                          NumberFormat.decimalPattern("en-US").format(
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        NumberFormat.decimalPattern("en-US").format(
+                            (e.stock ?? 0) -
+                                cartNotifier.checkProductQuantity(e.id)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 40,
+                      child: IconButton(
+                        onPressed: () async {
+                          List<ProductImageModel> images =
+                              await ProductImageModel.fetchByItemID(e.id);
+                          showProductDialog(
+                              e,
+                              images,
                               (e.stock ?? 0) -
-                                  cartNotifier.checkProductQuantity(e.id)),
-                          textAlign: TextAlign.center,
-                        ),
+                                  cartNotifier.checkProductQuantity(e.id));
+                        },
+                        icon: const Icon(Icons.view_array),
                       ),
-                      SizedBox(
-                        width: 40,
-                        child: IconButton(
-                          onPressed: () async {
-                            List<ProductImageModel> images =
-                                await ProductImageModel.fetchByItemID(e.id);
-                            showProductDialog(
-                                e,
-                                images,
-                                (e.stock ?? 0) -
-                                    cartNotifier.checkProductQuantity(e.id));
-                          },
-                          icon: const Icon(Icons.view_array),
-                        ),
-                      )
-                    ],
-                  ),
+                    )
+                  ],
                 ),
               ),
             );

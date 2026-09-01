@@ -275,9 +275,11 @@ ThemeData _bangunTema(_PaletTema palet) {
 
     Diturunkan menjadi warna tulisan pada opasitas rendah, jadi ia mengikuti
     tema dengan sendirinya alih-alih memakai satu abu-abu yang kebetulan cocok
-    di salah satunya.
+    di salah satunya. Tujuh persen, bukan sepuluh: di atas latar gelap #2B2432,
+    putih sepuluh persen masih menghasilkan lompatan terang yang terbaca
+    sebagai garis, bukan sebagai sekat.
   */
-  final pemisah = palet.tulisan.withValues(alpha: 0.10);
+  final pemisah = palet.tulisan.withValues(alpha: 0.07);
 
   /*
     Garis tepi kolom isian dan tombol bergaris perlu lebih tegas daripada
