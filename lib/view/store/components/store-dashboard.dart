@@ -369,30 +369,29 @@ class _StoreDashboardState extends State<StoreDashboard> {
         const SizedBox(
           height: 15,
         ),
+        /*
+          BINGKAI PELANGI DIBUANG.
+
+          Kartu ini dulu dikelilingi gradien biru-sian-merah muda setebal
+          2,5 piksel — satu-satunya tempat di seluruh aplikasi yang memakai
+          warna-warna itu, dan tidak satu pun di antaranya berarti apa-apa.
+          Akibatnya menyinkronkan stok tampil sebagai hal paling meriah di
+          halaman ini, di atas angka penjualan sekalipun.
+
+          Yang menonjol seharusnya isinya, bukan bingkainya. Sekarang ia
+          memakai permukaan dan garis rambut yang sama dengan kartu lain;
+          satu-satunya warna di sini tinggal tombolnya, yang memang tempat
+          tindakannya berada.
+        */
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(2.5),
-          // gradient color
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF5B8CFF),
-                Color(0xFFA4CAFB),
-                Color(0xFFA7EDFF),
-                Color(0xFFFDADEE),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              stops: [0.1187, 0.3842, 0.6419, 0.8996],
-            ),
-            borderRadius: BorderRadius.circular(15),
+            color: Theme.of(context).cardColor,
+            border: Border.all(color: Theme.of(context).dividerColor),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            padding: const EdgeInsets.all(30),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,14 +404,29 @@ class _StoreDashboardState extends State<StoreDashboard> {
                   height: 10,
                 ),
                 Text(
-                  "Sync your stock with the server to get the latest stock data. This function requires internet connection, make sure you are connected to the internet.",
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  "Pulls the latest stock figures from the server. Needs an "
+                  "internet connection.",
+                  /* Penjelasan, bukan isi: diredupkan dan dikecilkan. */
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(
                   height: 25,
                 ),
-                InkWell(
-                  onTap: () async {
+                /*
+                  Dulu InkWell membungkus sebuah Container bergaris yang
+                  KELIHATAN seperti tombol tanpa berperilaku seperti tombol:
+                  tanpa keadaan sorot, tanpa umpan balik tekan, tanpa kursor
+                  tangan. Sekarang tombol sungguhan, dan temanya yang memberi
+                  keempatnya sekaligus.
+                */
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(150, 44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () async {
                     try {
                       var storeModel = await StoreModel.getCurrentProfile();
                       String storeCode = storeModel!.code!;
@@ -434,24 +448,7 @@ class _StoreDashboardState extends State<StoreDashboard> {
                       );
                     }
                   },
-                  child: Container(
-                    // width fit
-                    width: 150,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 25),
-                    // border 1 px solid #ccc
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).dividerColor,
-                      ),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Text(
-                      "Sync now",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                  child: const Text("Sync now"),
                 ),
               ],
             ),
