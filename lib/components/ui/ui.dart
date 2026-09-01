@@ -158,7 +158,11 @@ class JudulBagian extends StatelessWidget {
   final String teks;
   final double atas;
 
-  const JudulBagian(this.teks, {super.key, this.atas = 22});
+  /// Tindakan di ujung kanan, sesudah garisnya. Tempat yang sama dengan
+  /// tindakan pada [Bagian].
+  final Widget? aksi;
+
+  const JudulBagian(this.teks, {super.key, this.atas = 22, this.aksi});
 
   @override
   Widget build(BuildContext context) {
@@ -171,6 +175,10 @@ class JudulBagian extends StatelessWidget {
           Expanded(
             child: Divider(height: 1, color: Theme.of(context).dividerColor),
           ),
+          if (aksi != null) ...[
+            const SizedBox(width: 12),
+            aksi!,
+          ],
         ],
       ),
     );

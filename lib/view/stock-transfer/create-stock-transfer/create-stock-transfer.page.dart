@@ -6,6 +6,7 @@ import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/model/model.user.model.dart';
 import 'package:cstyle_cashier_3/view/product-selector/product-selector.page.dart';
+import 'package:cstyle_cashier_3/components/ui/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -267,53 +268,51 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(
-          height: 15,
+        const SizedBox(height: 24),
+        /*
+          Judulnya dipendekkan. "Create stock transfer request" mengulang
+          kata yang sudah disebut penandanya di atas, dan tiga kata benda
+          beruntun membuat judul yang seharusnya dibaca sekilas jadi harus
+          diurai dulu.
+        */
+        const KepalaHalaman(
+          penanda: "INVENTORY",
+          judul: "New transfer",
+          keterangan: "Ask another store, or the office, to send stock to "
+              "this one.",
         ),
-        Text(
-          "Create stock transfer request",
-          style: Theme.of(context).textTheme.headlineLarge,
+        const SizedBox(height: 22),
+        BarisMeta(
+          isi: [
+            Meta("DATE", DateFormat("d MMM yyyy").format(DateTime.now())),
+          ],
         ),
-        const SizedBox(
-          height: 35,
-        ),
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Container(
-                // add border 1px solid grey
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(0),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: 1,
-                  ),
-                  color: Colors.transparent,
-                ),
+                /*
+                  Kotak bergaris DIBUANG. Warnanya Colors.grey.shade300 —
+                  nilai untuk latar terang — sehingga di tema gelap dua
+                  panel inilah bidang paling terang di halaman. Yang
+                  memisahkan bagiannya sekarang garis rambut di bawah
+                  labelnya, sama seperti halaman lain.
+                */
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: 20,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(0),
-                        color: Colors.black87,
-                      ),
-                      child: Text(
-                        "1. REQUEST OPTIONS",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium!
-                            .copyWith(
-                              color: Colors.white,
-                            ),
-                      ),
+                    /*
+                      Bilah judul hitam pekat DIBUANG. Ia memenuhi lebar
+                      panel dengan warna solid untuk memuat dua kata, dan
+                      penomorannya menjanjikan urutan langkah yang tidak
+                      pernah ada — tidak ada langkah 2 di halaman ini.
+                    */
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(15, 4, 15, 0),
+                      child: JudulBagian("DESTINATION", atas: 0),
                     ),
                     Container(
                       padding: const EdgeInsets.all(
@@ -412,39 +411,18 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 15,
-                            horizontal: 20,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(0),
-                            color: Theme.of(context)
-                                .secondaryHeaderColor
-                                .withValues(alpha: 0.8),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                "YOUR REQUEST",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium!
-                                    .copyWith(
-                                      color: Colors.white,
-                                    ),
-                              ),
-                              const Spacer(),
-                              IconButton(
-                                tooltip: "Add product",
-                                onPressed: _openProductSelector,
-                                icon: const Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
+                        /*
+                          Bilah ungu 80% DIBUANG, sama alasannya dengan
+                          bilah hitam di panel sebelah. Tombol tambahnya
+                          pindah ke kanan barisan label — tempat yang sama
+                          dengan tindakan di seluruh aplikasi.
+                        */
+                        JudulBagian(
+                          "PRODUCTS",
+                          aksi: TombolBagian(
+                            label: "Add product",
+                            ikon: Icons.add_rounded,
+                            onTekan: _openProductSelector,
                           ),
                         ),
                         products.isEmpty
