@@ -4,8 +4,8 @@ import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:cstyle_cashier_3/view/member-list/components/member-detail.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
+import 'package:cstyle_cashier_3/view/member-list/components/member-actions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class MemberListPage extends StatefulWidget {
   const MemberListPage({super.key});
@@ -196,183 +196,23 @@ class _MemberListPageState extends State<MemberListPage> {
                                   showModalBottomSheet(
                                       context: context,
                                       builder: (context) {
-                                        return Container(
-                                          width: 400,
-                                          padding: const EdgeInsets.all(20),
-                                          child: ListView(
-                                            shrinkWrap: true,
-                                            children: [
-                                              ListTile(
-                                                onTap: e.email == ""
-                                                    ? null
-                                                    : () {
-                                                        Clipboard.setData(
-                                                          ClipboardData(
-                                                            text: e.email,
-                                                          ),
-                                                        );
-
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                          const SnackBar(
-                                                            content: Text(
-                                                              "Successfully copied email.",
-                                                            ),
-                                                            duration: Duration(
-                                                                seconds: 1),
-                                                          ),
-                                                        );
-
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                leading: Icon(
-                                                  Icons.copy,
-                                                  color: e.email == ""
-                                                      ? Theme.of(context)
-                                                          .disabledColor
-                                                      : Theme.of(context)
-                                                          .iconTheme
-                                                          .color,
-                                                ),
-                                                title: Text(
-                                                  "Copy email",
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge!
-                                                      .copyWith(
-                                                        color: e.email == ""
-                                                            ? Theme.of(context)
-                                                                .disabledColor
-                                                            : Theme.of(context)
-                                                                .iconTheme
-                                                                .color,
-                                                      ),
-                                                ),
-                                              ),
-                                              ListTile(
-                                                onTap: e.phoneNumber == ""
-                                                    ? null
-                                                    : () {
-                                                        Clipboard.setData(
-                                                          ClipboardData(
-                                                            text: e.email,
-                                                          ),
-                                                        );
-
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                          const SnackBar(
-                                                            content: Text(
-                                                              "Successfully copied phone number.",
-                                                            ),
-                                                            duration: Duration(
-                                                                seconds: 1),
-                                                          ),
-                                                        );
-
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                leading: Icon(
-                                                  Icons.copy,
-                                                  color: e.phoneNumber == ""
-                                                      ? Theme.of(context)
-                                                          .disabledColor
-                                                      : Theme.of(context)
-                                                          .iconTheme
-                                                          .color,
-                                                ),
-                                                title: Text(
-                                                  "Copy phone number",
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge!
-                                                      .copyWith(
-                                                        color: e.phoneNumber ==
-                                                                ""
-                                                            ? Theme.of(context)
-                                                                .disabledColor
-                                                            : Theme.of(context)
-                                                                .iconTheme
-                                                                .color,
-                                                      ),
-                                                ),
-                                              ),
-                                              ListTile(
-                                                onTap: () {
-                                                  Clipboard.setData(
-                                                    ClipboardData(
-                                                      text: e.code,
-                                                    ),
-                                                  );
-
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        "Successfully copied code.",
-                                                      ),
-                                                      duration:
-                                                          Duration(seconds: 1),
-                                                    ),
-                                                  );
-
-                                                  Navigator.of(context).pop();
-                                                },
-                                                leading: Icon(
-                                                  Icons.copy,
-                                                  color: Theme.of(context)
-                                                      .iconTheme
-                                                      .color,
-                                                ),
-                                                title: Text(
-                                                  "Copy code",
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge!
-                                                      .copyWith(
-                                                        color: e.email == ""
-                                                            ? Theme.of(context)
-                                                                .disabledColor
-                                                            : Theme.of(context)
-                                                                .iconTheme
-                                                                .color,
-                                                      ),
-                                                ),
-                                              ),
-                                              ListTile(
-                                                onTap: () {
-                                                  Navigator.of(context)
-                                                      .pop("detail");
-                                                },
-                                                leading: Icon(
-                                                  Icons.info_outline,
-                                                  color: Theme.of(context)
-                                                      .iconTheme
-                                                      .color,
-                                                ),
-                                                title: Text(
-                                                  "View detail",
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
+                                        return MemberActions(anggota: e);
                                       }).then((value) {
-                                    if (value == 'detail') {
+                                    /*
+                                      Nilai kembaliannya disebut satu tempat —
+                                      MemberActions.bukaDetail — supaya teks
+                                      "detail" tidak diketik di dua berkas yang
+                                      berbeda dan menyimpang tanpa ketahuan.
+                                    */
+                                    if (value == MemberActions.bukaDetail) {
                                       // show dialog detail
                                       showDialog(
                                         context: context,
                                         builder: (context) {
                                           return AlertDialog(
                                             title: Text(
-                                              "Member Detail",
+                                              /* Nama orangnya, bukan nama layarnya. */
+                                              e.name,
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .headlineMedium,
