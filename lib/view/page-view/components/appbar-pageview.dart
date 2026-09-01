@@ -60,17 +60,24 @@ class AppbarPageView extends StatelessWidget {
               children: [
                 Image.asset(
                   logoTema(context),
-                  width: 32,
-                  height: 32,
+                  width: 30,
+                  height: 30,
                 ),
-                Expanded(
-                  child: Center(
-                    child: _PemilihMode(
-                      terpilih: page,
-                      onPilih: (i) => changePage(i),
-                    ),
-                  ),
+                const SizedBox(width: 10),
+                Text(
+                  "CSTYLE CASHIER",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: 11,
+                        letterSpacing: 2.2,
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
+                const Spacer(),
+                _TombolMode(
+                  diModeKelola: page == 1,
+                  onTukar: () => changePage(page == 1 ? 0 : 1),
+                ),
+                const SizedBox(width: 6),
                 Badge(
                   backgroundColor: Theme.of(context).secondaryHeaderColor,
                   /*
@@ -113,86 +120,37 @@ class AppbarPageView extends StatelessWidget {
   }
 }
 
-/// Pemilih mode: menjual, atau mengelola.
+/// Satu tombol untuk berpindah antara menjual dan mengelola.
 ///
-/// DULU DUA TAB BERGARIS BAWAH BERJUDUL "Dashboard" DAN "Store".
+/// KENAPA SATU TOMBOL, BUKAN DUA PILIHAN BERDAMPINGAN.
 ///
-/// Dua hal yang keliru di situ. Pertama namanya: "Dashboard" tidak menyebut
-/// bahwa itu layar tempat kasir menjual sepanjang hari, dan "Store" tidak
-/// menyebut bahwa isinya pengaturan — statistik toko, sinkronisasi stok,
-/// pengaturan tema dan pencetak, keanggotaan, persediaan. Keduanya nama tempat,
-/// bukan nama pekerjaan.
+/// Bentuk sebelumnya — mula-mula dua tab bergaris bawah, lalu sakelar
+/// bersegmen — memberi bobot yang sama kepada dua hal yang pemakaiannya sama
+/// sekali tidak seimbang. Kasir berada di mode menjual hampir sepanjang hari;
+/// mengelola adalah singgahan sesekali untuk menyinkronkan stok atau mengubah
+/// pencetak. Menampilkan keduanya bersisian di tengah bilah menyatakan bahwa
+/// keduanya setara, dan itu tidak benar.
 ///
-/// Kedua bentuknya. Tab bergaris bawah menyatakan "ini beberapa halaman dari
-/// satu bagian yang sama". Padahal ini bukan itu — ini dua MODE yang saling
-/// meniadakan: satu dipakai menghadap pembeli, satu lagi tidak. Bentuk yang
-/// menyatakan hal itu adalah sakelar bersegmen: satu wadah, satu segmen
-/// menyala, dan jelas bahwa memilih yang satu berarti meninggalkan yang lain.
+/// Satu tombol menyatakan hubungan yang sebenarnya: ada tempat kerja, dan ada
+/// jalan keluar sementara darinya. Ditaruh di KANAN bersama kendali lain, bukan
+/// di tengah — letaknya sendiri sudah mengatakan bahwa ini bukan navigasi
+/// utama, dan tengah bilah bebas untuk lambangnya.
 ///
-/// Ikonnya ditambahkan karena pada dua pilihan yang berdampingan, lambang jauh
-/// lebih cepat dikenali daripada kata — dan kasir menekan ini berkali-kali
-/// sehari tanpa membacanya lagi.
-class _PemilihMode extends StatelessWidget {
-  final int terpilih;
-  final ValueChanged<int> onPilih;
+/// Labelnya menyebut TUJUAN, bukan keadaan sekarang. "Manage store" berarti
+/// menekan ini membawa ke sana; ketika sudah di sana, ia berubah menjadi
+/// "Back to selling". Anak panahnya ikut berbalik supaya arahnya terbaca
+/// sebelum kalimatnya.
+class _TombolMode extends StatefulWidget {
+  final bool diModeKelola;
+  final VoidCallback onTukar;
 
-  const _PemilihMode({required this.terpilih, required this.onPilih});
+  const _TombolMode({required this.diModeKelola, required this.onTukar});
 
   @override
-  Widget build(BuildContext context) {
-    final warna = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: warna.onSurface.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _Segmen(
-            ikon: Icons.point_of_sale_outlined,
-            label: "Sell",
-            aktif: terpilih == 0,
-            onTekan: () => onPilih(0),
-          ),
-          const SizedBox(width: 3),
-          _Segmen(
-            ikon: Icons.storefront_outlined,
-            label: "Manage",
-            aktif: terpilih == 1,
-            onTekan: () => onPilih(1),
-          ),
-        ],
-      ),
-    );
-  }
+  State<_TombolMode> createState() => _TombolModeState();
 }
 
-/// Satu segmen pada [_PemilihMode].
-///
-/// Dijadikan satu widget karena versi tab sebelumnya menuliskan keduanya dua
-/// kali, dan salinannya sudah menyimpang: yang aktif pada tab pertama memakai
-/// ungu yang dipatok, yang kedua membacanya dari tema.
-class _Segmen extends StatefulWidget {
-  final IconData ikon;
-  final String label;
-  final bool aktif;
-  final VoidCallback onTekan;
-
-  const _Segmen({
-    required this.ikon,
-    required this.label,
-    required this.aktif,
-    required this.onTekan,
-  });
-
-  @override
-  State<_Segmen> createState() => _SegmenState();
-}
-
-class _SegmenState extends State<_Segmen> {
+class _TombolModeState extends State<_TombolMode> {
   bool _disorot = false;
 
   @override
@@ -200,51 +158,51 @@ class _SegmenState extends State<_Segmen> {
     final tema = Theme.of(context);
     final warna = tema.colorScheme;
 
-    /*
-      Tiga tingkat, bukan dua. Yang aktif berlatar aksen; yang disorot mendapat
-      latar samar; sisanya polos. Tanpa tingkat tengah, segmen yang bisa ditekan
-      tidak memberi tanda apa pun sampai benar-benar ditekan.
-    */
-    final Color latar = widget.aktif
-        ? warna.primary
-        : (_disorot
-            ? warna.onSurface.withValues(alpha: 0.07)
-            : Colors.transparent);
+    final ikon = widget.diModeKelola
+        ? Icons.arrow_back_rounded
+        : Icons.storefront_outlined;
+    final label = widget.diModeKelola ? "Back to selling" : "Manage store";
 
-    final Color depan = widget.aktif
-        ? warna.onPrimary
-        : warna.onSurface.withValues(alpha: _disorot ? 0.92 : 0.6);
+    final depan = warna.onSurface.withValues(alpha: _disorot ? 0.95 : 0.7);
 
-    return MouseRegion(
-      cursor: widget.aktif ? MouseCursor.defer : SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _disorot = true),
-      onExit: (_) => setState(() => _disorot = false),
-      child: GestureDetector(
-        onTap: widget.aktif ? null : widget.onTekan,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: Gerak.kilat,
-          curve: Gerak.masuk,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: latar,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(widget.ikon, size: 17, color: depan),
-              const SizedBox(width: 8),
-              Text(
-                widget.label,
-                style: tema.textTheme.bodyMedium?.copyWith(
-                  color: depan,
-                  fontSize: 13,
-                  letterSpacing: 0.3,
-                  fontWeight: widget.aktif ? FontWeight.w700 : FontWeight.w500,
+    return Tooltip(
+      message: widget.diModeKelola
+          ? "Return to the selling screen"
+          : "Stock sync, printer, memberships and settings",
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _disorot = true),
+        onExit: (_) => setState(() => _disorot = false),
+        child: GestureDetector(
+          onTap: widget.onTukar,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: Gerak.kilat,
+            curve: Gerak.masuk,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: _disorot
+                  ? warna.onSurface.withValues(alpha: 0.07)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: warna.outline.withValues(alpha: 0.6)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(ikon, size: 16, color: depan),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: tema.textTheme.bodyMedium?.copyWith(
+                    color: depan,
+                    fontSize: 13,
+                    letterSpacing: 0.2,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
