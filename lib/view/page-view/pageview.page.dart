@@ -6,6 +6,8 @@ import 'package:cstyle_cashier_3/view/page-view/components/appbar-pageview.dart'
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/utils/waktu.utils.dart';
+import 'dart:ui' show FontFeature;
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -582,63 +584,135 @@ class _PageViewPageState extends State<PageViewPage> {
                           return;
                         },
                         child: Container(
-                            height:
+                          /*
+                            Tingginya MENGIKUTI ISI, dengan batas atas. Dulu
+                            dipatok 90% tinggi layar apa pun isinya, jadi dua
+                            nota tertahan menghasilkan panel setinggi satu layar
+                            dengan ruang kosong di bawahnya — dan ruang kosong
+                            sebesar itu terbaca sebagai daftar yang gagal
+                            memuat, bukan sebagai daftar yang memang pendek.
+                          */
+                          constraints: BoxConstraints(
+                            maxHeight:
                                 (MediaQuery.of(context).size.height - 90) * 0.9,
-                            width: 450,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).cardColor,
+                          ),
+                          width: 420,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: Theme.of(context).cardColor,
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor,
                             ),
-                            padding: const EdgeInsets.all(10),
-                            child: ListView.builder(
-                              itemBuilder: (context, index) {
-                                return ListTile(
-                                  onTap: cartNotifier.selectedCart != null &&
-                                          cartNotifier.selectedCart!.id ==
-                                              carts[index].id
-                                      ? null
-                                      : () async {
-                                          // Get complete cart
-                                          var cart = await CartModel.fetchByID(
-                                              carts[index].id!);
-                                          Provider.of<CartNotifier>(context,
-                                                  listen: false)
-                                              .selectCart(cart);
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              /*
+                                Panel ini dulu muncul tanpa judul sama sekali —
+                                sederet nomor dan tanggal melayang di atas layar,
+                                tanpa apa pun yang menyebutkan itu daftar apa.
+                              */
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(18, 16, 10, 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        carts.isEmpty
+                                            ? "Held bills"
+                                            : "Held bills (${carts.length})",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      tooltip: "Close",
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      icon: const Icon(Icons.close, size: 20),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Divider(
+                                height: 1,
+                                color: Theme.of(context).dividerColor,
+                              ),
+                              if (carts.isEmpty)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(18, 34, 18, 40),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.inbox_outlined,
+                                        size: 30,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.3),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        "Nothing on hold",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "Bills you set aside show up here.",
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                Flexible(
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                      horizontal: 8,
+                                    ),
+                                    itemCount: carts.length,
+                                    itemBuilder: (context, index) {
+                                      final nota = carts[index];
+                                      final terbuka =
+                                          cartNotifier.selectedCart?.id ==
+                                              nota.id;
 
-                                          Navigator.of(context).pop();
-                                        },
-                                  /*
-                                    Waktu di atas, nomor nota di bawah — enam
-                                    nota tertahan pada hari yang sama hanya
-                                    dibedakan oleh jamnya, bukan oleh dua
-                                    belas angka acaknya.
-                                  */
-                                  title: Text(
-                                    waktuManusiawi(carts[index].date),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                      return _BarisNotaTertahan(
+                                        waktu: waktuManusiawi(nota.date),
+                                        nomor: nota.name,
+                                        jumlahUnit: nota.itemCount,
+                                        total: nota.totalPrice,
+                                        terbuka: terbuka,
+                                        onPilih: terbuka
+                                            ? null
+                                            : () async {
+                                                var cart =
+                                                    await CartModel.fetchByID(
+                                                        nota.id!);
+                                                if (!context.mounted) return;
+                                                Provider.of<CartNotifier>(
+                                                  context,
+                                                  listen: false,
+                                                ).selectCart(cart);
+                                                Navigator.of(context).pop();
+                                              },
+                                      );
+                                    },
                                   ),
-                                  subtitle: Text(
-                                    carts[index].name,
-                                    style: gayaLabelKolom(context),
-                                  ),
-                                  trailing: cartNotifier.selectedCart != null &&
-                                          cartNotifier.selectedCart!.id ==
-                                              carts[index].id
-                                      ? Icon(
-                                          Icons.check,
-                                          color:
-                                              Theme.of(context).iconTheme.color,
-                                        )
-                                      : null,
-                                );
-                              },
-                              itemCount: carts.length,
-                            )),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     )
                   ],
@@ -697,6 +771,125 @@ class _PageViewPageState extends State<PageViewPage> {
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Satu nota tertahan di dalam panel.
+///
+/// APA YANG DIBUTUHKAN UNTUK MENEMUKANNYA KEMBALI.
+///
+/// Panel ini dipakai ketika pembeli pergi mengambil barang lain dan kasir
+/// melayani orang berikutnya. Untuk kembali ke nota yang benar, yang ditanyakan
+/// bukan nomornya — dua belas angka acak yang tidak pernah dibaca siapa pun —
+/// melainkan "yang tadi, tiga barang, dua ratus ribuan".
+///
+/// Karena itu barisnya membawa jam, jumlah barang, dan totalnya. Ketiganya dulu
+/// tidak ada: daftarnya hanya berisi nomor dan tanggal, dan enam nota pada hari
+/// yang sama benar-benar tidak bisa dibedakan satu sama lain.
+class _BarisNotaTertahan extends StatefulWidget {
+  final String waktu;
+  final String nomor;
+  final int jumlahUnit;
+  final double total;
+  final bool terbuka;
+  final VoidCallback? onPilih;
+
+  const _BarisNotaTertahan({
+    required this.waktu,
+    required this.nomor,
+    required this.jumlahUnit,
+    required this.total,
+    required this.terbuka,
+    required this.onPilih,
+  });
+
+  @override
+  State<_BarisNotaTertahan> createState() => _BarisNotaTertahanState();
+}
+
+class _BarisNotaTertahanState extends State<_BarisNotaTertahan> {
+  bool _disorot = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final warna = tema.colorScheme;
+    final aksen = tema.secondaryHeaderColor;
+
+    final Color latar = widget.terbuka
+        ? aksen.withValues(alpha: 0.12)
+        : (_disorot
+            ? warna.onSurface.withValues(alpha: 0.05)
+            : Colors.transparent);
+
+    return MouseRegion(
+      cursor: widget.terbuka ? MouseCursor.defer : SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _disorot = true),
+      onExit: (_) => setState(() => _disorot = false),
+      child: GestureDetector(
+        onTap: widget.onPilih,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: Gerak.kilat,
+          curve: Gerak.masuk,
+          margin: const EdgeInsets.symmetric(vertical: 2),
+          padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
+          decoration: BoxDecoration(
+            color: latar,
+            borderRadius: BorderRadius.circular(9),
+            border: Border(
+              left: BorderSide(
+                color: widget.terbuka ? aksen : Colors.transparent,
+                width: 3,
+              ),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.waktu,
+                      style: tema.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: widget.terbuka ? aksen : null,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(widget.nomor, style: gayaLabelKolom(context)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Rp ${NumberFormat("#,##0").format(widget.total)}",
+                    style: tema.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    widget.jumlahUnit == 1
+                        ? "1 pc"
+                        : "${widget.jumlahUnit} pcs",
+                    style: tema.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

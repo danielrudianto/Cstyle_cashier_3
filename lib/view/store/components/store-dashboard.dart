@@ -226,9 +226,25 @@ class _StoreDashboardState extends State<StoreDashboard> {
         const SizedBox(
           height: 25,
         ),
-        Card(
-          color: Theme.of(context).cardColor,
-          elevation: 2,
+        /*
+          SATU BAHASA UNTUK SEMUA KARTU.
+
+          Halaman ini sempat memakai tiga perlakuan sekaligus: statistik dan
+          sinkronisasi memakai permukaan bergaris rambut, tema dan pencetak
+          memakai Card berelevasi tanpa garis, dan laporan harian memakai
+          latar beraksen. Tiga bentuk untuk hal yang sederajat membuat mata
+          mencari perbedaan yang tidak ada artinya.
+
+          Sekarang semuanya sama, dan SATU yang sengaja berbeda: laporan
+          harian, karena ia satu-satunya yang menghasilkan sesuatu untuk
+          dibawa keluar. Perbedaan yang tersisa jadi berarti.
+        */
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            border: Border.all(color: Theme.of(context).dividerColor),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
             /*
               Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
@@ -581,9 +597,13 @@ class _StoreDashboardState extends State<StoreDashboard> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: Card(
-                  color: Theme.of(context).cardColor,
-                  elevation: 2,
+                /* Bahasa kartu yang sama; lihat catatan di kartu statistik. */
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Padding(
                     /*
                       Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
@@ -649,9 +669,13 @@ class _StoreDashboardState extends State<StoreDashboard> {
               ),
               const SizedBox(width: 15),
               Expanded(
-                child: Card(
-                  color: Theme.of(context).cardColor,
-                  elevation: 2,
+                /* Bahasa kartu yang sama; lihat catatan di kartu statistik. */
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Padding(
                     /*
                       Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
@@ -677,9 +701,16 @@ class _StoreDashboardState extends State<StoreDashboard> {
                           height: 15,
                         ),
                         if (printer == null) ...[
+                          /*
+                            Keterangan keadaan, bukan judul — dulu bodyLarge,
+                            seukuran isi utama, sehingga kalimat yang hanya
+                            memberi tahu bahwa pencetak belum dipilih tampil
+                            lebih besar daripada nama pencetak itu sendiri.
+                          */
                           Text(
-                            "No printer is set. Please set your printer to enable printing.",
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            "No printer set. Printing is off until one is "
+                            "chosen.",
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                           const SizedBox(
                             height: 15,
@@ -725,9 +756,23 @@ class _StoreDashboardState extends State<StoreDashboard> {
                             },
                           ),
                         ] else ...[
+                          /*
+                            Label kecil di atas, nama pencetak di bawahnya —
+                            sama seperti kolom lain di aplikasi ini. Dulu satu
+                            baris "Printer: EPSONC70AE8 (L14150 Series)"
+                            seukuran judul, yang membuat nama perangkat menjadi
+                            hal terbesar kedua di halaman setelan.
+                          */
+                          Text("CONNECTED", style: gayaLabelKolom(context)),
+                          const SizedBox(height: 4),
                           Text(
-                            "Printer: ${printer!.name}",
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            printer!.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(
                             height: 15,

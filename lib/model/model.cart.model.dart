@@ -12,11 +12,16 @@ class CartModel {
   final List<CartItemModel> products;
   final double totalPrice;
 
+  /// Jumlah satuan barang; hanya terisi pada daftar nota tertahan, di mana
+  /// isinya tidak ikut dimuat.
+  final int itemCount;
+
   CartModel({
     required this.name,
     required this.date,
     required this.products,
     required this.totalPrice,
+    this.itemCount = 0,
     this.id,
     this.memberID,
   });
@@ -51,8 +56,14 @@ class CartModel {
         id: e.id,
         name: e.name,
         date: DateTime.parse(e.date),
+        /*
+          Isinya sengaja tidak dimuat — daftar ini hanya perlu ringkasannya,
+          dan memuat seluruh barang dari setiap nota tertahan hanya untuk
+          menghitungnya akan membaca jauh lebih banyak daripada yang dipakai.
+        */
         products: [],
-        totalPrice: 0,
+        totalPrice: e.total,
+        itemCount: e.jumlahUnit,
       );
     }).toList();
   }

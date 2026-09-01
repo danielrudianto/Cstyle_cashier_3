@@ -6,11 +6,23 @@ class SQLCartCodeModel {
   String date;
   String? memberID;
 
+  /// Jumlah satuan barang di dalam keranjang ini.
+  ///
+  /// Hanya terisi oleh [fetchCarts]; jalur lain tidak membutuhkannya dan
+  /// tidak membayar biaya menghitungnya.
+  final int jumlahUnit;
+
+  /// Total keranjang ini, dihitung dengan rumus yang sama persis dengan
+  /// yang dipakai layar kasir.
+  final double total;
+
   SQLCartCodeModel({
     this.id,
     required this.name,
     required this.date,
     this.memberID,
+    this.jumlahUnit = 0,
+    this.total = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,6 +40,8 @@ class SQLCartCodeModel {
       name: map['name'],
       date: map['date'],
       memberID: map['memberID'],
+      jumlahUnit: (map['jumlahUnit'] as int?) ?? 0,
+      total: ((map['total'] as num?) ?? 0).toDouble(),
     );
   }
 
@@ -46,12 +60,35 @@ class SQLCartCodeModel {
     }
   }
 
+  /// Nota tertahan, LENGKAP dengan ringkasan isinya.
+  ///
+  /// Dulu SELECT * dari cart_code saja, sehingga panel nota tertahan hanya
+  /// punya nomor dan tanggal untuk ditampilkan — dan enam nota pada hari yang
+  /// sama praktis tidak bisa dibedakan.
+  ///
+  /// Penjumlahan totalnya SENGAJA mengulang rumus di CartNotifier.updatePrice:
+  /// tiap baris dibulatkan ke bawah ke ribuan terdekat, baru dijumlahkan.
+  /// Menjumlahkan dulu lalu membulatkan menghasilkan angka yang berbeda, dan
+  /// nota yang menampilkan total berbeda dari yang dibayar adalah cacat yang
+  /// jauh lebih mahal daripada panel yang kosong.
+  ///
+  /// CAST ke INTEGER di SQLite memotong ke arah nol, yang sama dengan floor
+  /// untuk nilai positif — dan harga tidak pernah negatif di sini.
   static Future<List<SQLCartCodeModel>> fetchCarts() async {
     final db = await DatabaseUtils().database;
-    var result = await db.query(
-      "cart_code",
-      orderBy: "id DESC",
-    );
+    var result = await db.rawQuery('''
+      SELECT
+        cart_code.*,
+        COALESCE(SUM(cart.quantity), 0) AS jumlahUnit,
+        COALESCE(SUM(
+          CAST(cart.quantity * cart.price * (100 - cart.discount) / 100000
+               AS INTEGER) * 1000
+        ), 0) AS total
+      FROM cart_code
+      LEFT JOIN cart ON cart.cartCodeID = cart_code.id
+      GROUP BY cart_code.id
+      ORDER BY cart_code.id DESC
+    ''');
 
     return result.map((e) => SQLCartCodeModel.fromMap(e)).toList();
   }
