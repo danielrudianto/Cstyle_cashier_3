@@ -464,6 +464,35 @@ ThemeData _bangunTema(_PaletTema palet) {
 /// yang sejak aksen dipromosikan menjadi colorScheme.primary berarti UNGU DI
 /// ATAS UNGU. Yang paling terasa tombol Checkout: labelnya nyaris tidak
 /// terbaca.
+/// Gradien untuk PERMUKAAN KERJA — halaman utama dan halaman toko.
+///
+/// Keluarga warnanya sama dengan layar pembuka, kepekatannya jauh berbeda, dan
+/// itu bukan kompromi melainkan intinya.
+///
+/// Layar pembuka adalah momen merek: dilihat beberapa detik, lalu ditinggalkan.
+/// Di situ ungu pekat bekerja. Halaman utama dipelototi kasir sepanjang hari di
+/// belakang tulisan kecil dan angka; warna sepekat itu di sana melelahkan mata
+/// dan menaikkan kepekatan seluruh layar tanpa memberi keterangan apa pun.
+///
+/// Jadi kecerahannya dijaga tetap di sekitar warna latar sebelumnya — #292929
+/// di gelap, #FDFBFF di terang — dan yang ditambahkan hanya SEMBURAT ungu plus
+/// arah dari atas ke bawah. Cukup untuk membuat bidangnya terasa punya
+/// kedalaman dan sekeluarga dengan layar pembuka; tidak cukup untuk ikut
+/// bersaing dengan isinya.
+///
+/// Kalau ingin lebih terasa, yang dinaikkan cukup jarak antara kedua warnanya.
+LinearGradient gradienKerja(BuildContext context) {
+  final gelap = Theme.of(context).brightness == Brightness.dark;
+
+  return LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: gelap
+        ? const [Color(0xFF2B2432), Color(0xFF232028)]
+        : const [Color(0xFFFBF8FE), Color(0xFFF2EDF8)],
+  );
+}
+
 Color diAtasAksen(BuildContext context) {
   return Theme.of(context).brightness == Brightness.dark
       ? Colors.black

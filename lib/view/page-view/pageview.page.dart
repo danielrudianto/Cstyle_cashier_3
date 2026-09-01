@@ -4,6 +4,7 @@ import 'package:cstyle_cashier_3/view/dashboard/dashboard.page.dart';
 import 'package:cstyle_cashier_3/view/store/store.page.dart';
 import 'package:cstyle_cashier_3/view/page-view/components/appbar-pageview.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -637,41 +638,54 @@ class _PageViewPageState extends State<PageViewPage> {
       );
     }
 
-    return Material(
-      child: Column(
-        children: [
-          AppbarPageView(
-            page: currentPage,
-            changePage: (page) {
-              setState(() {
-                currentPage = page;
-              });
+    /*
+      Gradien permukaan kerja dipasang di akar halaman ini, dan Scaffold di
+      dalamnya dibuat transparan supaya tembus.
 
-              pageController.animateToPage(
-                currentPage,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            },
-            onOpenCart: () {
-              openProductCart();
-            },
-            onOpenCartList: () {
-              openProductCartList();
-            },
-          ),
-          Expanded(
-            child: PageView(
-              pageSnapping: true,
-              physics: const NeverScrollableScrollPhysics(),
-              controller: pageController,
-              children: const [
-                DashboardPage(),
-                StorePage(),
-              ],
+      Ditaruh di sini, bukan di tiap Scaffold, karena halaman utama memuat dua
+      halaman berdampingan di dalam PageView. Kalau masing-masing melukis
+      gradiennya sendiri, keduanya akan mulai dari nol lagi di tepi masing-
+      masing — dan saat digeser, sambungannya terlihat sebagai garis.
+    */
+    return DecoratedBox(
+      decoration: BoxDecoration(gradient: gradienKerja(context)),
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          children: [
+            AppbarPageView(
+              page: currentPage,
+              changePage: (page) {
+                setState(() {
+                  currentPage = page;
+                });
+
+                pageController.animateToPage(
+                  currentPage,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              },
+              onOpenCart: () {
+                openProductCart();
+              },
+              onOpenCartList: () {
+                openProductCartList();
+              },
             ),
-          )
-        ],
+            Expanded(
+              child: PageView(
+                pageSnapping: true,
+                physics: const NeverScrollableScrollPhysics(),
+                controller: pageController,
+                children: const [
+                  DashboardPage(),
+                  StorePage(),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

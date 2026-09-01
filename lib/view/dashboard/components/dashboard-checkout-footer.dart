@@ -41,22 +41,50 @@ class DashboardCheckoutFooter extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      "Total",
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                  ),
-                  Expanded(
-                    child: AngkaBergerak(
-                      nilai: value.toDouble(),
-                      gaya: Theme.of(context).textTheme.headlineSmall,
-                      rataan: TextAlign.right,
-                    ),
-                  ),
-                ],
+              /*
+                DULU "Total", PERSIS SAMA DENGAN YANG DI BAWAH GARIS SOBEK.
+
+                Tata letak ini meniru struk: yang di ATAS garis sobek adalah
+                rinciannya, yang di BAWAH adalah jumlah yang dibayar. Baris
+                "Subtotal" yang mestinya mengisi bagian atas dikomentari (ia
+                membagi dengan 1,11 untuk pajak yang tidak berlaku), dan yang
+                tersisa hanyalah Total yang sama diketik dua kali — dua angka
+                identik bersusun, yang justru membuat kasir berhenti sejenak
+                mencari bedanya.
+
+                Diganti dengan jumlah barang, yang memang termasuk rincian dan
+                memang berguna di meja kasir: pemeriksaan cepat bahwa yang
+                terpindai sebanyak yang ada di tangan.
+              */
+              Consumer<CartNotifier>(
+                builder: (_, keranjang, __) {
+                  final barang = keranjang.selectedCart?.products ?? [];
+                  final jumlahBaris = barang.length;
+                  final jumlahUnit = barang.fold<int>(
+                    0,
+                    (jumlah, x) => jumlah + x.quantity,
+                  );
+
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          jumlahBaris == 1
+                              ? "1 product"
+                              : "$jumlahBaris products",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          jumlahUnit == 1 ? "1 pc" : "$jumlahUnit pcs",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               // Row(
               //   children: [

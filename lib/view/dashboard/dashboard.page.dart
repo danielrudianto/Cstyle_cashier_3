@@ -212,7 +212,11 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      /*
+        Transparan: gradien permukaan kerja dilukis di akar halaman utama, dan
+        latar Scaffold yang buram akan menutupinya. Lihat pageview.page.dart.
+      */
+      backgroundColor: Colors.transparent,
       key: scaffoldKey,
       // ignore: deprecated_member_use
       body: RawKeyboardListener(

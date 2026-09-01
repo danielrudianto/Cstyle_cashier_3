@@ -966,7 +966,11 @@ class _StorePageState extends State<StorePage> {
     ScrollController scrollController = ScrollController();
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      /*
+        Transparan: gradien permukaan kerja dilukis di akar halaman utama, dan
+        latar Scaffold yang buram akan menutupinya. Lihat pageview.page.dart.
+      */
+      backgroundColor: Colors.transparent,
       body: Row(
         children: [
           Container(
