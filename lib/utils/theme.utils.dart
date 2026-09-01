@@ -262,7 +262,29 @@ TextTheme _tanggaHuruf(_PaletTema palet) {
 }
 
 ThemeData _bangunTema(_PaletTema palet) {
-  final pemisah = Colors.grey.shade500;
+  /*
+    GARIS PEMISAH DULU ABU-ABU TENGAH.
+
+    Colors.grey.shade500 itu #9E9E9E — abu-abu yang berdiri di tengah antara
+    hitam dan putih, jadi ia berkontras TINGGI terhadap latar mana pun. Dipakai
+    di 49 tempat, termasuk garis di bawah setiap baris barang.
+
+    Akibatnya daftar barang terbaca sebagai tumpukan kotak, bukan sebagai
+    daftar: garisnya lebih menonjol daripada isi yang dipisahkannya. Pemisah
+    yang benar adalah yang baru terlihat ketika dicari.
+
+    Diturunkan menjadi warna tulisan pada opasitas rendah, jadi ia mengikuti
+    tema dengan sendirinya alih-alih memakai satu abu-abu yang kebetulan cocok
+    di salah satunya.
+  */
+  final pemisah = palet.tulisan.withValues(alpha: 0.10);
+
+  /*
+    Garis tepi kolom isian dan tombol bergaris perlu lebih tegas daripada
+    pemisah — ia menandai batas sesuatu yang bisa disentuh, bukan sekat antar
+    baris.
+  */
+  final garisTepi = palet.tulisan.withValues(alpha: 0.28);
 
   return ThemeData(
     useMaterial3: true,
@@ -447,7 +469,7 @@ ThemeData _bangunTema(_PaletTema palet) {
         yang keunguan dan tidak nyambung dengan pemisah abu-abu di seluruh
         aplikasi.
       */
-      outline: pemisah,
+      outline: garisTepi,
     ),
   );
 }
@@ -491,6 +513,21 @@ LinearGradient gradienKerja(BuildContext context) {
         ? const [Color(0xFF2B2432), Color(0xFF232028)]
         : const [Color(0xFFFBF8FE), Color(0xFFF2EDF8)],
   );
+}
+
+/// Berkas logo yang terbaca di atas latar tema yang sedang berlaku.
+///
+/// Ada dua berkas di assets/images: icon.webp berwarna, dan IconReverted.webp
+/// versi putihnya. Bilah atas halaman utama memakai yang berwarna secara tetap,
+/// dan sejak latarnya menjadi gelap, lambangnya nyaris menyatu dengan
+/// belakangnya.
+///
+/// Mematoknya ke yang putih hanya memindahkan cacatnya: putih di atas latar
+/// terang #FBF8FE justru hilang sama sekali. Jadi dipilih per tema.
+String logoTema(BuildContext context) {
+  return Theme.of(context).brightness == Brightness.dark
+      ? "assets/images/IconReverted.webp"
+      : "assets/images/icon.webp";
 }
 
 Color diAtasAksen(BuildContext context) {

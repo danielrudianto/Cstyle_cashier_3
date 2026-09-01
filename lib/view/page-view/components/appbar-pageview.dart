@@ -44,7 +44,7 @@ class AppbarPageView extends StatelessWidget {
             Flexible(
               flex: 1,
               child: Image.asset(
-                "assets/images/icon.webp",
+                logoTema(context),
                 width: 40,
                 height: 40,
               ),

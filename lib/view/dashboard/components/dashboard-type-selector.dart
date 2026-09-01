@@ -77,10 +77,25 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
     final dasar = Theme.of(context).textTheme.bodyMedium;
     if (dasar == null) return null;
 
+    /*
+      Dibuat berkarakter LABEL, bukan disamakan dengan kode referensi di tabel.
+
+      Yang membuat tulisan terbaca sebagai label adalah ukuran kecil DAN jarak
+      antarhuruf yang dilebarkan — bukan warnanya yang diabukan. Kode referensi
+      di tabel memakai 12px abu karena ia metadata yang sesekali dilirik;
+      penyaring ini target klik yang dibaca sejauh lengan, dan 12px abu di situ
+      menyulitkan keduanya sekaligus.
+
+      Jadi yang diambil karakternya: 14px dengan jarak huruf dilebarkan, warna
+      tetap penuh untuk yang terpilih. Bidang sentuh ListTile tidak ikut
+      mengecil — ia ditentukan tinggi tile, bukan tinggi hurufnya.
+    */
     return dasar.copyWith(
-      height: 1.25,
-      fontWeight: terpilih ? FontWeight.w600 : FontWeight.w400,
-      color: terpilih ? dasar.color : dasar.color?.withValues(alpha: 0.66),
+      fontSize: 14,
+      height: 1.3,
+      letterSpacing: 0.4,
+      fontWeight: terpilih ? FontWeight.w700 : FontWeight.w400,
+      color: terpilih ? dasar.color : dasar.color?.withValues(alpha: 0.62),
     );
   }
 
