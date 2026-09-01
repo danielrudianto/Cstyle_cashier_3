@@ -1,6 +1,8 @@
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/list-stock-transfer/components/list-stock-transfer-detail.dart';
+import 'package:cstyle_cashier_3/components/ui/ui.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -39,152 +41,179 @@ class _ListStockTransferState extends State<ListStockTransfer> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(
-          height: 25,
+        const SizedBox(height: 24),
+        /*
+          Halaman ini dulu terbuka langsung ke tabel — tanpa judul, tanpa
+          keterangan, dan tanpa jumlah. Sekarang memakai kepala halaman dan
+          label bagian yang sama dengan daftar anggota dan halaman kelola.
+        */
+        const KepalaHalaman(
+          penanda: "INVENTORY",
+          judul: "Transfer list",
+          keterangan: "Every stock transfer this store has requested or "
+              "been asked for.",
         ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height - 221,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SizedBox(
-              width: double.infinity,
-              child: DataTable(
-                showCheckboxColumn: false,
-                dividerThickness: 0.25,
-                // border color only horizontal
-                border: TableBorder(
-                  horizontalInside: BorderSide(
-                    color:
-                        Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                  ),
-                  verticalInside: BorderSide.none,
-                ),
-                columns: [
-                  DataColumn(
-                    label: Text(
-                      "Name",
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      "Request From",
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      "Request To",
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      "Created by",
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      "Created at",
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                  ),
-                ],
-                rows: stockTransfers.isEmpty == true
-                    ? [
-                        DataRow(
-                          cells: [
-                            DataCell(
-                              Text(
-                                "No data",
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                            const DataCell(
-                              Text(""),
-                            ),
-                            const DataCell(
-                              Text(""),
-                            ),
-                            const DataCell(
-                              Text(""),
-                            ),
-                            const DataCell(
-                              Text(""),
-                            ),
-                          ],
-                        ),
-                      ]
-                    : stockTransfers
-                        .map(
-                          (stockTransfer) => DataRow(
-                            selected: false,
-                            onSelectChanged: (value) {
-                              // show dialog
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: const Text("Stock Transfer Detail"),
-                                    content: ListStockTransferDetail(
-                                      id: stockTransfer.id!,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text("Close"),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            cells: [
-                              DataCell(
-                                Text(
-                                  stockTransfer.name,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  stockTransfer.requestFrom == null
-                                      ? "Office"
-                                      : stockTransfer.requestFrom!['name'],
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  stockTransfer.requestTo == null
-                                      ? "Office"
-                                      : stockTransfer.requestTo!['name'],
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  stockTransfer.createdBy,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  DateFormat("dd MMM yyyy HH:mm")
-                                      .format(stockTransfer.createdAt),
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                        .toList(),
+        Bagian(
+          label: stockTransfers.isEmpty
+              ? "TRANSFERS"
+              : "TRANSFERS · ${NumberFormat.decimalPattern("en-US").format(count)}",
+        ),
+        /*
+          TINGGI TETAP DIBUANG.
+
+          Tabelnya dulu dipatok setinggi layar dikurangi sebuah angka tetap,
+          dengan penggulirnya sendiri di dalamnya. Angka itu menghitung
+          tinggi segala sesuatu di atasnya — dan begitu satu baris
+          ditambahkan di atas, ia menjadi salah tanpa ada yang memberi tahu:
+          tabelnya tetap setinggi itu, dan yang berada DI BAWAHNYA —
+          perpindahan halaman — terdorong keluar layar.
+
+          Sekarang tabelnya setinggi isinya dan halamannya sendiri yang
+          menggulir, jadi tidak ada lagi angka yang harus ikut diperbarui
+          setiap kali sesuatu ditambahkan di atasnya.
+        */
+        DataTable(
+          showCheckboxColumn: false,
+          /*
+                          Tanpa garis antarbaris, dan barisnya direnggangkan —
+                          sama seperti daftar anggota. Dua puluh baris berarti dua
+                          puluh garis sejajar, dan mata membacanya sebagai kisi.
+                        */
+          dividerThickness: 0,
+          border: const TableBorder(),
+          dataRowMinHeight: 56,
+          dataRowMaxHeight: 56,
+          headingRowHeight: 44,
+          headingRowColor: const WidgetStatePropertyAll(
+            Colors.transparent,
+          ),
+          columns: [
+            DataColumn(
+              label: Text(
+                "NAME",
+                style: gayaKode(context),
               ),
             ),
-          ),
+            DataColumn(
+              label: Text(
+                "REQUEST FROM",
+                style: gayaKode(context),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                "REQUEST TO",
+                style: gayaKode(context),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                "CREATED BY",
+                style: gayaKode(context),
+              ),
+            ),
+            DataColumn(
+              label: Text(
+                "CREATED AT",
+                style: gayaKode(context),
+              ),
+            ),
+          ],
+          rows: stockTransfers.isEmpty == true
+              ? [
+                  DataRow(
+                    cells: [
+                      DataCell(
+                        Text(
+                          "No data",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      const DataCell(
+                        Text(""),
+                      ),
+                      const DataCell(
+                        Text(""),
+                      ),
+                      const DataCell(
+                        Text(""),
+                      ),
+                      const DataCell(
+                        Text(""),
+                      ),
+                    ],
+                  ),
+                ]
+              : stockTransfers
+                  .map(
+                    (stockTransfer) => DataRow(
+                      selected: false,
+                      onSelectChanged: (value) {
+                        // show dialog
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text("Stock Transfer Detail"),
+                              content: ListStockTransferDetail(
+                                id: stockTransfer.id!,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text("Close"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      cells: [
+                        DataCell(
+                          /* Nomor transfernya kode, bukan kalimat. */
+                          Text(
+                            stockTransfer.name,
+                            style: gayaKode(context, ukuran: 13).copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            stockTransfer.requestFrom == null
+                                ? "Office"
+                                : stockTransfer.requestFrom!['name'],
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            stockTransfer.requestTo == null
+                                ? "Office"
+                                : stockTransfer.requestTo!['name'],
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            stockTransfer.createdBy,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            DateFormat("dd MMM yyyy HH:mm")
+                                .format(stockTransfer.createdAt),
+                            /* Kolom tanggal berbaris lurus. */
+                            style: gayaKode(context, ukuran: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                  .toList(),
         ),
         PaginationComponent(
           pageIndex: page - 1,
