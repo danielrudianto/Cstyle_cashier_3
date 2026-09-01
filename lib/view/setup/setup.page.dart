@@ -59,6 +59,21 @@ class _SetupStorePageState extends State<SetupStorePage> {
     super.dispose();
   }
 
+  /// Kode toko yang sudah dibersihkan: tanpa tanda hubung, tanpa spasi.
+  ///
+  /// Di database `stores.code` tersimpan sebagai UUID bertanda hubung,
+  /// sedangkan aplikasi dan endpoint /cashier/stores/:kode sama-sama
+  /// mensyaratkan 32 heksadesimal TANPA tanda hubung — server menyusun ulang
+  /// tanda hubungnya sendiri sebelum mencari.
+  ///
+  /// Menyalin nilai itu apa adanya dari database adalah hal paling wajar yang
+  /// dilakukan orang, dan dulu hasilnya ditolak tanpa penjelasan. Sekarang
+  /// keduanya diterima.
+  String get _kodeBersih =>
+      _kodeToko.text.replaceAll("-", "").replaceAll(" ", "").trim();
+
+  static final RegExp _polaKode = RegExp(r"^[0-9a-fA-F]{32}$");
+
   Future<void> _validateStore() async {
     if (_sedangMemeriksa) return;
     if (!(_kunciForm.currentState?.validate() ?? false)) return;
@@ -69,7 +84,7 @@ class _SetupStorePageState extends State<SetupStorePage> {
     });
 
     try {
-      final toko = await StoreModel.checkStoreUID(_kodeToko.text.trim());
+      final toko = await StoreModel.checkStoreUID(_kodeBersih);
 
       LoggerUtils()
           .log("Store found, applying to local database", LogType.info);
@@ -146,8 +161,9 @@ class _SetupStorePageState extends State<SetupStorePage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "Enter the store code for the till this computer belongs "
-                    "to. It is set once and remembered.",
+                    "Paste the store code for the till this computer "
+                    "belongs to. Dashes are fine. It is set once and "
+                    "remembered.",
                     style: tema.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 22),
@@ -167,7 +183,7 @@ class _SetupStorePageState extends State<SetupStorePage> {
                     ),
                     decoration: InputDecoration(
                       labelText: "Store code",
-                      hintText: "e.g. CS-01",
+                      hintText: "32 characters",
                       hintStyle: TextStyle(
                         color: warna.onSurface.withValues(alpha: 0.4),
                         letterSpacing: 1.1,
@@ -182,9 +198,20 @@ class _SetupStorePageState extends State<SetupStorePage> {
                         vertical: 16,
                       ),
                     ),
-                    validator: (nilai) {
-                      if (nilai == null || nilai.trim().isEmpty) {
+                    validator: (_) {
+                      /*
+                        Format diperiksa DI SINI, bukan dibiarkan gagal di
+                        server. Kode yang panjangnya salah selalu ditolak, jadi
+                        mengirimkannya lebih dulu hanya menukar pesan yang tepat
+                        dengan pesan umum "gagal mengaktifkan" sesudah menunggu
+                        satu perjalanan jaringan.
+                      */
+                      if (_kodeBersih.isEmpty) {
                         return "Enter a store code";
+                      }
+                      if (!_polaKode.hasMatch(_kodeBersih)) {
+                        return "That is not a store code. It is 32 letters and "
+                            "numbers, with or without dashes.";
                       }
                       return null;
                     },
