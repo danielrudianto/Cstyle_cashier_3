@@ -150,6 +150,15 @@ class _MemberListPageState extends State<MemberListPage> {
                   puluh baris berarti dua puluh garis sejajar, dan mata
                   membacanya sebagai kisi. Pemisahnya jarak antarbaris.
                 */
+                /*
+                  Baris dibuat lebih tinggi. Bawaan DataTable 48 piksel dirancang
+                  untuk baris satu tulisan; dengan lingkaran inisial di depannya
+                  dan tanpa garis pemisah, yang memisahkan satu baris dari yang
+                  lain tinggal ruangnya — dan 48 tidak cukup untuk itu.
+                */
+                dataRowMinHeight: 60,
+                dataRowMaxHeight: 60,
+                headingRowHeight: 44,
                 dividerThickness: 0,
                 border: const TableBorder(),
                 /*
@@ -220,20 +229,35 @@ class _MemberListPageState extends State<MemberListPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 5,
-                                      vertical: 10,
                                     ),
-                                    child: Text(
-                                      e.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.start,
-                                      /* Nama yang dicari; ia memimpin barisnya. */
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
+                                    child: Row(
+                                      children: [
+                                        /*
+                                          Jangkar baris. Daftar tanpa garis
+                                          antarbaris mengandalkan jarak, dan
+                                          jarak saja membuat mata kehilangan
+                                          tempat ketika namanya mirip-mirip.
+                                        */
+                                        AvatarInisial(
+                                          nama: e.name,
+                                          kunci: e.code,
+                                        ),
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Text(
+                                            e.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.start,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -241,7 +265,6 @@ class _MemberListPageState extends State<MemberListPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 5,
-                                      vertical: 10,
                                     ),
                                     child: Text(
                                       e.code,
@@ -257,7 +280,6 @@ class _MemberListPageState extends State<MemberListPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 5,
-                                      vertical: 10,
                                     ),
                                     /*
                                       Dulu "N/A", ditulis sama tegasnya dengan
@@ -291,7 +313,6 @@ class _MemberListPageState extends State<MemberListPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 5,
-                                      vertical: 10,
                                     ),
                                     child: Text(
                                       e.phoneNumber == "" ? "—" : e.phoneNumber,

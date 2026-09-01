@@ -459,6 +459,96 @@ InputDecoration dekorasiIsian(
   );
 }
 
+/// Lingkaran inisial sebagai jangkar baris.
+///
+/// KENAPA BUKAN SEKADAR PEMANIS.
+///
+/// Daftar tanpa garis antarbaris mengandalkan jarak untuk memisahkan, dan jarak
+/// saja membuat mata kehilangan tempat ketika namanya mirip-mirip. Lingkaran di
+/// tepi kiri memberi satu titik tetap di setiap baris — mata melompat dari
+/// lingkaran ke lingkaran alih-alih menyusuri tulisan.
+///
+/// WARNANYA YANG MEMBEDAKAN, BUKAN HURUFNYA.
+///
+/// Pada data toko ini sebagian besar nama diawali pola yang sama — "A A GD",
+/// "A A NGURAH", "A.A BAGUS" — sehingga inisialnya hampir seluruhnya "AA" dan
+/// tidak membedakan apa pun. Warnanya diturunkan dari KODE anggota, yang unik,
+/// jadi satu orang selalu mendapat warna yang sama dan dua baris bersebelahan
+/// hampir tidak pernah sewarna.
+///
+/// Rona diambil dari kodenya, tetapi kepekatan dan kecerahannya dipatok — jadi
+/// warnanya beragam tanpa ada yang meloncat keluar dari suasana halaman.
+class AvatarInisial extends StatelessWidget {
+  final String nama;
+
+  /// Sumber warnanya. Dipisah dari [nama] karena nama bisa sama, kode tidak.
+  final String kunci;
+
+  final double ukuran;
+
+  const AvatarInisial({
+    super.key,
+    required this.nama,
+    required this.kunci,
+    this.ukuran = 34,
+  });
+
+  String get _inisial {
+    final bagian = nama
+        .trim()
+        .split(RegExp(r"[\s.]+"))
+        .where((x) => x.isNotEmpty)
+        .toList();
+    if (bagian.isEmpty) return "?";
+    if (bagian.length == 1) {
+      return bagian.first.substring(0, 1).toUpperCase();
+    }
+    return (bagian.first.substring(0, 1) + bagian.last.substring(0, 1))
+        .toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gelap = Theme.of(context).brightness == Brightness.dark;
+
+    var jumlah = 0;
+    for (final c in kunci.codeUnits) {
+      jumlah = (jumlah * 31 + c) & 0xFFFFFF;
+    }
+    final rona = (jumlah % 360).toDouble();
+
+    final latar = HSLColor.fromAHSL(
+      1,
+      rona,
+      gelap ? 0.32 : 0.42,
+      gelap ? 0.30 : 0.86,
+    ).toColor();
+
+    final depan = HSLColor.fromAHSL(
+      1,
+      rona,
+      gelap ? 0.55 : 0.55,
+      gelap ? 0.78 : 0.30,
+    ).toColor();
+
+    return Container(
+      width: ukuran,
+      height: ukuran,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: latar, shape: BoxShape.circle),
+      child: Text(
+        _inisial,
+        style: TextStyle(
+          color: depan,
+          fontSize: ukuran * 0.36,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
 /// Kepala halaman: penanda kecil, judul besar, satu paragraf yang diredupkan.
 ///
 /// Urutan yang dipakai halaman yang harus dibaca sekilas. Penanda di atas
