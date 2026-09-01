@@ -39,7 +39,7 @@ class BrandBackdrop extends StatelessWidget {
   /// Harus sejalan dengan `msix_version` di pubspec.yaml. Dulu ditulis
   /// langsung di dalam hero.page.dart, jadi ia diam-diam basi setiap kali
   /// versinya naik tanpa ada yang ingat menyuntingnya.
-  static const String versiAplikasi = "3.0.9.1";
+  static const String versiAplikasi = "3.1.0.0";
 
   /// Ungu merek, gelap. Sama dengan aksenCstyle di utils/theme.utils.dart.
   static const Color _bawah = Color.fromARGB(255, 109, 78, 137);

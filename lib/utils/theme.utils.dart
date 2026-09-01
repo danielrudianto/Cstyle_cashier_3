@@ -1,3 +1,4 @@
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:flutter/material.dart';
 
 /*
@@ -48,6 +49,21 @@ const Color aksenCstyle = Color.fromARGB(255, 109, 78, 137);
 /// varian terang ungunya.
 const Color aksenCstyleMuda = Color.fromARGB(255, 161, 121, 220);
 
+/// Ungu untuk BIDANG TERISI di tema gelap — tombol utama, FAB, sakelar aktif.
+///
+/// Berbeda dari [aksenCstyleMuda], dan perbedaannya punya alasan yang bisa
+/// dihitung. Aksen untuk TULISAN di atas latar gelap harus terang; bidang yang
+/// DIISI lalu ditulisi harus cukup gelap untuk menampung tulisan putih.
+///
+/// Di atas aksenCstyleMuda, tulisan putih hanya berkontras 3,4:1 — gagal WCAG
+/// AA. Yang benar di situ justru tulisan hitam (6,2:1), tetapi hasilnya
+/// terbaca pucat, seperti tombol yang sedang dinonaktifkan.
+///
+/// Nilai ini 4,7:1 terhadap putih, jadi tulisan putihnya sah; dan 3,3:1
+/// terhadap kartu gelap #242424, jadi tombolnya benar-benar terpisah dari
+/// permukaan di belakangnya alih-alih mengambang di atasnya.
+const Color aksenIsianGelap = Color.fromARGB(255, 139, 95, 191);
+
 /// Huruf aplikasi.
 ///
 /// DULU "Montserrat", DAN TIDAK PERNAH SEKALI PUN TAMPIL.
@@ -91,6 +107,15 @@ class _PaletTema {
   /// Tulisan dan ikon di atas [aksen].
   final Color diAtasAksen;
 
+  /// Warna bidang yang DIISI aksen: tombol utama, FAB, sakelar aktif.
+  ///
+  /// Terpisah dari [aksen] karena keduanya menjawab pertanyaan berbeda —
+  /// [aksen] harus terbaca DI ATAS latar, [isian] harus bisa DITULISI.
+  final Color isian;
+
+  /// Tulisan dan ikon di atas [isian]. Putih di kedua tema.
+  final Color diAtasIsian;
+
   /// Aksen untuk teks tombol snackbar.
   ///
   /// Sengaja KEBALIKAN dari [aksen]. Latar snackbar dibalik terhadap temanya —
@@ -113,6 +138,8 @@ class _PaletTema {
     required this.tulisanSnackbar,
     required this.aksen,
     required this.diAtasAksen,
+    required this.isian,
+    required this.diAtasIsian,
     required this.aksenSnackbar,
   });
 }
@@ -130,6 +157,8 @@ final _paletTerang = _PaletTema(
   tulisanSnackbar: Colors.white,
   aksen: aksenCstyle,
   diAtasAksen: Colors.white,
+  isian: aksenCstyle,
+  diAtasIsian: Colors.white,
   aksenSnackbar: aksenCstyleMuda,
 );
 
@@ -153,6 +182,8 @@ final _paletGelap = _PaletTema(
   tulisanSnackbar: Colors.black,
   aksen: aksenCstyleMuda,
   diAtasAksen: Colors.black,
+  isian: aksenIsianGelap,
+  diAtasIsian: Colors.white,
   aksenSnackbar: aksenCstyle,
 );
 
@@ -287,6 +318,98 @@ ThemeData _bangunTema(_PaletTema palet) {
       contentTextStyle: TextStyle(color: palet.tulisanSnackbar),
       actionTextColor: palet.aksenSnackbar,
     ),
+    /*
+      TOMBOL UTAMA: BOBOT DAN KEADAAN SOROT.
+
+      Material 3 memberi FilledButton elevasi nol dan lapisan sorot yang
+      sangat tipis. Di aplikasi seluler itu masuk akal; di aplikasi kasir
+      Windows yang dikemudikan tetikus, hasilnya tombol yang terbaca sebagai
+      bidang datar berwarna — kontras warnanya cukup, bobotnya yang tidak ada.
+
+      Tiga keadaan dibedakan dengan jelas:
+
+        diam    elevasi 1, warna aksen apa adanya
+        disorot elevasi 4, warna ditarik 10% ke arah warna tulisannya
+        ditekan elevasi 1, ditarik 18% — masuk kembali ke dalam
+
+      Penarikan warnanya memakai palet.diAtasAksen sebagai tujuan, bukan putih
+      atau hitam tetap. Di tema terang aksennya ungu gelap dan tujuannya putih,
+      jadi menyorot MENCERAHKAN; di tema gelap aksennya ungu muda dan tujuannya
+      hitam, jadi menyorot MENGGELAPKAN. Keduanya bergerak menjauh dari latar
+      di belakangnya, yang memang arah yang benar untuk masing-masing.
+
+      Lapisan sorot bawaan dimatikan. Kalau dibiarkan, ia menumpuk di atas
+      perubahan warna latar ini dan hasilnya dua efek yang saling mengaburkan.
+    */
+    filledButtonTheme: FilledButtonThemeData(
+      style: ButtonStyle(
+        animationDuration: Gerak.kilat,
+        /*
+          Kursor tangan. Material menyetelnya sendiri di web, tetapi pada
+          aplikasi desktop tombolnya membiarkan kursor tetap berbentuk panah —
+          jadi satu-satunya cara tahu sesuatu dapat ditekan adalah mencobanya.
+        */
+        mouseCursor: WidgetStateProperty.resolveWith((keadaan) {
+          if (keadaan.contains(WidgetState.disabled)) {
+            return SystemMouseCursors.basic;
+          }
+          return SystemMouseCursors.click;
+        }),
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        foregroundColor: WidgetStateProperty.resolveWith((keadaan) {
+          if (keadaan.contains(WidgetState.disabled)) {
+            return palet.tulisan.withValues(alpha: 0.38);
+          }
+          return palet.diAtasIsian;
+        }),
+        backgroundColor: WidgetStateProperty.resolveWith((keadaan) {
+          if (keadaan.contains(WidgetState.disabled)) {
+            return palet.nonaktif;
+          }
+          if (keadaan.contains(WidgetState.pressed)) {
+            return Color.lerp(palet.isian, palet.diAtasIsian, 0.18);
+          }
+          if (keadaan.contains(WidgetState.hovered)) {
+            return Color.lerp(palet.isian, palet.diAtasIsian, 0.10);
+          }
+          return palet.isian;
+        }),
+        elevation: WidgetStateProperty.resolveWith((keadaan) {
+          if (keadaan.contains(WidgetState.disabled)) return 0.0;
+          if (keadaan.contains(WidgetState.pressed)) return 1.0;
+          if (keadaan.contains(WidgetState.hovered)) return 4.0;
+          return 1.0;
+        }),
+        shadowColor: WidgetStatePropertyAll(
+          palet.kecerahan == Brightness.dark ? Colors.black : palet.aksen,
+        ),
+      ),
+    ),
+
+    /*
+      Tombol bergaris mengikuti aksen yang sama, supaya tindakan lapis kedua
+      terlihat sekeluarga dengan yang utama — bukan abu-abu netral yang
+      terputus dari sisa layar.
+    */
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: ButtonStyle(
+        animationDuration: Gerak.kilat,
+        mouseCursor: WidgetStateProperty.resolveWith((keadaan) {
+          if (keadaan.contains(WidgetState.disabled)) {
+            return SystemMouseCursors.basic;
+          }
+          return SystemMouseCursors.click;
+        }),
+        foregroundColor: WidgetStatePropertyAll(palet.aksen),
+        side: WidgetStateProperty.resolveWith((keadaan) {
+          final tebal = keadaan.contains(WidgetState.hovered) ? 1.6 : 1.0;
+          return BorderSide(color: palet.aksen, width: tebal);
+        }),
+        overlayColor: WidgetStatePropertyAll(
+          palet.aksen.withValues(alpha: 0.08),
+        ),
+      ),
+    ),
     colorScheme: ColorScheme(
       brightness: palet.kecerahan,
 
@@ -303,8 +426,8 @@ ThemeData _bangunTema(_PaletTema palet) {
         ini berjalan dengan warna yang berbeda sendiri dari seluruh aplikasi.
         Sekarang keduanya memakai satu warna yang sama.
       */
-      primary: palet.aksen,
-      onPrimary: palet.diAtasAksen,
+      primary: palet.isian,
+      onPrimary: palet.diAtasIsian,
 
       /*
         `secondary` sengaja dibiarkan abu-abu. Menaikkannya jadi ungu juga akan
