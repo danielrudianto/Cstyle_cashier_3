@@ -464,207 +464,242 @@ class _StoreDashboardState extends State<StoreDashboard> {
         const SizedBox(
           height: 15,
         ),
-        Card(
-          color: Theme.of(context).cardColor,
-          elevation: 2,
-          child: Padding(
-            /*
-              Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
-              pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
-              dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
-              justru harus menggulir jauh untuk menemukannya.
-            */
-            padding: const EdgeInsets.all(20),
-            child: Consumer<ThemeNotifier>(builder: (_, value, __) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Theme setting",
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(
-                      height: 25,
-                    ),
+        /*
+          BERDAMPINGAN, BUKAN BERSUSUN.
+
+          Keduanya setelan pendek — satu pilihan tema, satu pilihan pencetak —
+          dan bersusun keduanya menjadi dua kartu selebar penuh yang isinya
+          hanya beberapa baris, dengan sisa lebarnya kosong. Berdampingan,
+          lebar kartunya mendekati lebar isinya, dan halaman ini kehilangan satu
+          layar penuh gulungan.
+
+          IntrinsicHeight menyamakan tingginya. Tanpa itu, kartu yang isinya
+          lebih pendek berakhir menggantung, dan dua kartu bersebelahan dengan
+          tinggi berbeda terbaca sebagai kesalahan, bukan sebagai pilihan.
+        */
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Card(
+                  color: Theme.of(context).cardColor,
+                  elevation: 2,
+                  child: Padding(
                     /*
-                      Dulu RadioListTile<Brightness> dengan groupValue berbunyi
-                      "terang kalau light, selain itu gelap". Mode "ikut sistem"
-                      tidak punya wakil di situ, jadi ia tampil sebagai "Dark"
-                      terpilih walaupun layarnya sedang terang.
-
-                      Sekarang bertipe ThemeMode dan ketiga keadaannya diwakili
-                      apa adanya, termasuk "ikut sistem" yang sebelumnya tidak
-                      bisa dicapai sama sekali — penjelasannya di
-                      viewmodel/theme.viewmodel.dart.
+                      Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
+                      pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
+                      dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
+                      justru harus menggulir jauh untuk menemukannya.
                     */
-                    /*
-                      TIGA RadioListTile MENJADI SATU BARIS BERSEGMEN.
+                    padding: const EdgeInsets.all(20),
+                    child: Consumer<ThemeNotifier>(builder: (_, value, __) {
+                      /*
+                        Center DIBUANG.
 
-                      Masing-masing tile setinggi lima puluh piksel dan selebar
-                      kartu, jadi tiga pilihan yang saling meniadakan memakan
-                      seratus lima puluh piksel dan tampak seperti daftar yang
-                      bisa panjang. Padahal jumlahnya tetap tiga, selamanya, dan
-                      ketiganya muat berdampingan dalam satu baris.
+                        Isinya — satu judul dan tiga tombol, totalnya sekitar tiga
+                        ratus piksel — ditaruh di tengah kartu selebar seribu seratus.
+                        Yang terlihat bukan kartu yang lapang, melainkan kartu yang
+                        KOSONG, karena tidak ada apa pun di kiri dan kanan isinya yang
+                        menjelaskan kenapa ruang itu ada.
+                      */
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Theme setting",
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(
+                              height: 25,
+                            ),
+                            /*
+                              Dulu RadioListTile<Brightness> dengan groupValue berbunyi
+                              "terang kalau light, selain itu gelap". Mode "ikut sistem"
+                              tidak punya wakil di situ, jadi ia tampil sebagai "Dark"
+                              terpilih walaupun layarnya sedang terang.
 
-                      Bentuk bersegmen juga menyatakan hubungannya dengan lebih
-                      jujur: memilih salah satu berarti melepas dua lainnya.
-                    */
-                    _PilihanTema(terpilih: value.themeMode),
-                  ],
-                ),
-              );
-            }),
-          ),
-        ),
-        const SizedBox(
-          height: 15,
-        ),
-        Card(
-          color: Theme.of(context).cardColor,
-          elevation: 2,
-          child: Padding(
-            /*
-              Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
-              pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
-              dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
-              justru harus menggulir jauh untuk menemukannya.
-            */
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  height: 5,
-                  width: double.infinity,
-                ),
-                Text(
-                  "Printer setting",
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                if (printer == null) ...[
-                  Text(
-                    "No printer is set. Please set your printer to enable printing.",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  /*
-                    Bergaris, bukan terisi: memilih pencetak adalah persiapan
-                    sekali pasang, bukan tindakan utama halaman ini.
-                  */
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.print_outlined, size: 17),
-                    label: const Text("Set printer"),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(150, 42),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () async {
-                      Printing.pickPrinter(context: context)
-                          .then((selectedPrinter) {
-                        if (selectedPrinter == null) {
-                          return;
-                        } else if (selectedPrinter.isAvailable == false) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      "Printer is currently not available")));
-                          return;
-                        } else {
-                          setState(() {
-                            printer = selectedPrinter;
-                          });
+                              Sekarang bertipe ThemeMode dan ketiga keadaannya diwakili
+                              apa adanya, termasuk "ikut sistem" yang sebelumnya tidak
+                              bisa dicapai sama sekali — penjelasannya di
+                              viewmodel/theme.viewmodel.dart.
+                            */
+                            /*
+                              TIGA RadioListTile MENJADI SATU BARIS BERSEGMEN.
 
-                          SharedPreferences.getInstance().then((prefs) {
-                            prefs.setString("printer:url", selectedPrinter.url);
-                            prefs.setString(
-                                "printer:name", selectedPrinter.name);
-                          });
-                        }
-                      });
-                    },
-                  ),
-                ] else ...[
-                  Text(
-                    "Printer: ${printer!.name}",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Printing.pickPrinter(context: context)
-                          .then((selectedPrinter) {
-                        if (selectedPrinter != null) {
-                          if (selectedPrinter.isAvailable == false) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text("Printer is currently not available"),
-                              ),
-                            );
-                          } else {
-                            setState(() {
-                              printer = selectedPrinter;
-                            });
+                              Masing-masing tile setinggi lima puluh piksel dan selebar
+                              kartu, jadi tiga pilihan yang saling meniadakan memakan
+                              seratus lima puluh piksel dan tampak seperti daftar yang
+                              bisa panjang. Padahal jumlahnya tetap tiga, selamanya, dan
+                              ketiganya muat berdampingan dalam satu baris.
 
-                            SharedPreferences.getInstance().then((prefs) {
-                              prefs.setString(
-                                  "printer:url", selectedPrinter.url);
-                              prefs.setString(
-                                  "printer:name", selectedPrinter.name);
-                            });
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    "Printer has been changed successfully"),
-                              ),
-                            );
-                          }
-                        }
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 25),
-                      // border 1 px solid #ccc
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Theme.of(context).dividerColor,
+                              Bentuk bersegmen juga menyatakan hubungannya dengan lebih
+                              jujur: memilih salah satu berarti melepas dua lainnya.
+                            */
+                            _PilihanTema(terpilih: value.themeMode),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        "Change printer",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
+                      );
+                    }),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Card(
+                  color: Theme.of(context).cardColor,
+                  elevation: 2,
+                  child: Padding(
+                    /*
+                      Dulu 35 piksel di atas dan bawah untuk satu judul dan tiga
+                      pilihan. Setelan yang isinya sedikit tidak menjadi lebih mudah
+                      dibaca karena dikelilingi ruang kosong sebesar itu; yang terjadi
+                      justru harus menggulir jauh untuk menemukannya.
+                    */
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(
+                          height: 5,
+                          width: double.infinity,
+                        ),
+                        Text(
+                          "Printer setting",
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        if (printer == null) ...[
+                          Text(
+                            "No printer is set. Please set your printer to enable printing.",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          /*
+                            Bergaris, bukan terisi: memilih pencetak adalah persiapan
+                            sekali pasang, bukan tindakan utama halaman ini.
+                          */
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.print_outlined, size: 17),
+                            label: const Text("Set printer"),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(150, 42),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () async {
+                              Printing.pickPrinter(context: context)
+                                  .then((selectedPrinter) {
+                                if (selectedPrinter == null) {
+                                  return;
+                                } else if (selectedPrinter.isAvailable ==
+                                    false) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Printer is currently not available")));
+                                  return;
+                                } else {
+                                  setState(() {
+                                    printer = selectedPrinter;
+                                  });
+
+                                  SharedPreferences.getInstance().then((prefs) {
+                                    prefs.setString(
+                                        "printer:url", selectedPrinter.url);
+                                    prefs.setString(
+                                        "printer:name", selectedPrinter.name);
+                                  });
+                                }
+                              });
+                            },
+                          ),
+                        ] else ...[
+                          Text(
+                            "Printer: ${printer!.name}",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Printing.pickPrinter(context: context)
+                                  .then((selectedPrinter) {
+                                if (selectedPrinter != null) {
+                                  if (selectedPrinter.isAvailable == false) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            "Printer is currently not available"),
+                                      ),
+                                    );
+                                  } else {
+                                    setState(() {
+                                      printer = selectedPrinter;
+                                    });
+
+                                    SharedPreferences.getInstance()
+                                        .then((prefs) {
+                                      prefs.setString(
+                                          "printer:url", selectedPrinter.url);
+                                      prefs.setString(
+                                          "printer:name", selectedPrinter.name);
+                                    });
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            "Printer has been changed successfully"),
+                                      ),
+                                    );
+                                  }
+                                }
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 25),
+                              // border 1 px solid #ccc
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Theme.of(context).dividerColor,
+                                ),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: Text(
+                                "Change printer",
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                ],
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(
           height: 15,
         ),
         // button to logout from application
-        InkWell(
-          onTap: () async {
+        _TombolKeluar(
+          onKeluar: () async {
             /*
               Dulu then().catchError(). Penangkap galatnya tidak pernah
               mengembalikan nilai, sementara rantainya bertipe Never karena
@@ -689,46 +724,18 @@ class _StoreDashboardState extends State<StoreDashboard> {
             }
           },
           /*
-            Dulu tulisan biasa di dalam Container berwarna canvas — tidak
-            terlihat seperti tombol, dan tidak terlihat seperti tindakan yang
-            menutup aplikasi. Keluar dari sini menjalankan exit(0): apa pun
-            yang belum tersinkron ditinggalkan begitu saja.
+            DIAM SAAT TIDAK DISENTUH, MERAH SAAT DISOROT.
 
-            Sekarang bergaris warna galat. Bukan terisi penuh — itu akan
-            membuatnya menjadi hal paling mencolok di halaman setelan,
-            padahal ia yang paling jarang ditekan.
+            Percobaan sebelumnya memberinya garis merah tetap. Itu keliru ke
+            arah sebaliknya: ia menjadi satu-satunya benda berwarna galat di
+            seluruh halaman, berdiri sendirian di bawah, dan mata membacanya
+            sebagai peringatan tentang sesuatu yang sedang terjadi — padahal
+            tidak ada yang terjadi; itu hanya tombol yang jarang ditekan.
+
+            Tindakan yang jarang tetapi berat sebaiknya begini: tenang sampai
+            didekati, lalu menyatakan dirinya. Peringatannya muncul tepat saat
+            ia berguna — ketika kursor sudah berada di atasnya.
           */
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 11,
-              horizontal: 22,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color:
-                    Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.logout,
-                  size: 17,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(width: 9),
-                Text(
-                  "Log out of this store",
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
-            ),
-          ),
         ),
       ],
     );
@@ -849,6 +856,70 @@ class _SegmenTemaState extends State<_SegmenTema> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tombol keluar dari toko.
+///
+/// Tenang sampai disorot, lalu merah. Ia menjalankan exit(0) — apa pun yang
+/// belum tersinkron ditinggalkan — jadi peringatannya memang perlu ada; yang
+/// tidak perlu adalah peringatan itu menyala sepanjang waktu pada halaman yang
+/// dibuka untuk mengganti pencetak.
+class _TombolKeluar extends StatefulWidget {
+  final Future<void> Function() onKeluar;
+
+  const _TombolKeluar({required this.onKeluar});
+
+  @override
+  State<_TombolKeluar> createState() => _TombolKeluarState();
+}
+
+class _TombolKeluarState extends State<_TombolKeluar> {
+  bool _disorot = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final warna = Theme.of(context).colorScheme;
+    final depan =
+        _disorot ? warna.error : warna.onSurface.withValues(alpha: 0.55);
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _disorot = true),
+        onExit: (_) => setState(() => _disorot = false),
+        child: GestureDetector(
+          onTap: () => widget.onKeluar(),
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: Gerak.kilat,
+            curve: Gerak.masuk,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: _disorot
+                  ? warna.error.withValues(alpha: 0.09)
+                  : Colors.transparent,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.logout, size: 16, color: depan),
+                const SizedBox(width: 9),
+                Text(
+                  "Log out of this store",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: depan,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

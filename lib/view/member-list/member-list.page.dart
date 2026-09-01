@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:cstyle_cashier_3/view/member-list/components/member-detail.dart';
+import 'dart:ui' show FontFeature;
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -56,23 +58,66 @@ class _MemberListPageState extends State<MemberListPage> {
         const SizedBox(
           height: 25,
         ),
-        SizedBox(
-          height: 50,
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              label: Text(
-                "Search member",
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Theme.of(context).dividerColor,
+        /*
+          Disamakan dengan pencarian barang di layar jual: terisi samar,
+          bersudut, lebarnya dibatasi. Bentuk lama memakai label melayang
+          seukuran isian dan garis tepi dividerColor — yang sejak pemisah
+          diturunkan ke 7% menjadi hampir tak terlihat.
+        */
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: TextField(
+              controller: controller,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: "Search members",
+                hintStyle: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.45),
                 ),
-              ),
-              prefix: Icon(
-                Icons.search,
-                color: Theme.of(context).iconTheme.color,
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: 20,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.55),
+                ),
+                filled: true,
+                fillColor: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.05),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.6,
+                  ),
+                ),
               ),
             ),
           ),
@@ -88,38 +133,42 @@ class _MemberListPageState extends State<MemberListPage> {
               width: double.infinity,
               child: DataTable(
                 showCheckboxColumn: false,
-                dividerThickness: 0.75,
-                // border color only horizontal
-                border: TableBorder(
-                  horizontalInside: BorderSide(
-                    color:
-                        Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                  ),
-                  verticalInside: BorderSide.none,
+                /*
+                  Tanpa garis antarbaris, sama seperti tabel barang: dua
+                  puluh baris berarti dua puluh garis sejajar, dan mata
+                  membacanya sebagai kisi. Pemisahnya jarak antarbaris.
+                */
+                dividerThickness: 0,
+                border: const TableBorder(),
+                headingRowColor: WidgetStatePropertyAll(
+                  Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.03),
                 ),
                 columns: [
                   DataColumn(
                     label: Text(
-                      "Name",
-                      style: Theme.of(context).textTheme.labelLarge,
+                      "NAME",
+                      style: gayaLabelKolom(context),
                     ),
                   ),
                   DataColumn(
                     label: Text(
-                      "Code",
-                      style: Theme.of(context).textTheme.labelLarge,
+                      "CODE",
+                      style: gayaLabelKolom(context),
                     ),
                   ),
                   DataColumn(
                     label: Text(
-                      "Email",
-                      style: Theme.of(context).textTheme.labelLarge,
+                      "EMAIL",
+                      style: gayaLabelKolom(context),
                     ),
                   ),
                   DataColumn(
                     label: Text(
-                      "Phone",
-                      style: Theme.of(context).textTheme.labelLarge,
+                      "PHONE",
+                      style: gayaLabelKolom(context),
                     ),
                   ),
                 ],
@@ -363,8 +412,13 @@ class _MemberListPageState extends State<MemberListPage> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.start,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
+                                      /* Nama yang dicari; ia memimpin barisnya. */
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -379,8 +433,42 @@ class _MemberListPageState extends State<MemberListPage> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.start,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
+                                      /* Penanda, bukan isi: diperlakukan sebagai label. */
+                                      style: gayaLabelKolom(context),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                      vertical: 10,
+                                    ),
+                                    /*
+                                      Dulu "N/A", ditulis sama tegasnya dengan
+                                      alamat surel yang ada. Pada halaman berisi
+                                      dua puluh anggota yang kebanyakan tidak
+                                      punya surel, itu berarti selusin "N/A"
+                                      berjajar yang lebih menarik mata daripada
+                                      data yang benar-benar ada. Ketiadaan
+                                      sebaiknya terlihat sebagai ketiadaan.
+                                    */
+                                    child: Text(
+                                      e.email == "" ? "—" : e.email,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.start,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: e.email == ""
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.35)
+                                                : null,
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -391,30 +479,24 @@ class _MemberListPageState extends State<MemberListPage> {
                                       vertical: 10,
                                     ),
                                     child: Text(
-                                      e.email == "" ? "N/A" : e.email,
+                                      e.phoneNumber == "" ? "—" : e.phoneNumber,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.start,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                  ),
-                                ),
-                                DataCell(
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                      vertical: 10,
-                                    ),
-                                    child: Text(
-                                      e.phoneNumber == ""
-                                          ? "N/A"
-                                          : e.phoneNumber,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.start,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures()
+                                        ],
+                                        color: e.phoneNumber == ""
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(alpha: 0.35)
+                                            : null,
+                                      ),
                                     ),
                                   ),
                                 ),
