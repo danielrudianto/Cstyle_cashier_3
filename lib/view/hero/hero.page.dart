@@ -1,9 +1,11 @@
+import 'package:cstyle_cashier_3/components/brand-backdrop/brand-backdrop.dart';
 import 'package:cstyle_cashier_3/model/model.cart.model.dart';
 import 'package:cstyle_cashier_3/model/model.migration.model.dart';
 import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/database.utils.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/sync.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -225,48 +227,52 @@ class _HeroPageState extends State<HeroPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 161, 121, 220),
-      body: Center(
-        child: Column(
-          children: [
-            Expanded(
-              flex: 8,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/images/IconReverted.webp",
-                    width: 100,
-                    height: 100,
-                  ),
-                  const SizedBox(height: 15),
-                  const Text(
-                    "CSTYLE CASHIER APPLICATION",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Text(
-                    "Version 3.0.9.1",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Text(
-                    loadingStatus,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ],
+    /*
+      Lockup merek — logo, nama, versi — sekarang tinggal di BrandBackdrop dan
+      dipakai bersama layar penyiapan. Dulu keduanya menyalinnya masing-masing,
+      dengan ukuran logo dan nomor versi yang berbeda sendiri-sendiri, sehingga
+      berpindah dari layar ini ke layar berikutnya terlihat seperti berpindah
+      aplikasi.
+
+      Yang tersisa di sini hanya yang memang milik layar ini: keterangan
+      langkah yang sedang berjalan.
+    */
+    return BrandBackdrop(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 132,
+            child: LinearProgressIndicator(
+              minHeight: 2,
+              backgroundColor: Colors.white24,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ConstrainedBox(
+            /*
+              Dibatasi lebarnya karena sebagian keterangan panjang — yang soal
+              selisih waktu sampai dua kalimat — dan tanpa batas ini ia
+              membentang selebar jendela dalam satu baris.
+            */
+            constraints: const BoxConstraints(maxWidth: 320),
+            child: AnimatedSwitcher(
+              duration: Gerak.cepat,
+              child: Text(
+                loadingStatus,
+                key: ValueKey(loadingStatus),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontFamily: "Lato",
+                  fontSize: 13,
+                  height: 1.45,
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
