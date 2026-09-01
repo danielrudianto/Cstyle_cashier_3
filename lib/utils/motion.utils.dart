@@ -148,71 +148,25 @@ class AngkaBergerak extends StatelessWidget {
 }
 
 /*
-  KEDUA WIDGET DI BAWAH SENGAJA TIDAK MENANGKAP SENTUHAN.
+  DUA WIDGET SOROT PERNAH ADA DI SINI, DAN KEDUANYA SUDAH DIBUANG.
 
-  Percobaan pertama menggabungkan sorot kursor dan umpan balik tekan dalam satu
-  widget yang memasang GestureDetector sendiri. Itu salah untuk aplikasi ini:
-  hampir semua yang dapat ditekan di sini sudah dibungkus InkWell, dan dua
-  penangkap sentuhan yang bertumpuk akan saling berebut di gesture arena —
-  gejalanya sentuhan yang kadang tidak terbaca, dan itu jauh lebih mahal
-  daripada nilai animasinya.
+  SorotBerlatar menyalakan latar baris daftar saat disorot; SorotMembesar
+  membesarkan tombol dan kartu sedikit. Keduanya bekerja, dan keduanya ternyata
+  tidak diperlukan.
 
-  Jadi keduanya hanya mendengarkan KURSOR lewat MouseRegion, yang tidak ikut
-  dalam perebutan itu sama sekali. Umpan balik sentuhan tetap ditangani riak
-  bawaan InkWell yang memang sudah ada.
+  Yang pertama dibuang karena ongkosnya: satu MouseRegion dan satu
+  AnimatedContainer per baris, dengan setState saat kursor masuk dan keluar,
+  pada daftar yang membangun ratusan baris sekaligus. InkWell yang sudah ada di
+  situ menangani sorot lewat satu lapisan Material untuk seluruh daftar.
 
-  Keadaan sorot memang tidak ada pada layar sentuh. Tetapi ini aplikasi Windows
-  yang dijalankan dengan tetikus, dan justru benda yang menyadari kursor ada di
-  atasnya itulah yang paling membedakan program desktop yang digarap dari yang
-  tidak.
+  Yang kedua dibuang karena tidak ada lagi yang memakainya: tombol-tombol yang
+  dulu dibungkusnya kini FilledButton sungguhan, dan tema sudah memberi mereka
+  sorot, elevasi, dan kursor tangan.
+
+  Pelajarannya dicatat di sini karena mudah terulang: sebelum membungkus sesuatu
+  dengan widget sorot buatan sendiri, periksa dulu apakah widget yang sudah
+  membungkusnya memang belum punya keadaan itu. Biasanya sudah.
 */
-
-/// Sedikit membesar saat kursor berada di atasnya. Untuk tombol dan kartu.
-///
-/// Pembesarannya 2%. Pada sesuatu yang dilewati kursor ratusan kali sehari,
-/// gerakan besar berubah menjadi ribut.
-///
-/// JANGAN DIPAKAI PER BARIS PADA DAFTAR PANJANG.
-///
-/// Widget ini memasang MouseRegion dan AnimatedScale masing-masing satu, dan
-/// memanggil setState saat kursor masuk dan keluar. Satu tombol tidak apa-apa;
-/// lima puluh baris berarti lima puluh pasang, dan menggeser kursor
-/// menyeberanginya memicu serentetan rebuild yang benar-benar terasa. Versi
-/// sebelumnya berkas ini memuat SorotBerlatar untuk keperluan itu dan sudah
-/// dibuang justru karena itu.
-///
-/// Untuk baris daftar, pakai `hoverColor` pada InkWell yang biasanya sudah ada
-/// di sana: keadaan sorotnya ditangani satu lapisan Material untuk seluruh
-/// daftar, tanpa widget tambahan.
-class SorotMembesar extends StatefulWidget {
-  final Widget child;
-  final double skala;
-
-  const SorotMembesar({super.key, required this.child, this.skala = 1.02});
-
-  @override
-  State<SorotMembesar> createState() => _SorotMembesarState();
-}
-
-class _SorotMembesarState extends State<SorotMembesar> {
-  bool _disorot = false;
-
-  @override
-  Widget build(BuildContext context) {
-    if (gerakDimatikan(context)) return widget.child;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _disorot = true),
-      onExit: (_) => setState(() => _disorot = false),
-      child: AnimatedScale(
-        scale: _disorot ? widget.skala : 1.0,
-        duration: Gerak.kilat,
-        curve: Gerak.masuk,
-        child: widget.child,
-      ),
-    );
-  }
-}
 
 /// Perpindahan yang HANYA memudar, tanpa pergeseran.
 ///

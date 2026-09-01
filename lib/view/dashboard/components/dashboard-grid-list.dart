@@ -5,7 +5,6 @@ import 'package:cstyle_cashier_3/components/product-image.component.dart';
 import 'package:cstyle_cashier_3/utils/router.utils.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:cstyle_cashier_3/viewmodel/compare.viewmodel.dart';
-import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -32,22 +31,50 @@ class DashboardGridList extends StatelessWidget {
       showDialog(
           context: context,
           builder: (context) {
+            final tema = Theme.of(context);
+            final warna = tema.colorScheme;
+            final habis = stock <= 0;
+
+            /*
+              DIALOG INI DULU BERTINGGI TETAP 250 PIKSEL.
+
+              Isinya tidak pernah muat, jadi ia menggulir di dalam kotak sempit
+              dan kode referensi di barisnya yang paling atas terpotong separuh.
+              Sekarang tingginya mengikuti isinya, dengan batas atas supaya
+              barang bernama panjang pun tidak memenuhi layar.
+
+              Dua baris terakhirnya — "100% Original Products" dan "Pay on
+              delivery" — dibuang. Keduanya kalimat toko daring pada aplikasi
+              kasir tempat orang berdiri di depan meja; yang kedua bahkan tidak
+              benar, tidak ada pengiriman di sini.
+
+              Dan tombolnya dulu berbunyi "Available" / "Not Available".
+              Itu KEADAAN, bukan tindakan — tombol seharusnya menyebut apa yang
+              terjadi kalau ditekan. Lebih buruk lagi: saat stok nol ia hanya
+              berganti warna, onTap-nya tetap berjalan, jadi barang habis tetap
+              bisa masuk keranjang. Sekarang keadaannya ditulis terpisah sebagai
+              keterangan, dan tombolnya benar-benar mati ketika habis.
+            */
             return Dialog(
-              child: Container(
-                width: images.isEmpty ? 350 : 565,
-                height: 250,
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(10),
+              backgroundColor: tema.cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: images.isEmpty ? 380 : 620,
+                  maxHeight: 460,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    images.isEmpty
-                        ? const SizedBox()
-                        : Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (images.isNotEmpty) ...[
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
                             child: ProductImageComponent(
                               id: e.id,
                               autoPlay: true,
@@ -55,120 +82,93 @@ class DashboardGridList extends StatelessWidget {
                               static: false,
                             ),
                           ),
-                    SizedBox(
-                      width: images.isEmpty ? 0 : 15,
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
+                        ),
+                        const SizedBox(width: 20),
+                      ],
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
+                            Text(e.reference, style: gayaLabelKolom(context)),
+                            const SizedBox(height: 6),
+                            Text(
+                              e.description,
+                              style: tema.textTheme.headlineSmall?.copyWith(
+                                height: 1.25,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              e.brand,
+                              style: tema.textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 18),
+                            Text(
+                              /*
+                                Tanpa ",00". Rupiah tidak dipakai dalam sen di
+                                meja kasir, dan dua angka nol yang selalu sama
+                                hanya membuat harganya lebih lambat dibaca.
+                              */
+                              "Rp ${NumberFormat("#,##0").format(e.price)}",
+                              style: tema.textTheme.headlineMedium?.copyWith(
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures()
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            /*
+                              Keadaan stok ditulis di sini, terpisah dari
+                              tombol — dan angkanya disebut, bukan cuma
+                              "Available". Berapa sisanya menentukan apakah
+                              kasir menawarkan dua atau menahan yang terakhir.
+                            */
                             Row(
                               children: [
+                                Icon(
+                                  habis
+                                      ? Icons.remove_shopping_cart_outlined
+                                      : Icons.inventory_2_outlined,
+                                  size: 16,
+                                  color: habis
+                                      ? warna.error
+                                      : warnaPeringatan(context),
+                                ),
+                                const SizedBox(width: 8),
                                 Text(
-                                  e.reference,
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  habis ? "Out of stock" : "$stock in stock",
+                                  style: tema.textTheme.bodySmall?.copyWith(
+                                    color: habis ? warna.error : null,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ],
                             ),
-                            Text(e.description,
-                                style: Theme.of(context).textTheme.bodyLarge),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Text(e.brand,
-                                style: Theme.of(context).textTheme.bodySmall),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              "Rp. ${NumberFormat("#,##0.00").format(e.price)}",
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            SorotMembesar(
-                              child: InkWell(
-                                onTap: () {
-                                  router.pop("add");
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: stock == 0
-                                        ? Theme.of(context).disabledColor
-                                        : Theme.of(context)
-                                            .secondaryHeaderColor,
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 7.5,
-                                    horizontal: 25,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.add_shopping_cart_rounded,
-                                        color: Colors.white,
-                                      ),
-                                      const SizedBox(
-                                        height: 15,
-                                      ),
-                                      Text(
-                                        stock == 0
-                                            ? "Not Available"
-                                            : "Available",
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      ),
-                                    ],
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton.icon(
+                                onPressed:
+                                    habis ? null : () => router.pop("add"),
+                                icon: const Icon(
+                                  Icons.add_shopping_cart_rounded,
+                                  size: 18,
+                                ),
+                                label: const Text("Add to cart"),
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(46),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(9),
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.verified,
-                                  color: Theme.of(context).iconTheme.color,
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  "100% Original Products",
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.credit_card,
-                                  color: Theme.of(context).iconTheme.color,
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  "Pay on delivery",
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
