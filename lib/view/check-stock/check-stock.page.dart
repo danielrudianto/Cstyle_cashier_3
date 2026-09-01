@@ -405,8 +405,14 @@ class _CheckStockPageState extends State<CheckStockPage> {
         ),
         child: StickyHeadersTable(
           key: ValueKey("hal$page"),
-          showVerticalScrollbar: true,
-          showHorizontalScrollbar: true,
+          /*
+            Muncul HANYA saat menggulir. Saat selalu tampak, thumb horizontal
+            membentang nyaris selebar tabel begitu isinya muat di layar —
+            dan batang sepanjang itu tidak terbaca sebagai scrollbar,
+            melainkan sebagai palang tebal di bawah kepala kolom.
+          */
+          showVerticalScrollbar: false,
+          showHorizontalScrollbar: false,
           scrollControllers:
               ScrollControllers(verticalBodyController: controller),
           cellAlignments: const CellAlignments.fixed(
