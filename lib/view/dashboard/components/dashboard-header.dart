@@ -13,7 +13,8 @@ class DashboardHeader extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Colors.grey.shade300,
+            /* Dulu grey.shade300; garis terang di atas latar gelap. */
+            color: Theme.of(context).dividerColor,
           ),
         ),
       ),

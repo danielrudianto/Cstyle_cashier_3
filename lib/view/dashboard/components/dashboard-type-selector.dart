@@ -11,18 +11,12 @@ class DashboardTypeSelector extends StatefulWidget {
   final List<String> productTypes;
   final List<String> selectedTypes;
   final Function onUpdateSelectedTypes;
-  final Function onSearch;
-  final Function onFocus;
-  final Function onUnfocus;
 
   const DashboardTypeSelector({
     super.key,
     required this.selectedTypes,
     required this.productTypes,
     required this.onUpdateSelectedTypes,
-    required this.onSearch,
-    required this.onFocus,
-    required this.onUnfocus,
   });
 
   @override
@@ -30,21 +24,6 @@ class DashboardTypeSelector extends StatefulWidget {
 }
 
 class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
-  late FocusNode searchFocusNode;
-
-  @override
-  void initState() {
-    searchFocusNode = FocusNode();
-    searchFocusNode.addListener(() {
-      if (searchFocusNode.hasFocus) {
-        widget.onFocus();
-      } else {
-        widget.onUnfocus();
-      }
-    });
-    super.initState();
-  }
-
   Future<Printer?> checkPrinter() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getString("printer:name") == null ||
@@ -111,7 +90,11 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
       decoration: BoxDecoration(
         border: Border(
           right: BorderSide(
-            color: Colors.grey.shade300,
+            /*
+              Dulu Colors.grey.shade300 — nilai untuk latar terang. Di tema
+              gelap ia menjadi garis vertikal terang yang membelah layar.
+            */
+            color: Theme.of(context).dividerColor,
             width: 1.0,
           ),
         ),
@@ -120,49 +103,13 @@ class DashboardTypeSelectorState extends State<DashboardTypeSelector> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 15,
-          ),
-          TextFormField(
-            focusNode: searchFocusNode,
-            decoration: const InputDecoration(
-              labelStyle: TextStyle(
-                color: Color.fromARGB(255, 122, 122, 122),
-              ),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Color.fromARGB(255, 209, 209, 209),
-                ),
-              ),
-              labelText: 'Search',
-              prefixIcon: Icon(Icons.search),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Color.fromARGB(255, 209, 209, 209),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Color.fromARGB(255, 179, 179, 179),
-                ),
-              ),
-              contentPadding: EdgeInsets.symmetric(
-                vertical: 1,
-                horizontal: 3,
-              ),
-              prefixIconColor: Color.fromARGB(255, 209, 209, 209),
-            ),
-            style: const TextStyle(
-              color: Color.fromARGB(255, 122, 122, 122),
-              fontFamily: "Lato",
-            ),
-            onChanged: (value) {
-              widget.onSearch(value);
-            },
-          ),
-          const SizedBox(
-            height: 15,
-          ),
+          /*
+            Kolom pencarian PINDAH ke atas tabel barang; lihat
+            components/dashboard-search.dart. Ia menyaring isi tabel di tengah,
+            jadi tempatnya bersama tabel itu — bukan di kolom yang mengurus
+            penyaring jenis.
+          */
+          const SizedBox(height: 6),
           Text(
             "Product Types",
             style: Theme.of(context).textTheme.headlineSmall,

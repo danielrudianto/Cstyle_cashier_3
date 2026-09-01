@@ -6,6 +6,7 @@ import 'package:cstyle_cashier_3/utils/logger.utils.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-checkout.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-grid-list.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-header.dart';
+import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-search.dart';
 import 'package:cstyle_cashier_3/view/dashboard/components/dashboard-type-selector.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -265,24 +266,24 @@ class _DashboardPageState extends State<DashboardPage> {
 
                       fetchProducts(1);
                     },
-                    onSearch: (value) {
-                      onSearch(value);
-                    },
-                    onFocus: () {
-                      setState(() {
-                        _isFocusing = true;
-                      });
-                    },
-                    onUnfocus: () {
-                      setState(() {
-                        _isFocusing = false;
-                        barcodeFocusNode.requestFocus();
-                      });
-                    },
                   ),
                   Expanded(
                     child: Column(
                       children: [
+                        /*
+                          Pencarian duduk bersama tabel yang disaringnya, tepat
+                          di atas kepala kolomnya. Sebelumnya ia berada di kolom
+                          kiri, sehingga mengetik di satu sisi layar dan melihat
+                          hasilnya di sisi lain.
+                        */
+                        DashboardSearch(
+                          onSearch: (value) => onSearch(value),
+                          onFocus: () => setState(() => _isFocusing = true),
+                          onUnfocus: () => setState(() {
+                            _isFocusing = false;
+                            barcodeFocusNode.requestFocus();
+                          }),
+                        ),
                         const DashboardHeader(),
                         Expanded(
                           child: RawScrollbar(
