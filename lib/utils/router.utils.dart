@@ -12,6 +12,7 @@ import 'package:cstyle_cashier_3/view/stock-transfer/create-stock-transfer/creat
 import 'package:cstyle_cashier_3/view/stock-transfer/receive-stock-transfer/receive-stock-transfer.page.dart';
 import 'package:cstyle_cashier_3/view/stock-transfer/send-stock-transfer/send-stock.transfer.page.dart';
 import 'package:cstyle_cashier_3/view/upload/upload.page.dart';
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,84 +21,98 @@ final GoRouter router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
       path: "/",
-      builder: (context, state) {
-        return const HeroPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const HeroPage(),
+      ),
     ),
     GoRoute(
       path: "/main",
-      builder: (context, state) {
-        return const PageViewPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const PageViewPage(),
+      ),
     ),
     GoRoute(
       path: "/checkout",
-      builder: (context, state) {
-        return const CheckoutPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const CheckoutPage(),
+      ),
     ),
     GoRoute(
       path: "/compare",
-      builder: (context, state) {
-        return const ComparePage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const ComparePage(),
+      ),
     ),
     GoRoute(
       path: "/setup",
-      builder: (context, state) {
-        return const SetupStorePage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const SetupStorePage(),
+      ),
     ),
     GoRoute(
       path: "/upload",
-      builder: (context, state) {
-        return const UploadPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const UploadPage(),
+      ),
     ),
     GoRoute(
       path: "/member/list",
-      builder: (context, state) {
-        return const MemberListPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const MemberListPage(),
+      ),
     ),
     GoRoute(
       path: "/history/:id",
-      builder: (context, state) {
-        return const HistoryPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const HistoryPage(),
+      ),
     ),
     GoRoute(
       path: "/inventory/stock-transfer/create",
-      builder: (context, state) {
-        return const CreateStockTransferPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const CreateStockTransferPage(),
+      ),
     ),
     GoRoute(
       path: "/inventory/stock-transfer/send",
-      builder: (context, state) {
-        return const SendStockTransferPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const SendStockTransferPage(),
+      ),
     ),
     GoRoute(
         path: "/inventory/stock-transfer/receive",
-        builder: (context, state) {
-          return const ReceiveStockTransferPage();
-        }),
+        pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const ReceiveStockTransferPage(),
+      )),
     GoRoute(
         path: "/inventory/check-stock",
-        builder: (context, state) {
-          return const CheckStockPage();
-        }),
+        pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const CheckStockPage(),
+      )),
     GoRoute(
         path: "/settings",
-        builder: (context, state) {
-          return const SettingPage();
-        }),
+        pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const SettingPage(),
+      )),
     GoRoute(
       path: "/local",
-      builder: (context, state) {
-        return const LocalHistoryPage();
-      },
+      pageBuilder: (context, state) => halamanBergerak(
+        kunci: state.pageKey,
+        anak: const LocalHistoryPage(),
+      ),
     ),
   ],
   initialLocation: "/",

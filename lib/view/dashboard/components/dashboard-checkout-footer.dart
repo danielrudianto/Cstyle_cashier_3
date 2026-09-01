@@ -1,6 +1,7 @@
 import 'package:cstyle_cashier_3/components/checkout-card/checkout-card.dart';
 import 'package:cstyle_cashier_3/components/dashed-line/dashed-line.dart';
 import 'package:cstyle_cashier_3/viewmodel/cart.viewmodel.dart';
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -50,12 +51,10 @@ class DashboardCheckoutFooter extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      NumberFormat("#,##0.00").format(
-                        value,
-                      ),
-                      style: Theme.of(context).textTheme.headlineSmall,
-                      textAlign: TextAlign.right,
+                    child: AngkaBergerak(
+                      nilai: value.toDouble(),
+                      gaya: Theme.of(context).textTheme.headlineSmall,
+                      rataan: TextAlign.right,
                     ),
                   ),
                 ],
@@ -162,12 +161,10 @@ class DashboardCheckoutFooter extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: Text(
-                  NumberFormat("#,##0.00").format(
-                    value,
-                  ),
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.right,
+                child: AngkaBergerak(
+                  nilai: value.toDouble(),
+                  gaya: Theme.of(context).textTheme.headlineSmall,
+                  rataan: TextAlign.right,
                 ),
               ),
             ],
