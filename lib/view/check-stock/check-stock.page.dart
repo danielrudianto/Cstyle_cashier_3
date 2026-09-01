@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:io';
 import 'package:cstyle_cashier_3/components/pagination/pagination.dart';
+import 'package:cstyle_cashier_3/components/ui/ui.dart';
+import 'package:cstyle_cashier_3/utils/motion.utils.dart';
+import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/model/model.product-stock.model.dart';
 import 'package:cstyle_cashier_3/model/model.store.model.dart';
 import 'package:cstyle_cashier_3/utils/logger.utils.dart';
@@ -155,10 +159,6 @@ class _CheckStockPageState extends State<CheckStockPage> {
   _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      setState(() {
-        page = 1;
-      });
-
       _fetchItems(1);
     });
   }
@@ -176,179 +176,135 @@ class _CheckStockPageState extends State<CheckStockPage> {
     super.initState();
   }
 
+  /// Mengunduh matriks stok sebagai berkas Excel ke folder Downloads.
+  void _unduhExcel() {
+    setState(() {
+      isDownloading = true;
+    });
+    _downloadStocks().then((value) async {
+      try {
+        Directory? directory = await getDownloadsDirectory();
+        if (directory != null) {
+          String filePath =
+              "${directory.path}/stock_${DateTime.now().microsecondsSinceEpoch.toString()}.xlsx";
+          if (value == null) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Failed to build the Excel file"),
+            ));
+          } else {
+            File(filePath)
+              ..createSync(recursive: false)
+              ..writeAsBytesSync(value);
+
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Stock saved to your Downloads folder."),
+            ));
+
+            LoggerUtils()
+                .log("Stock card downloaded successfully.", LogType.info);
+          }
+        }
+      } catch (error) {
+        LoggerUtils().log("Error", LogType.error,
+            error: error, stackTrace: StackTrace.current);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.toString())));
+      }
+    }).catchError((error) {
+      LoggerUtils().log("Error", LogType.error,
+          error: error, stackTrace: StackTrace.current);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.toString())));
+    }).whenComplete(() {
+      if (!mounted) return;
+      setState(() {
+        isDownloading = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+
+    /*
+      Matriks lengketnya butuh tinggi terpagar — ia menggulir dua arah di
+      dalam dirinya sendiri, jadi tidak bisa dibiarkan setinggi isinya seperti
+      tabel biasa. Diambil dari tinggi layar dengan lantai 360 supaya layar
+      pendek tidak meremasnya jadi celah.
+    */
+    final tinggiMatriks = max(360.0, MediaQuery.sizeOf(context).height - 380);
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  hintText: "Search",
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Theme.of(context).iconTheme.color,
+        const SizedBox(height: 24),
+        const KepalaHalaman(
+          penanda: "INVENTORY",
+          judul: "Stock",
+          keterangan: "How much of each product every store is holding "
+              "right now.",
+        ),
+        Bagian(
+          atas: 34,
+          label: count == 0
+              ? "PRODUCTS"
+              : "PRODUCTS · ${NumberFormat.decimalPattern("en-US").format(count)}",
+          aksi: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 300,
+                child: TextField(
+                  controller: searchController,
+                  onChanged: _onSearchChanged,
+                  style: tema.textTheme.bodyMedium?.copyWith(
+                    color: tema.colorScheme.onSurface,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    // color
-                    borderSide: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                    ),
+                  decoration: dekorasiIsian(
+                    context,
+                    petunjuk: "Search products",
+                    awalan: const Icon(Icons.search, size: 19),
                   ),
                 ),
-                onChanged: _onSearchChanged,
               ),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            IconButton(
-              tooltip: "Download as Excel",
-              onPressed: isDownloading
-                  ? null
-                  : () {
-                      setState(() {
-                        isDownloading = true;
-                      });
-                      _downloadStocks().then((value) async {
-                        try {
-                          Directory? directory = await getDownloadsDirectory();
-                          if (directory == null) {
-                          } else {
-                            String filePath =
-                                "${directory.path}/stock_${DateTime.now().microsecondsSinceEpoch.toString()}.xlsx";
-                            if (value == null) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content: Text("Failed to encode Excel fild"),
-                              ));
-                            } else {
-                              File(filePath)
-                                ..createSync(recursive: false)
-                                ..writeAsBytesSync(value);
-
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content:
-                                    Text("Stock card downloaded successfully."),
-                              ));
-
-                              LoggerUtils().log(
-                                  "Stock card downloaded successfully.",
-                                  LogType.info);
-                            }
-                          }
-                        } catch (error) {
-                          LoggerUtils().log("Error", LogType.error,
-                              error: error, stackTrace: StackTrace.current);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(error.toString())));
-                        }
-                      }).catchError((error) {
-                        LoggerUtils().log("Error", LogType.error,
-                            error: error, stackTrace: StackTrace.current);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(error.toString())));
-                      }).whenComplete(() {
-                        setState(() {
-                          isDownloading = false;
-                        });
-                      });
-                    },
-              icon: Icon(
-                Icons.download,
-                color: Theme.of(context).primaryColor,
+              const SizedBox(width: 10),
+              TombolBagian(
+                label: "Download Excel",
+                ikon: Icons.download_rounded,
+                memuat: isDownloading,
+                onTekan: _unduhExcel,
               ),
+            ],
+          ),
+          child: SizedBox(
+            height: tinggiMatriks,
+            child: AnimatedSwitcher(
+              duration: Gerak.cepat,
+              switchInCurve: Gerak.masuk,
+              switchOutCurve: Gerak.keluar,
+              child: isLoading
+                  ? const Center(
+                      key: ValueKey("memuat"),
+                      child: CircularProgressIndicator(),
+                    )
+                  : items.isEmpty
+                      ? Center(
+                          key: const ValueKey("kosong"),
+                          child: Text(
+                            searchController.text.trim().isEmpty
+                                ? "No products to show."
+                                : "No product matches "
+                                    "\u201C${searchController.text.trim()}\u201D.",
+                            style: tema.textTheme.bodyMedium,
+                          ),
+                        )
+                      : _matriks(context),
             ),
-          ],
+          ),
         ),
-        const SizedBox(
-          height: 15,
-        ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height - 286,
-          child: items.isEmpty
-              ? const Center(
-                  child: Text("Data not found."),
-                )
-              : StickyHeadersTable(
-                  scrollControllers:
-                      ScrollControllers(verticalBodyController: controller),
-                  cellAlignments: const CellAlignments.fixed(
-                    contentCellAlignment: Alignment.center,
-                    stickyLegendAlignment: Alignment.center,
-                    stickyColumnAlignment: Alignment.centerLeft,
-                    stickyRowAlignment: Alignment.center,
-                  ),
-                  cellDimensions: const CellDimensions.fixed(
-                    contentCellWidth: 150,
-                    contentCellHeight: 100,
-                    stickyLegendWidth: 250,
-                    stickyLegendHeight: 100,
-                  ),
-                  columnsLength: stores.length,
-                  legendCell: Text(
-                    'Product',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  columnsTitleBuilder: (i) {
-                    return Text(
-                      "${stores[i].name.split(" ").first}\n${stores[i].name.split(" ").skip(1).join(" ")}",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
-                    );
-                  },
-                  rowsLength: items.length,
-                  rowsTitleBuilder: (rowIndex) {
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          items[rowIndex].reference,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          items[rowIndex].description,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    );
-                  },
-                  contentCellBuilder: (i, j) {
-                    var storeID = stores[i].id;
-                    var dataStockIndex =
-                        items[j].stock.indexWhere((e) => e.storeID == storeID);
-
-                    return Text(
-                      dataStockIndex == -1
-                          ? "0"
-                          : NumberFormat().format(
-                              items[j].stock[dataStockIndex].quantity,
-                            ),
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    );
-                  },
-                ),
-        ),
+        const SizedBox(height: 6),
         PaginationComponent(
             pageIndex: page - 1,
             dataCount: count,
@@ -356,14 +312,98 @@ class _CheckStockPageState extends State<CheckStockPage> {
             onPageChange: (value) {
               page = value + 1;
               _fetchItems(page);
-              // scroll controller, go to top
-              controller.animateTo(
-                0,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-              );
+              controller.jumpTo(0);
             }),
       ],
+    );
+  }
+
+  Widget _matriks(BuildContext context) {
+    final tema = Theme.of(context);
+
+    return StickyHeadersTable(
+      key: ValueKey("hal$page"),
+      scrollControllers: ScrollControllers(verticalBodyController: controller),
+      cellAlignments: const CellAlignments.fixed(
+        contentCellAlignment: Alignment.center,
+        stickyLegendAlignment: Alignment.centerLeft,
+        stickyColumnAlignment: Alignment.centerLeft,
+        stickyRowAlignment: Alignment.center,
+      ),
+      /*
+        Tinggi sel diturunkan dari 100 ke 56. Seratus piksel untuk satu angka
+        membuat lima barang memenuhi layar; matriks stok gunanya justru
+        MEMBANDINGKAN, dan membandingkan butuh banyak baris terlihat
+        sekaligus.
+      */
+      cellDimensions: const CellDimensions.fixed(
+        contentCellWidth: 120,
+        contentCellHeight: 56,
+        stickyLegendWidth: 280,
+        stickyLegendHeight: 44,
+      ),
+      columnsLength: stores.length,
+      legendCell: Text("PRODUCT", style: gayaKode(context)),
+      columnsTitleBuilder: (i) {
+        /*
+          Kata pertama semua toko sama — "CSTYLE" — jadi yang ditampilkan
+          justru sisanya, bagian yang membedakan. Kantor pusat tidak
+          berawalan itu dan lewat apa adanya.
+        */
+        final kata = stores[i].name.split(" ");
+        final label = kata.length > 1 && kata.first.toUpperCase() == "CSTYLE"
+            ? kata.skip(1).join(" ")
+            : stores[i].name;
+        return Text(
+          label.toUpperCase(),
+          style: gayaKode(context),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        );
+      },
+      rowsLength: items.length,
+      rowsTitleBuilder: (rowIndex) {
+        return Padding(
+          padding: const EdgeInsets.only(right: 14),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(items[rowIndex].reference, style: gayaKode(context)),
+              const SizedBox(height: 2),
+              Text(
+                items[rowIndex].description,
+                style: tema.textTheme.bodyMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        );
+      },
+      contentCellBuilder: (i, j) {
+        var storeID = stores[i].id;
+        var dataStockIndex =
+            items[j].stock.indexWhere((e) => e.storeID == storeID);
+        final jumlah =
+            dataStockIndex == -1 ? 0 : items[j].stock[dataStockIndex].quantity;
+
+        /*
+          Nol diredupkan, bukan disembunyikan dan bukan diwarnai bahaya:
+          pada matriks berisi ratusan sel, nol adalah keadaan paling umum,
+          dan yang perlu menonjol justru angka yang ADA.
+        */
+        return Text(
+          NumberFormat.decimalPattern("en-US").format(jumlah),
+          style: gayaKode(context, ukuran: 12).copyWith(
+            color: jumlah == 0
+                ? tema.colorScheme.onSurface.withValues(alpha: 0.3)
+                : tema.colorScheme.onSurface.withValues(alpha: 0.85),
+          ),
+        );
+      },
     );
   }
 }
