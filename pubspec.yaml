@@ -3,7 +3,7 @@ description: "CStyle Cashier Application"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
-version: 3.0.9
+version: 3.2.0
 
 environment:
   # Dinaikkan dari ">=3.3.4": withValues() butuh Dart 3.6 (Flutter 3.27).
@@ -71,11 +71,11 @@ msix_config:
   display_name: CStyle Cashier Application V3
   publisher_display_name: PT. Terra Nusa Teknologi
   identity_name: terranusa.tech.cstyle.cashier3
-  msix_version: 3.1.0.0
-  logo_path: E:\source\repos\OJS Pelangi Harapan\cstyle_cashier_3\Icon.png
+  msix_version: 3.2.0.0
+  logo_path: Icon.png
   capabilities: internetClient
   languages: en-US
-  certificate_path: E:\source\repos\OJS Pelangi Harapan\cstyle_cashier_3\certificate\0372026\certificate.pfx
+  certificate_path: certificate/0372026/certificate.pfx
   certificate_password: jamuju18
   architecture: x64
   verbose: true
