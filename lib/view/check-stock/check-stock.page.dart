@@ -40,7 +40,21 @@ class _CheckStockPageState extends State<CheckStockPage> {
   /// Dipegang halaman, bukan tiap sel, karena satu baris digambar oleh
   /// delapan builder terpisah — judulnya satu, angkanya tujuh — dan
   /// kedelapannya harus menyala bersama supaya terbaca sebagai baris.
-  int? _barisSorot;
+  ///
+  /// ValueNotifier, BUKAN setState — dan itu bukan soal selera. Penyelaras
+  /// gulir tabel lengketnya dibuat ulang pada setiap build dan lupa bahwa
+  /// sebuah gestur sedang berlangsung, sehingga setState per gerakan mouse
+  /// memutus ikatan kepala kolom dengan badannya persis selagi penunjuk ada
+  /// di atas tabel. Dengan notifier, hover tidak membangun ulang apa pun
+  /// kecuali sel yang berlangganan.
+  final ValueNotifier<int?> _barisSorot = ValueNotifier(null);
+
+  /// Dibuat SEKALI, bukan di build. Setiap pemanggilan ScrollControllers()
+  /// melahirkan tiga pengendali baru untuk kepala kolom dan legenda; kalau
+  /// lahir di build, setiap rebuild menukar pengendali yang sedang dipegang
+  /// tampilan yang tengah digulirkan.
+  late final ScrollControllers _kendaliGulir =
+      ScrollControllers(verticalBodyController: controller);
 
   /*
     Ukuran sel disebut SEKALI. Pembungkus sorotnya harus mengisi penuh slot
@@ -182,6 +196,7 @@ class _CheckStockPageState extends State<CheckStockPage> {
   @override
   void dispose() {
     _debounce?.cancel();
+    _barisSorot.dispose();
     controller.dispose();
     searchController.dispose();
     super.dispose();
@@ -353,21 +368,28 @@ class _CheckStockPageState extends State<CheckStockPage> {
     AlignmentGeometry rata = Alignment.center,
     EdgeInsetsGeometry? bantalan,
   }) {
+    final sorotan = Theme.of(context).colorScheme.onSurface.withValues(
+          alpha: 0.05,
+        );
     return MouseRegion(
-      onEnter: (_) => setState(() => _barisSorot = baris),
+      onEnter: (_) => _barisSorot.value = baris,
       onExit: (_) {
-        if (_barisSorot == baris) setState(() => _barisSorot = null);
+        if (_barisSorot.value == baris) _barisSorot.value = null;
       },
-      child: AnimatedContainer(
-        duration: Gerak.kilat,
-        curve: Gerak.masuk,
-        width: lebar,
-        height: _tinggiSel,
-        alignment: rata,
-        padding: bantalan,
-        color: _barisSorot == baris
-            ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05)
-            : Colors.transparent,
+      child: ValueListenableBuilder<int?>(
+        valueListenable: _barisSorot,
+        builder: (context, sorot, anakTetap) {
+          return AnimatedContainer(
+            duration: Gerak.kilat,
+            curve: Gerak.masuk,
+            width: lebar,
+            height: _tinggiSel,
+            alignment: rata,
+            padding: bantalan,
+            color: sorot == baris ? sorotan : Colors.transparent,
+            child: anakTetap,
+          );
+        },
         child: anak,
       ),
     );
@@ -413,8 +435,7 @@ class _CheckStockPageState extends State<CheckStockPage> {
           */
           showVerticalScrollbar: false,
           showHorizontalScrollbar: false,
-          scrollControllers:
-              ScrollControllers(verticalBodyController: controller),
+          scrollControllers: _kendaliGulir,
           cellAlignments: const CellAlignments.fixed(
             contentCellAlignment: Alignment.center,
             stickyLegendAlignment: Alignment.centerLeft,
