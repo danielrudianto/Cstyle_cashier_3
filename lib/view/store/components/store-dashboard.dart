@@ -172,7 +172,6 @@ class _StoreDashboardState extends State<StoreDashboard> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 22),
         /*
           BARIS KETERANGAN TERMINAL.
 

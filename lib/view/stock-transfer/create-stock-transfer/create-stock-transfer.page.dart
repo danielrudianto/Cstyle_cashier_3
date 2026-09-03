@@ -1,5 +1,5 @@
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
- import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
+import 'package:cstyle_cashier_3/components/select-employee/select-employee.dart';
 import 'package:cstyle_cashier_3/components/store-selector/store-selector.dart';
 import 'package:cstyle_cashier_3/model/model.product.model.dart';
 import 'package:cstyle_cashier_3/model/model.stock-transfer.dart';
@@ -192,7 +192,6 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 24),
         /*
           Judulnya dipendekkan. "Create stock transfer request" mengulang
           kata yang sudah disebut penandanya di atas, dan tiga kata benda
@@ -285,16 +284,26 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  /*
+                                    Nama dan alamat dulu setara besarnya,
+                                    jadi tidak ada yang menuntun mata.
+                                    Namanya yang menjawab pertanyaan
+                                    "kirim ke mana"; alamatnya keterangan.
+                                  */
                                   Text(
                                     store!.name,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                  ),
-                                  Text(
-                                    store!.address,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .bodyMedium,
+                                        .bodyLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    store!.address,
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
                                   ),
                                 ],
                               ),
@@ -312,8 +321,7 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                           controller: noteController,
                           decoration: dekorasiIsian(
                             context,
-                            petunjuk:
-                                "Anything the sending store should know",
+                            petunjuk: "Anything the sending store should know",
                           ),
                           maxLines: 3,
                         ),
@@ -348,15 +356,35 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                   ),
                   products.isEmpty
                       ? Container(
-                          padding: const EdgeInsets.all(
-                            20,
-                          ),
-                          child: Center(
-                            child: Text(
-                              "You have not selected any products",
-                              style:
-                                  Theme.of(context).textTheme.bodyLarge,
-                            ),
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 36),
+                          /*
+                            Keadaan kosong yang kelihatan kosong. Sebaris
+                            kalimat hitam pekat terbaca seperti isi, bukan
+                            ketiadaan isi; ikon redup plus petunjuk langkah
+                            berikutnya menyatakan dua-duanya.
+                          */
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.shopping_basket_outlined,
+                                size: 32,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.25),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Nothing in this request yet",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "Use Add product to pick what to ask for.",
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
                           ),
                         )
                       : ListView.separated(
@@ -430,37 +458,37 @@ class _CreateStockTransferPageState extends State<CreateStockTransferPage> {
                             );
                           },
                         ),
-                const SizedBox(
-                  height: 15,
-                ),
-                InkWell(
-                  onTap: isValid ? _createStockTransfer : null,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 15,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isValid
-                          ? Theme.of(context).secondaryHeaderColor
-                          : Theme.of(context)
-                              .disabledColor
-                              .withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Text(
-                      "Submit",
-                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: isValid
-                                ? Colors.white
-                                : Theme.of(context).disabledColor,
-                          ),
-                      textAlign: TextAlign.center,
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  InkWell(
+                    onTap: isValid ? _createStockTransfer : null,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 15,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isValid
+                            ? Theme.of(context).secondaryHeaderColor
+                            : Theme.of(context)
+                                .disabledColor
+                                .withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        "Submit",
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              color: isValid
+                                  ? Colors.white
+                                  : Theme.of(context).disabledColor,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
-                ),
-],
+                ],
               ),
             ),
           ],

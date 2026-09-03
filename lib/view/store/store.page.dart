@@ -1401,7 +1401,15 @@ class _StorePageState extends State<StorePage> {
                       minHeight: MediaQuery.of(context).size.height - 100,
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(15),
+                      /*
+                        Jarak dari navigasi ke isi dipegang SATU tempat: di
+                        sini. Dulu setiap halaman menyisipkan SizedBox-nya
+                        sendiri di baris pertamanya, dan delapan angka yang
+                        seharusnya sama adalah delapan kesempatan untuk beda —
+                        yang memang terjadi, dan terlihat setiap berpindah
+                        menu.
+                      */
+                      padding: const EdgeInsets.fromLTRB(15, 39, 15, 15),
                       /*
                         Dulu AnimatedContainer — yang menganimasikan PROPERTI
                         yang berubah, dan di sini tidak ada satu pun: anaknya

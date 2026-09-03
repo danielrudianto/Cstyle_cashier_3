@@ -170,7 +170,6 @@ class _SendStockTransferPageState extends State<SendStockTransferPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 24),
         const KepalaHalaman(
           penanda: "INVENTORY",
           judul: "Send transfer",

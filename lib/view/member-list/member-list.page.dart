@@ -55,7 +55,6 @@ class _MemberListPageState extends State<MemberListPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 24),
         /*
           Kepala halaman yang sama dengan halaman kelola. Sebelumnya daftar
           ini dibuka langsung ke kolom pencarian, tanpa satu pun kalimat yang

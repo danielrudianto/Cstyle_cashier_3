@@ -278,7 +278,6 @@ class _CheckStockPageState extends State<CheckStockPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 24),
         const KepalaHalaman(
           penanda: "INVENTORY",
           judul: "Stock",

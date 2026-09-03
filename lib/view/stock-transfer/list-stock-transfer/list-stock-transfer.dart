@@ -42,7 +42,6 @@ class _ListStockTransferState extends State<ListStockTransfer> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 24),
         /*
           Halaman ini dulu terbuka langsung ke tabel — tanpa judul, tanpa
           keterangan, dan tanpa jumlah. Sekarang memakai kepala halaman dan

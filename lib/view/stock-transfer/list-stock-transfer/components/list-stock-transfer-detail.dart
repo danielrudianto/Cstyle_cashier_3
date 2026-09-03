@@ -126,7 +126,8 @@ class _ListStockTransferDetailState extends State<ListStockTransferDetail> {
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         trailing: Text(
-                          NumberFormat.decimalPattern().format(stockTransfer!.items[index].quantity),
+                          NumberFormat.decimalPattern()
+                              .format(stockTransfer!.items[index].quantity),
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       );

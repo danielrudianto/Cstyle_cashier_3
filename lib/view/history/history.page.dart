@@ -87,7 +87,6 @@ class _HistoryPageState extends State<HistoryPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 24),
         const KepalaHalaman(
           penanda: "SALES",
           judul: "History",
