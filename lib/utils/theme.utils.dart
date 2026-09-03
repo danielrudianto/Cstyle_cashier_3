@@ -324,6 +324,14 @@ ThemeData _bangunTema(_PaletTema palet) {
     scaffoldBackgroundColor: palet.latar,
     cardColor: palet.kartu,
     dividerColor: pemisah,
+    /*
+      Di Material 3, garis antarbaris DataTable TIDAK diambil dari
+      dividerColor — ia diambil dari DividerTheme, yang bawaannya
+      outlineVariant: abu terang yang mencolok di tema gelap. Tanpa baris ini
+      setiap DataTable menggambar garis terang itu, tak peduli dividerColor
+      disetel apa.
+    */
+    dividerTheme: DividerThemeData(color: pemisah, space: 1),
     disabledColor: palet.nonaktif,
     iconTheme: IconThemeData(color: palet.ikon),
     textTheme: _tanggaHuruf(palet),

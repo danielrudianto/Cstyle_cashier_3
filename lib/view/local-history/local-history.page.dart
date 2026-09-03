@@ -83,8 +83,12 @@ class _LocalHistoryPageState extends State<LocalHistoryPage> {
                   memakai token pemisah apa adanya.
                 */
                 child: Theme(
-                  data: Theme.of(context)
-                      .copyWith(dividerColor: Colors.transparent),
+                  data: Theme.of(context).copyWith(
+                    dividerColor: Colors.transparent,
+                    // Jalur yang benar-benar dibaca DataTable pada Material 3.
+                    dividerTheme:
+                        const DividerThemeData(color: Colors.transparent),
+                  ),
                   child: DataTable(
                       showCheckboxColumn: false,
                       dividerThickness: 0,

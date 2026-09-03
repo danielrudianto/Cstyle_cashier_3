@@ -169,7 +169,11 @@ class _MemberListPageState extends State<MemberListPage> {
           tabel ini.
         */
         Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          data: Theme.of(context).copyWith(
+            dividerColor: Colors.transparent,
+            // Jalur yang benar-benar dibaca DataTable pada Material 3.
+            dividerTheme: const DividerThemeData(color: Colors.transparent),
+          ),
           child: SizedBox(
             width: double.infinity,
             child: DataTable(

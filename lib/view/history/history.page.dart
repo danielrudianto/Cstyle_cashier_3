@@ -147,7 +147,11 @@ class _HistoryPageState extends State<HistoryPage> {
     */
     return Theme(
       key: ValueKey("hal$page"),
-      data: tema.copyWith(dividerColor: Colors.transparent),
+      data: tema.copyWith(
+        dividerColor: Colors.transparent,
+        // Jalur yang benar-benar dibaca DataTable pada Material 3.
+        dividerTheme: const DividerThemeData(color: Colors.transparent),
+      ),
       child: SizedBox(
         width: double.infinity,
         child: DataTable(
