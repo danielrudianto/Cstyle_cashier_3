@@ -323,6 +323,18 @@ ThemeData _bangunTema(_PaletTema palet) {
     secondaryHeaderColor: palet.aksen,
     scaffoldBackgroundColor: palet.latar,
     cardColor: palet.kartu,
+    /*
+      Pemilih tanggal mengikuti bahasa dialog yang lain: permukaan kartu,
+      sudut 14, tombol teks beraksen. Tanpa ini ia tampil dengan permukaan
+      dan bentuk bawaan Material yang tidak nyambung dengan dialog mana pun
+      di aplikasi — dan selama ini setiap pemanggil menambalnya sendiri.
+    */
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: palet.kartu,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      cancelButtonStyle: TextButton.styleFrom(foregroundColor: palet.aksen),
+      confirmButtonStyle: TextButton.styleFrom(foregroundColor: palet.aksen),
+    ),
     dividerColor: pemisah,
     /*
       Di Material 3, garis antarbaris DataTable TIDAK diambil dari

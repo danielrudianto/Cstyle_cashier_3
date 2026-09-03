@@ -805,46 +805,52 @@ class _StorePageState extends State<StorePage> {
                                     ),
                                   ),
                                   onTap: () {
-                                    var firstDate = DateTime.now();
-                                    var lastDate = DateTime.now();
+                                    final kini = DateTime.now();
+                                    final firstDate = DateTime(kini.year - 100);
+                                    final lastDate = DateTime(kini.year - 18);
 
-                                    firstDate = DateTime(firstDate.year - 100);
-                                    lastDate = DateTime(lastDate.year - 18);
+                                    /*
+                                      Kalau kolomnya sudah terisi, kalender
+                                      dibuka DI TANGGAL ITU — membetulkan
+                                      salah ketik tidak seharusnya mengulang
+                                      pencarian dari nol.
+                                    */
+                                    DateTime? awal;
+                                    try {
+                                      awal =
+                                          DateFormat("dd/MM/yyyy").parseStrict(
+                                        memberBirthdayController.text,
+                                      );
+                                    } catch (_) {
+                                      awal = null;
+                                    }
+                                    if (awal != null &&
+                                        (awal.isBefore(firstDate) ||
+                                            awal.isAfter(lastDate))) {
+                                      awal = null;
+                                    }
+
                                     showDatePicker(
-                                            // container color
-                                            builder: (context, child) {
-                                              return Theme(
-                                                data:
-                                                    Theme.of(context).copyWith(
-                                                  colorScheme: Theme.of(context)
-                                                              .brightness ==
-                                                          Brightness.dark
-                                                      ? ColorScheme.dark(
-                                                          surface:
-                                                              Theme.of(context)
-                                                                  .canvasColor,
-                                                        )
-                                                      : ColorScheme.light(
-                                                          surface:
-                                                              Theme.of(context)
-                                                                  .canvasColor,
-                                                        ),
-                                                  textButtonTheme:
-                                                      TextButtonThemeData(
-                                                    style: TextButton.styleFrom(
-                                                      foregroundColor: Theme.of(
-                                                              context)
-                                                          .secondaryHeaderColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: child!,
-                                              );
-                                            },
-                                            context: context,
-                                            firstDate: firstDate,
-                                            lastDate: lastDate)
-                                        .then((value) {
+                                      context: context,
+                                      /*
+                                        Dibuka pada KISI TAHUN, bukan pada
+                                        kalender bulanan. Ulang tahun hampir
+                                        selalu berpuluh tahun dari tanggal
+                                        awal kalendernya, dan panah bulan
+                                        bukan kendaraan untuk jarak sejauh
+                                        itu. Mode ketiknya sengaja tidak
+                                        dijadikan pembuka: pengurai bawaan
+                                        Flutter berbahasa Inggris menuntut
+                                        bulan/tanggal/tahun, urutan yang
+                                        berlawanan dengan kebiasaan di sini.
+                                      */
+                                      initialDatePickerMode:
+                                          DatePickerMode.year,
+                                      initialDate: awal ?? lastDate,
+                                      firstDate: firstDate,
+                                      lastDate: lastDate,
+                                      helpText: "Member's birthday",
+                                    ).then((value) {
                                       if (value == null) {
                                         return;
                                       } else {
