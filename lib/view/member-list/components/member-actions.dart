@@ -1,4 +1,6 @@
+import 'package:cstyle_cashier_3/components/ui/ui.dart';
 import 'package:cstyle_cashier_3/utils/motion.utils.dart';
+import 'package:intl/intl.dart';
 import 'package:cstyle_cashier_3/utils/theme.utils.dart';
 import 'package:cstyle_cashier_3/model/model.member.model.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +34,9 @@ import 'package:flutter/services.dart';
 /// Dialognya menampilkan kembali nama, kode, surel, dan telepon — empat hal
 /// yang sudah terbaca di baris tabelnya dan tiga di antaranya sudah tertulis
 /// di lembaran ini beserta nilainya. Ia menambah satu ketukan untuk sampai ke
-/// keterangan yang tidak pernah baru.
+/// keterangan yang tidak pernah baru. Sisa datanya yang memang tidak tampil
+/// di mana-mana — ulang tahun, bahasa struk, kebangsaan, poin — kini duduk
+/// di baris keterangan di bawah nama, jadi dialog itu tidak dirindukan.
 ///
 /// Dan pesan setelahnya. "Successfully copied email." dibuka dengan kata yang
 /// tidak menambah apa-apa; yang ingin dibaca sekilas adalah "Email copied".
@@ -73,19 +77,74 @@ class MemberActions extends StatelessWidget {
             lain.
           */
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 4),
-            child: Text(
-              anggota.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: tema.textTheme.headlineSmall,
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+            child: Row(
+              children: [
+                /*
+                  Avatar yang SAMA dengan barisnya di tabel: nama dan kode
+                  yang sama menghasilkan inisial dan warna yang sama, jadi
+                  sekali lirik sudah kelihatan lembaran ini menunjuk ke baris
+                  yang barusan ditekan.
+                */
+                AvatarInisial(
+                  nama: anggota.name,
+                  kunci: anggota.code,
+                  ukuran: 40,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        anggota.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: tema.textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(anggota.code, style: gayaLabelKolom(context)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
+          /*
+            Data yang tidak tampil di tempat lain. Bukan tindakan — ulang
+            tahun tidak untuk disalin ke mana-mana — jadi bentuknya baris
+            keterangan, sama dengan yang dipakai kepala halaman.
+          */
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-            child: Text(anggota.code, style: gayaLabelKolom(context)),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: BarisMeta(
+              isi: [
+                Meta(
+                  "BIRTHDAY",
+                  anggota.birthday == null
+                      ? "—"
+                      : DateFormat("d MMM yyyy").format(anggota.birthday!),
+                ),
+                Meta(
+                  "RECEIPT",
+                  /*
+                    Lewat .name, bukan enum-nya: tipe language kebetulan
+                    tinggal di store.page.dart, dan lembaran ini tidak
+                    perlu mengimpor sebuah halaman hanya untuk sebuah
+                    perbandingan.
+                  */
+                  anggota.lang.name == "EN" ? "English" : "Bahasa",
+                ),
+                if ((anggota.nationality ?? "").trim().isNotEmpty)
+                  Meta("NATIONALITY", anggota.nationality!.trim()),
+                Meta(
+                  "POINTS",
+                  NumberFormat.decimalPattern("en-US").format(anggota.points),
+                ),
+              ],
+            ),
           ),
-          Divider(height: 1, color: tema.dividerColor),
           _Tindakan(
             ikon: Icons.alternate_email,
             label: "Copy email",
